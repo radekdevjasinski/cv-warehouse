@@ -1,6 +1,6 @@
 # CV Warehouse
 
-Browser game in Unity 2D. Robots search a procedurally generated warehouse, find boxes holding fragments of a CV and load them onto trucks, while the CV assembles itself on the waybill. The full design lives in [Docs/GameDesign.md](Docs/GameDesign.md). Read it before designing any feature, and update it in the same change whenever a decision alters the design.
+Browser game in Unity 2D. Robots search a procedurally generated warehouse, take fragments of a CV out of boxes and carry them to a truck, while the CV assembles itself on the waybill. The full design lives in [Docs/GameDesign.md](Docs/GameDesign.md). Read it before designing any feature, and update it in the same change whenever a decision alters the design.
 
 ## Two rules that always apply
 
@@ -34,7 +34,7 @@ The `UnityMCP` server (MCP for Unity by CoplayDev, pinned in `Packages/manifest.
 
 These come from the design document and shape the architecture:
 
-- **Data-driven.** Everything about the CV comes from one JSON file: name, job title, categories, sections, entries. Adding or removing a section changes the number of trucks and the map size without code changes. Never hardcode CV content.
+- **Data-driven.** Everything about the CV comes from one JSON file: name, job title, categories, sections, entries. Adding or removing entries changes the number of boxes and the map size without code changes. Never hardcode CV content.
 - **Swappable at runtime.** The JSON is loaded over HTTP at startup, not baked into the build, so it can be replaced on the server without rebuilding. A second language is a second file.
 - **Robust to bad data.** Missing fields get defaults. An invalid file shows a readable message instead of a broken game.
 - **Deterministic generation.** The map is generated from parameters and a seed shown on screen. The same seed and the same file must always produce the same map.
@@ -70,7 +70,7 @@ Docs/
 - **Randomness is injected.** Use a seeded `System.Random` instance passed into the generator. Never use `UnityEngine.Random` in `Core`, because it is global state and breaks determinism and tests.
 - **Time is injected.** `Core` receives delta time as a parameter instead of reading `Time.deltaTime`, so the simulation can be stepped in tests.
 - **Dependencies go through constructors or serialized fields.** No `FindObjectOfType`, no `GameObject.Find`, no singletons with static access.
-- **Tunable values live in ScriptableObjects**, not in constants scattered through code: bot speeds, weight limits, prices, generator parameters.
+- **Tunable values live in ScriptableObjects**, not in constants scattered through code: bot speeds, box values per weight class, prices, generator parameters.
 - **Upgrade effects are a fixed pool in code.** The JSON only points at an effect by id. An unknown id is a data error handled by the robustness rules, never an exception.
 
 ## WebGL rules
@@ -134,8 +134,8 @@ In WebGL the garbage collector runs only between frames, so garbage created insi
 
 ## Testing
 
-- **EditMode tests** cover everything in `Core`. Required coverage includes the generator guarantees for many seeds and CV sizes, CV parsing with missing fields and malformed files, section splitting and empty sections, weight and category rules for each bot type, task queue ordering, pricing scaled to CV size and scoring.
-- **PlayMode tests** cover scene wiring: the game boots from a CV file, bots deliver boxes, a truck departs, the final CV screen appears, and the skip button works from any state.
+- **EditMode tests** cover everything in `Core`. Required coverage includes the generator guarantees for many seeds and CV sizes, CV parsing with missing fields and malformed files, empty sections, cutting blocks into words and letters, emptying a box at each carry size, category specializations, task queue ordering, pricing scaled to CV size and scoring.
+- **PlayMode tests** cover scene wiring: the game boots from a CV file, bots empty boxes and deliver text, the final CV screen appears, and the skip button works from any state.
 - **Manual WebGL check** is required for anything that behaves differently in a browser: JSON loading over HTTP, file download, audio start, fullscreen, resizing and touch input. Automated tests run in the Editor and do not prove WebGL behaviour.
 - A bug fix starts with a test that reproduces the bug.
 - Tests are independent, deterministic and use fixed seeds. No test depends on another test's state or on real time.

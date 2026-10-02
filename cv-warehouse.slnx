@@ -1,2 +1,5 @@
 ﻿<Solution>
+  <Project Path="CvWarehouse.Tests.EditMode.csproj" />
+  <Project Path="CvWarehouse.Runtime.csproj" />
+  <Project Path="CvWarehouse.Tests.PlayMode.csproj" />
 </Solution>

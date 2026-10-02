@@ -1,0 +1,186 @@
+{
+  "name": "Radosław Jasiński",
+  "title": "Game Developer • M.Sc. in Computer Science (Computer Graphics)",
+  "contacts": [
+    { "kind": "phone", "text": "+48 507 453 078", "link": "tel:+48507453078" },
+    { "kind": "email", "text": "radek.dev.jasinski@gmail.com", "link": "mailto:radek.dev.jasinski@gmail.com" },
+    { "kind": "github", "text": "github.com/radekdevjasinski", "link": "https://github.com/radekdevjasinski" },
+    { "kind": "itch", "text": "radekdev.itch.io", "link": "https://radekdev.itch.io" }
+  ],
+  "categories": [
+    { "id": "technical", "name": "Technical" },
+    { "id": "soft", "name": "Soft" }
+  ],
+  "sections": [
+    {
+      "title": "Profile",
+      "type": "paragraph",
+      "text": "Unity game developer with an M.Sc. in Computer Science (Computer Graphics). Six games published on itch.io, two game jam awards, and two theses on machine-learning opponents in games."
+    },
+    {
+      "title": "Projects",
+      "type": "list",
+      "style": "bullets",
+      "entries": [
+        {
+          "title": "Machine Learning FPS",
+          "subtitle": "Unity 6, ML-Agents",
+          "meta": "radekdev.itch.io/machine-learning-fps",
+          "link": "https://radekdev.itch.io/machine-learning-fps",
+          "description": "Master’s thesis. 1v1 arena shooter with bots trained by PPO self-play.",
+          "weight": "heavy",
+          "category": "technical"
+        },
+        {
+          "title": "Defuse or Lose",
+          "subtitle": "Unity, co-op puzzle",
+          "meta": "radekdev.itch.io/defuse-or-lose",
+          "link": "https://radekdev.itch.io/defuse-or-lose",
+          "description": "Co-op bomb defusal with 8 levels of randomized puzzles and hazards. Team of two.",
+          "weight": "medium",
+          "category": "technical"
+        },
+        {
+          "title": "Cars vs Chickens",
+          "subtitle": "Unity, arcade lane defence",
+          "meta": "radekdev.itch.io/cars-vs-chickens",
+          "link": "https://radekdev.itch.io/cars-vs-chickens",
+          "description": "Reverse tower defence built in 10 days for WitchJam 2026. Team of three.",
+          "weight": "medium",
+          "category": "technical"
+        },
+        {
+          "title": "Dungeon’s Whisper",
+          "subtitle": "Unity, dark fantasy roguelike",
+          "meta": "radekdev.itch.io/dungeons-whisper",
+          "link": "https://radekdev.itch.io/dungeons-whisper",
+          "description": "Procedurally generated dungeons, items, bosses. Led a 16-person team.",
+          "weight": "heavy",
+          "category": "soft"
+        },
+        {
+          "title": "The Reaver King",
+          "subtitle": "Unity, ML-Agents",
+          "meta": "radekdev.itch.io/the-reaver-king",
+          "link": "https://radekdev.itch.io/the-reaver-king",
+          "description": "Engineering thesis. Shoot ’em up with a computer player trained by PPO.",
+          "weight": "heavy",
+          "category": "technical"
+        },
+        {
+          "title": "Zombie Killer",
+          "subtitle": "Unity, Blender",
+          "meta": "radekdev.itch.io/zombie-killer",
+          "link": "https://radekdev.itch.io/zombie-killer",
+          "description": "PS2-style FPS demo with ragdoll physics, own low-poly models and animations.",
+          "weight": "medium",
+          "category": "technical"
+        }
+      ]
+    },
+    {
+      "title": "Awards",
+      "type": "list",
+      "style": "rows",
+      "entries": [
+        {
+          "title": "3rd place — WitchJam 2026",
+          "subtitle": "Kielce University of Technology & Fool’s Theory",
+          "meta": "May 2026",
+          "description": "Game jam, theme <i>“On the other side”</i>. Built Cars vs Chickens, an arcade lane defence game with low-poly graphics.",
+          "weight": "heavy",
+          "category": "soft"
+        },
+        {
+          "title": "Honorable mention — PoliJam 2025",
+          "subtitle": "Kielce University of Technology & 11 bit studios",
+          "meta": "Mar 2025",
+          "description": "Week-long game jam, theme <i>“The clock is ticking”</i>. Built Defuse or Lose, a 2D co-op puzzle game played against a timer.",
+          "weight": "medium",
+          "category": "soft"
+        }
+      ]
+    },
+    {
+      "title": "Technical Skills",
+      "type": "list",
+      "style": "keyValue",
+      "entries": [
+        { "title": "Languages", "description": "C#, C++, Java, Python", "weight": "light", "category": "technical" },
+        {
+          "title": "Game development",
+          "description": "Unity (URP, Input System, ML-Agents, Test Framework), procedural generation, game AI, PhysX, OpenGL",
+          "weight": "medium",
+          "category": "technical"
+        },
+        { "title": "Tools", "description": "Blender, Aseprite, Adobe Photoshop, Git", "weight": "light", "category": "technical" }
+      ]
+    },
+    {
+      "title": "Experience",
+      "type": "list",
+      "style": "rows",
+      "entries": [
+        {
+          "title": "Mobile Developer Intern (Full-stack)",
+          "meta": "2026 – present",
+          "bullets": [
+            "Develop full-stack mobile app features in Flutter and Java (Spring Boot).",
+            "Build responsive UIs and integrate them with REST APIs and databases."
+          ],
+          "weight": "heavy",
+          "category": "technical"
+        }
+      ]
+    },
+    {
+      "title": "Education",
+      "type": "list",
+      "style": "rows",
+      "entries": [
+        {
+          "title": "Master’s degree, Computer Science",
+          "subtitle": "Kielce University of Technology",
+          "meta": "2025 – 2026",
+          "weight": "heavy",
+          "category": "technical"
+        },
+        {
+          "title": "Engineer’s degree (B.Eng.), Computer Science",
+          "subtitle": "Kielce University of Technology",
+          "meta": "2021 – 2025",
+          "weight": "medium",
+          "category": "technical"
+        },
+        {
+          "title": "IT Technician",
+          "subtitle": "ZSE Kielce Technical Secondary School",
+          "meta": "2017 – 2021",
+          "weight": "light",
+          "category": "technical"
+        }
+      ]
+    },
+    {
+      "title": "Languages & Other",
+      "type": "list",
+      "style": "inline",
+      "entries": [
+        { "title": "Polish (native)", "weight": "light", "category": "soft" },
+        { "title": "English (B2)", "weight": "light", "category": "soft" },
+        { "title": "Driving licence (cat. B)", "weight": "light", "category": "soft" }
+      ]
+    },
+    {
+      "title": "Interests",
+      "type": "list",
+      "style": "keyValue",
+      "entries": [
+        { "title": "Video games", "description": "favourites: Elden Ring, The Witcher 3, Fallout 4, RimWorld", "weight": "light", "category": "soft" },
+        { "title": "Running and gym", "description": "training for a marathon", "weight": "light", "category": "soft" },
+        { "title": "Movies and shows", "description": "Blade Runner 2049, The Prestige, Interstellar, Breaking Bad", "weight": "light", "category": "soft" }
+      ]
+    }
+  ],
+  "footer": "I consent to the processing of my personal data for the purposes of the recruitment process, in accordance with Regulation (EU) 2016/679 (GDPR)."
+}
