@@ -2,6 +2,7 @@
     "name": "CvWarehouse.Runtime",
     "rootNamespace": "CvWarehouse",
     "references": [
+        "Unity.InputSystem",
         "Unity.TextMeshPro",
         "UnityEngine.UI"
     ],

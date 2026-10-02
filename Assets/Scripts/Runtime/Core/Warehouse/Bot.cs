@@ -1,0 +1,72 @@
+using System.Collections.Generic;
+
+namespace CvWarehouse.Core.Warehouse
+{
+    public sealed class Bot
+    {
+        public Bot(int id, GridPosition cell)
+        {
+            Id = id;
+            Cell = cell;
+            NextCell = cell;
+            Destination = cell;
+        }
+
+        public int Id { get; }
+
+        public GridPosition Cell { get; internal set; }
+
+        public GridPosition NextCell { get; internal set; }
+
+        public bool IsMoving { get; internal set; }
+
+        public int MoveTicks { get; internal set; }
+
+        public int MoveDuration { get; internal set; }
+
+        public BotState State { get; internal set; }
+
+        public GridPosition Destination { get; private set; }
+
+        public Box JobBox { get; internal set; }
+
+        public GridPosition AccessCell { get; internal set; }
+
+        public GridPosition DropCell { get; internal set; }
+
+        public GridPosition ParkingCell { get; internal set; }
+
+        public bool HasParkingCell { get; internal set; }
+
+        public int ClaimedPieces { get; internal set; }
+
+        public int CargoPieces { get; internal set; }
+
+        public float MoveFraction => IsMoving ? (float)MoveTicks / MoveDuration : 0f;
+
+        public bool IsAtDestination => !IsMoving && Cell == Destination;
+
+        internal List<GridPosition> Path { get; } = new List<GridPosition>();
+
+        internal int PathIndex { get; set; }
+
+        internal int WaitTicks { get; set; }
+
+        internal int WorkTicksLeft { get; set; }
+
+        internal bool HasPath => PathIndex < Path.Count;
+
+        internal void SetDestination(GridPosition destination)
+        {
+            Destination = destination;
+            ClearPath();
+            WaitTicks = 0;
+        }
+
+        internal void ClearPath()
+        {
+            Path.Clear();
+            PathIndex = 0;
+        }
+    }
+}
