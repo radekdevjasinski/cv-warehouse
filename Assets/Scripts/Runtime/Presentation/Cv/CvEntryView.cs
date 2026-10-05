@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using CvWarehouse.Core.Cv;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace CvWarehouse.Presentation.Cv
 {
@@ -17,8 +18,11 @@ namespace CvWarehouse.Presentation.Cv
         [SerializeField] private TMP_Text bodyText;
         [SerializeField] private CvLinkButton linkButton;
         [SerializeField] private CvRevealable revealable;
+        [SerializeField] private LayoutElement headingColumn;
 
         public CvRevealable Revealable => revealable;
+
+        public float HeadingWidth => headingText.preferredWidth;
 
         public void Show(CvBlockReveal blockReveal, string link)
         {
@@ -27,9 +31,17 @@ namespace CvWarehouse.Presentation.Cv
             metaText.SetText(segments[MetaSegment]);
             bodyText.SetText(segments[BodySegment]);
             headingRow.SetActive(segments[HeadingSegment].Length > 0 || segments[MetaSegment].Length > 0);
+            metaText.gameObject.SetActive(segments[MetaSegment].Length > 0);
             bodyText.gameObject.SetActive(segments[BodySegment].Length > 0);
             linkButton.SetLink(link);
             revealable.Bind(blockReveal);
+        }
+
+        public void SetHeadingColumnWidth(float width)
+        {
+            headingColumn.minWidth = width;
+            headingColumn.preferredWidth = width;
+            headingColumn.flexibleWidth = 0f;
         }
     }
 }

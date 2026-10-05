@@ -1,5 +1,6 @@
 using System.Collections;
 using CvWarehouse.Core.Warehouse;
+using CvWarehouse.Presentation.Cv;
 using CvWarehouse.Presentation.Warehouse;
 using NUnit.Framework;
 using UnityEngine;
@@ -18,7 +19,11 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
         private const string AddBotButtonName = "AddBotButton";
         private const string RemoveBotButtonName = "RemoveBotButton";
         private const int StartingBots = 3;
+        private const string WaybillPanelPath = "CvCanvas/Panel";
+        private const string ExpandButtonName = "ExpandButton";
         private const int MaxTicks = 600000;
+        private const int MaxFramesToWait = 300;
+        private const float AnchorTolerance = 0.0001f;
 
         private WarehouseDemo demo;
 
@@ -70,6 +75,87 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
 
             Assert.IsTrue(simulation.IsComplete);
             Assert.AreEqual(0, Object.FindAnyObjectByType<WarehouseBoxesView>().VisibleBoxCount);
+        }
+
+        [UnityTest]
+        public IEnumerator Scene_Booted_SplitsTheScreenBetweenTheWarehouseAndTheWaybill()
+        {
+            yield return null;
+            var waybillPanel = (RectTransform)Object.FindAnyObjectByType<CvScreen>().transform.Find(WaybillPanelPath);
+            Rect warehouseView = Object.FindAnyObjectByType<WarehouseCamera>().GetComponent<Camera>().rect;
+
+            Assert.Less(warehouseView.xMax, 1f);
+            Assert.AreEqual(warehouseView.xMax, waybillPanel.anchorMin.x, AnchorTolerance);
+            Assert.AreEqual(1f, waybillPanel.anchorMax.x, AnchorTolerance);
+        }
+
+        [UnityTest]
+        public IEnumerator Scene_Booted_ShowsTheWaybillWithEveryBlockHidden()
+        {
+            CvScreen waybill = Object.FindAnyObjectByType<CvScreen>();
+
+            yield return WaitForTheCv(waybill);
+            yield return null;
+
+            Assert.Greater(waybill.RevealState.Blocks.Count, 0);
+            Assert.AreEqual(0, waybill.RevealState.RevealedLetterCount);
+        }
+
+        [UnityTest]
+        public IEnumerator Simulation_RunToTheEnd_RevealsTheWholeCv()
+        {
+            CvScreen waybill = Object.FindAnyObjectByType<CvScreen>();
+            WarehouseSimulation simulation = demo.Simulation;
+            while (simulation.TryAddBot())
+            {
+            }
+
+            yield return WaitForTheCv(waybill);
+            for (int tick = 0; tick < MaxTicks && !simulation.IsComplete; tick++)
+                simulation.Tick();
+            yield return null;
+
+            Assert.IsTrue(waybill.RevealState.IsComplete);
+        }
+
+        [UnityTest]
+        public IEnumerator ExpandButton_Clicked_ShowsTheWaybillFullScreenAndHidesTheWarehouse()
+        {
+            var waybillPanel = (RectTransform)Object.FindAnyObjectByType<CvScreen>().transform.Find(WaybillPanelPath);
+            WarehouseCamera warehouseCamera = Object.FindAnyObjectByType<WarehouseCamera>();
+            WarehouseHudView hud = Object.FindAnyObjectByType<WarehouseHudView>();
+
+            GameObject.Find(ExpandButtonName).GetComponent<Button>().onClick.Invoke();
+            yield return null;
+
+            Assert.AreEqual(0f, waybillPanel.anchorMin.x, AnchorTolerance);
+            Assert.IsFalse(warehouseCamera.gameObject.activeSelf);
+            Assert.IsFalse(hud.gameObject.activeSelf);
+        }
+
+        [UnityTest]
+        public IEnumerator ExpandButton_ClickedTwice_BringsTheWarehouseBack()
+        {
+            var waybillPanel = (RectTransform)Object.FindAnyObjectByType<CvScreen>().transform.Find(WaybillPanelPath);
+            WarehouseCamera warehouseCamera = Object.FindAnyObjectByType<WarehouseCamera>();
+            Button expandButton = GameObject.Find(ExpandButtonName).GetComponent<Button>();
+
+            expandButton.onClick.Invoke();
+            yield return null;
+            expandButton.onClick.Invoke();
+            yield return null;
+
+            Assert.Greater(waybillPanel.anchorMin.x, 0f);
+            Assert.IsTrue(warehouseCamera.gameObject.activeSelf);
+            Assert.AreEqual(waybillPanel.anchorMin.x, warehouseCamera.GetComponent<Camera>().rect.xMax, AnchorTolerance);
+        }
+
+        private static IEnumerator WaitForTheCv(CvScreen waybill)
+        {
+            for (int frame = 0; frame < MaxFramesToWait && waybill.RevealState == null; frame++)
+                yield return null;
+
+            Assert.IsNotNull(waybill.RevealState, "The CV was not loaded in time.");
         }
     }
 }

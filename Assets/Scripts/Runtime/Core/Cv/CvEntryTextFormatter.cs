@@ -5,7 +5,6 @@ namespace CvWarehouse.Core.Cv
     public sealed class CvEntryTextFormatter
     {
         private const string BulletPrefix = "• ";
-        private const string KeyColumnIndent = " <indent=24%>";
         private const string BulletBodyIndent = "<indent=1em>";
 
         private readonly StringBuilder builder = new StringBuilder();
@@ -22,7 +21,7 @@ namespace CvWarehouse.Core.Cv
 
         private static string FormatHeading(CvEntry entry, CvListStyle style)
         {
-            if (style == CvListStyle.KeyValue || entry.Title.Length == 0)
+            if (entry.Title.Length == 0)
                 return string.Empty;
 
             string title = "<b>" + entry.Title + "</b>";
@@ -42,10 +41,7 @@ namespace CvWarehouse.Core.Cv
         private string FormatBody(CvEntry entry, CvListStyle style)
         {
             builder.Clear();
-            if (style == CvListStyle.KeyValue)
-                AppendLine(FormatKeyValue(entry));
-            else
-                AppendDescription(entry, style);
+            AppendDescription(entry, style);
 
             foreach (string bullet in entry.Bullets)
                 AppendLine(BulletPrefix + bullet);
@@ -61,14 +57,6 @@ namespace CvWarehouse.Core.Cv
             if (!isSubtitleInHeading && entry.Subtitle.Length > 0)
                 AppendLine("<i>" + entry.Subtitle + "</i>");
             AppendLine(entry.Description);
-        }
-
-        private static string FormatKeyValue(CvEntry entry)
-        {
-            if (entry.Title.Length == 0)
-                return entry.Description;
-
-            return "<b>" + entry.Title + "</b>" + KeyColumnIndent + entry.Description + "</indent>";
         }
 
         private void AppendLine(string line)

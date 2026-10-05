@@ -19,6 +19,8 @@ namespace CvWarehouse.Presentation.Warehouse
 
         public WarehouseSimulation Simulation { get; private set; }
 
+        public int Seed => seed;
+
         private void Start()
         {
             var random = new System.Random(seed);

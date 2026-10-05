@@ -37,14 +37,14 @@ namespace CvWarehouse.Tests.EditMode.Cv
         }
 
         [Test]
-        public void Format_KeyValueStyle_PutsTitleAndDescriptionOnOneLine()
+        public void Format_KeyValueStyle_PutsTheKeyInTheHeadingAndTheValueInTheBody()
         {
             CvEntry entry = ParseFirstEntry("{\"sections\":[{\"entries\":[{\"title\":\"Tools\",\"description\":\"Git\"}]}]}");
 
             CvEntryTexts texts = formatter.Format(entry, CvListStyle.KeyValue);
 
-            Assert.AreEqual(string.Empty, texts.Heading);
-            Assert.AreEqual("<b>Tools</b> <indent=24%>Git</indent>", texts.Body);
+            Assert.AreEqual("<b>Tools</b>", texts.Heading);
+            Assert.AreEqual("Git", texts.Body);
         }
 
         [Test]

@@ -13,8 +13,12 @@ namespace CvWarehouse.Tests.PlayMode.Cv
     public sealed class CvScreenTests
     {
         private const string ScreenPrefabPath = "Assets/Prefabs/Cv/CvScreen.prefab";
-        private const string NamePath = "CvCanvas/ScrollView/Viewport/Page/Header/Name";
+        private const string NamePath = "CvCanvas/Panel/ScrollView/Viewport/Page/Header/Name";
         private const string ButtonsPath = "DebugCanvas/Buttons/";
+        private const string PanelPath = "CvCanvas/Panel";
+        private const float WidestPage = 920f;
+        private const float NarrowPanelLeftEdge = 0.6f;
+        private const float WidthTolerance = 0.5f;
         private const int BlockCount = 7;
         private const int NameLetterCount = 11;
         private const string ValidCv =
@@ -146,6 +150,28 @@ namespace CvWarehouse.Tests.PlayMode.Cv
             CvErrorView errorView = screen.GetComponentInChildren<CvErrorView>();
             Assert.IsTrue(errorView.IsVisible);
             Assert.AreEqual("Could not load the CV file.", errorView.Message);
+        }
+
+        [Test]
+        public void ScrollView_OwnBackground_CatchesThePointerForScrolling()
+        {
+            ScrollRect scrollRect = screen.GetComponentInChildren<ScrollRect>();
+
+            Assert.IsTrue(scrollRect.GetComponent<Graphic>().raycastTarget);
+        }
+
+        [UnityTest]
+        public IEnumerator Panel_Narrowed_ShrinksThePageToThePanelWidth()
+        {
+            yield return Show(CvTextResponse.Success(ValidCv));
+            var panel = (RectTransform)screen.transform.Find(PanelPath);
+            ScrollRect scrollRect = screen.GetComponentInChildren<ScrollRect>();
+
+            panel.anchorMin = new Vector2(NarrowPanelLeftEdge, 0f);
+            yield return null;
+
+            Assert.Less(scrollRect.content.rect.width, WidestPage);
+            Assert.AreEqual(scrollRect.viewport.rect.width, scrollRect.content.rect.width, WidthTolerance);
         }
 
         private IEnumerator Show(CvTextResponse response)
