@@ -21,6 +21,8 @@ namespace CvWarehouse.Presentation.Warehouse
         [SerializeField] private float margin = 2f;
         [SerializeField] private float keyPanViewsPerSecond = 1.2f;
         [SerializeField] private float zoomStep = 0.12f;
+        [SerializeField] private float edgePanViewsPerSecond = 0.6f;
+        [SerializeField, Range(0f, 0.2f)] private float edgePanScreenFraction = 0.03f;
 
         private Camera warehouseCamera;
         private InputAction moveAction;
@@ -31,6 +33,7 @@ namespace CvWarehouse.Presentation.Warehouse
         private Vector2 lastPointer;
         private bool wasPressed;
         private bool isDragging;
+        private bool isPointerAMouse;
 
         public void Frame(WarehouseLayout layout)
         {
@@ -56,10 +59,12 @@ namespace CvWarehouse.Presentation.Warehouse
             pointAction.Enable();
             pressAction.Enable();
             scrollAction.Enable();
+            pointAction.performed += RememberPointerDevice;
         }
 
         private void OnDisable()
         {
+            pointAction.performed -= RememberPointerDevice;
             moveAction.Disable();
             pointAction.Disable();
             pressAction.Disable();
@@ -74,6 +79,7 @@ namespace CvWarehouse.Presentation.Warehouse
             framing.SetAspect(warehouseCamera.aspect);
             PanWithKeys();
             PanWithDrag();
+            PanWithScreenEdges();
             ZoomWithScroll();
             Apply();
         }
@@ -96,6 +102,23 @@ namespace CvWarehouse.Presentation.Warehouse
 
             wasPressed = isPressed;
             lastPointer = pointer;
+        }
+
+        private void PanWithScreenEdges()
+        {
+            if (!isPointerAMouse || wasPressed || eventSystem.IsPointerOverGameObject())
+                return;
+
+            float edgeWidth = Screen.height * edgePanScreenFraction;
+            Vector2 direction = EdgePan.DirectionAt(lastPointer, warehouseCamera.pixelRect, edgeWidth);
+            float frameSeconds = Mathf.Min(Time.unscaledDeltaTime, Time.maximumDeltaTime);
+            if (direction != Vector2.zero)
+                framing.Pan(direction * (framing.Size * 2f * edgePanViewsPerSecond * frameSeconds));
+        }
+
+        private void RememberPointerDevice(InputAction.CallbackContext context)
+        {
+            isPointerAMouse = context.control.device is Mouse;
         }
 
         private void ZoomWithScroll()
