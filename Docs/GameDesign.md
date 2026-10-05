@@ -32,16 +32,16 @@ This is a living document. It is edited as development progresses.
 ## Grid and Movement
 
 - **Grid:** the warehouse is a grid of cells. A cell is floor, blocked, a drop cell or a parking cell.
-- **Eight directions:** bots step to any of the eight neighbouring cells. A diagonal step costs 1.4 of a straight one and is not allowed past a blocked corner or past another bot.
-- **Linear movement:** a bot slides from cell to cell and holds both cells until it arrives. Two bots never share a cell and never pass through each other or through boxes.
+- **Eight directions:** bots step to any of the eight neighbouring cells. A diagonal step costs 1.4 of a straight one and is not allowed past a blocked corner.
+- **Linear movement:** a bot slides from cell to cell. Bots on the move drive through each other, so two of them can cross in the same cell. They never pass through boxes.
 - **Box footprint:** light 1x1, medium 2x1, heavy 2x2. A box never moves. When it is emptied it disappears and its cells become floor, so the map only ever opens up.
 - **Access cells:** the floor cells touching a box on its four sides. A bot must stand on one to take text out, and several bots can work one box at once, one per access cell.
 - **Truck:** stands on the top edge of the grid. Bots unload on the drop cells in front of it; the rest of the truck is scenery.
 - **Parking:** bots without work wait on parking cells by the ramp. The number of parking cells is the limit on bot slots.
-- **Tight spots:** gaps between boxes can be one cell wide. Bots that meet in one wait, look for a way around and step aside, so a jam slows them down without locking them.
+- **Tight spots:** gaps between boxes can be one cell wide. Bots that meet in one drive through each other, so a narrow gap never jams.
 - **Jobs:** the shared queue hands out the box nearest the truck that still has unclaimed text and a free access cell. The order is worked out again every time a box disappears.
 - **Removing a bot:** whatever it carries counts as delivered. A bot reserves its access cell, and later its drop cell, so two bots never head for the same spot.
-- **Blocked bots:** a bot whose next cell is taken waits, then looks for a path around the other bots, then steps aside to a free cell picked by the seed.
+- **Standing bots:** a bot only stops on a cell it has reserved: its access cell, its drop cell or its parking cell. Two bots never stand on the same cell.
 - **Fixed tick:** the simulation runs at 60 ticks per second regardless of frame rate, so the same seed always plays out the same way.
 
 ## Bots
@@ -50,7 +50,7 @@ This is a living document. It is edited as development progresses.
 - **Carry size:** how much text a bot takes per trip: a letter, a word or a block. Bots start with a letter. Carry size is raised by upgrades.
 - **Specializations:** a bot can specialize in a category and carries boxes of that category faster.
 - **Category:** a list from the file (e.g. technical and soft, up to 4–5). Each gets a colour.
-- **Traffic jams:** more bots does not mean faster, because aisles are narrow. On top of that there is a limit on bot slots.
+- **Crowding:** more bots does not mean proportionally faster, because a box only has as many access cells as it has open sides and the truck only has a few drop cells. On top of that there is a limit on bot slots.
 
 ## Player and Economy
 

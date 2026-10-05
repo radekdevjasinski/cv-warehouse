@@ -23,7 +23,7 @@ namespace CvWarehouse.Presentation.Warehouse
         {
             var random = new System.Random(seed);
             WarehouseLayout layout = new WarehouseGenerator(generatorConfig.CreateGeneratorSettings(), random).Generate();
-            Simulation = new WarehouseSimulation(layout, settings.CreateSimulationSettings(), random);
+            Simulation = new WarehouseSimulation(layout, settings.CreateSimulationSettings());
             for (int bot = 0; bot < settings.StartingBots; bot++)
                 Simulation.TryAddBot();
 

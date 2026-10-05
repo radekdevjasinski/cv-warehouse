@@ -5,6 +5,8 @@ namespace CvWarehouse.Core.Warehouse
 {
     public sealed class ReservationTable
     {
+        private const int NoOwner = -1;
+
         private readonly WarehouseGrid grid;
         private readonly int[] ownerAtCell;
 
@@ -12,12 +14,12 @@ namespace CvWarehouse.Core.Warehouse
         {
             this.grid = grid;
             ownerAtCell = new int[grid.CellCount];
-            Array.Fill(ownerAtCell, WarehouseGrid.NoBot);
+            Array.Fill(ownerAtCell, NoOwner);
         }
 
         public bool IsReserved(GridPosition position)
         {
-            return ownerAtCell[grid.IndexOf(position)] != WarehouseGrid.NoBot;
+            return ownerAtCell[grid.IndexOf(position)] != NoOwner;
         }
 
         public bool TryReserve(GridPosition position, int botId)
@@ -51,14 +53,14 @@ namespace CvWarehouse.Core.Warehouse
         {
             int cellIndex = grid.IndexOf(position);
             if (ownerAtCell[cellIndex] == botId)
-                ownerAtCell[cellIndex] = WarehouseGrid.NoBot;
+                ownerAtCell[cellIndex] = NoOwner;
         }
 
         public void ReleaseAll(int botId)
         {
             for (int cellIndex = 0; cellIndex < ownerAtCell.Length; cellIndex++)
                 if (ownerAtCell[cellIndex] == botId)
-                    ownerAtCell[cellIndex] = WarehouseGrid.NoBot;
+                    ownerAtCell[cellIndex] = NoOwner;
         }
     }
 }

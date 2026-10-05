@@ -4,10 +4,7 @@ namespace CvWarehouse.Core.Warehouse
 {
     public sealed class WarehouseGrid
     {
-        public const int NoBot = -1;
-
         private readonly CellType[] cellTypes;
-        private readonly int[] botAtCell;
 
         public WarehouseGrid(int width, int height)
         {
@@ -17,8 +14,6 @@ namespace CvWarehouse.Core.Warehouse
             Width = width;
             Height = height;
             cellTypes = new CellType[width * height];
-            botAtCell = new int[width * height];
-            Array.Fill(botAtCell, NoBot);
         }
 
         public int Width { get; }
@@ -57,29 +52,6 @@ namespace CvWarehouse.Core.Warehouse
             return Contains(position) && cellTypes[IndexOf(position)] != CellType.Blocked;
         }
 
-        public int GetBotAt(GridPosition position)
-        {
-            return botAtCell[IndexOf(position)];
-        }
-
-        public bool IsFreeFor(GridPosition position, int botId)
-        {
-            int occupant = botAtCell[IndexOf(position)];
-            return occupant == NoBot || occupant == botId;
-        }
-
-        public void Occupy(GridPosition position, int botId)
-        {
-            botAtCell[IndexOf(position)] = botId;
-        }
-
-        public void Vacate(GridPosition position, int botId)
-        {
-            int cellIndex = IndexOf(position);
-            if (botAtCell[cellIndex] == botId)
-                botAtCell[cellIndex] = NoBot;
-        }
-
         public bool CanStep(GridPosition from, int direction)
         {
             if (!IsWalkable(GridDirections.Step(from, direction)))
@@ -89,17 +61,6 @@ namespace CvWarehouse.Core.Warehouse
 
             return IsWalkable(from.Offset(GridDirections.DeltaXOf(direction), 0))
                 && IsWalkable(from.Offset(0, GridDirections.DeltaYOf(direction)));
-        }
-
-        public bool IsStepFreeFor(GridPosition from, int direction, int botId)
-        {
-            if (!CanStep(from, direction) || !IsFreeFor(GridDirections.Step(from, direction), botId))
-                return false;
-            if (!GridDirections.IsDiagonal(direction))
-                return true;
-
-            return IsFreeFor(from.Offset(GridDirections.DeltaXOf(direction), 0), botId)
-                && IsFreeFor(from.Offset(0, GridDirections.DeltaYOf(direction)), botId);
         }
     }
 }

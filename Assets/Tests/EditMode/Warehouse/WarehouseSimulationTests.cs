@@ -66,20 +66,33 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         }
 
         [Test]
-        public void Tick_EveryBotSlotUsed_NeverPutsTwoBotsOnOneCellOrInsideABox()
+        public void Tick_EveryBotSlotUsed_NeverStopsTwoBotsOnOneCellOrPutsABotInsideABox()
         {
             WarehouseSimulation simulation = NewGeneratedSimulation(EveryBotSlot);
             int expectedPoints = PointsOfEveryPiece(simulation.Layout);
-            var takenCells = new HashSet<GridPosition>();
+            var standingCells = new HashSet<GridPosition>();
 
             for (int tick = 0; tick < MaxTicks && !simulation.IsComplete; tick++)
             {
                 simulation.Tick();
-                AssertNoSharedCells(simulation, takenCells);
+                AssertNoSharedStandingCells(simulation, standingCells);
             }
 
             Assert.IsTrue(simulation.IsComplete, "The bots got stuck before emptying the warehouse.");
             Assert.AreEqual(expectedPoints, simulation.Score.Points);
+        }
+
+        [Test]
+        public void Tick_EveryBotSlotUsed_NoBotEverWaitsOnItsWay()
+        {
+            WarehouseSimulation simulation = NewGeneratedSimulation(EveryBotSlot);
+
+            for (int tick = 0; tick < MaxTicks && !simulation.IsComplete; tick++)
+            {
+                simulation.Tick();
+                foreach (Bot bot in simulation.Bots)
+                    Assert.IsTrue(bot.IsMoving || bot.IsAtDestination, "Bot " + bot.Id + " waited at " + bot.Cell + " on tick " + simulation.TickCount);
+            }
         }
 
         [Test]
@@ -174,7 +187,7 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
                 .AddParkingCell(new GridPosition(5, 5))
                 .AddBox(new GridPosition(3, 2), WeightClass.Medium, SmallBoxPieces)
                 .Build();
-            return new WarehouseSimulation(layout, settings, new Random(Seed));
+            return new WarehouseSimulation(layout, settings);
         }
 
         private static WarehouseSimulation NewGeneratedSimulation(int botCount)
@@ -191,9 +204,8 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
                 LightBoxes = 45,
                 BigClusterRadius = 4
             };
-            var random = new Random(Seed);
-            WarehouseLayout layout = new WarehouseGenerator(generatorSettings, random).Generate();
-            var simulation = new WarehouseSimulation(layout, new SimulationSettings(), random);
+            WarehouseLayout layout = new WarehouseGenerator(generatorSettings, new Random(Seed)).Generate();
+            var simulation = new WarehouseSimulation(layout, new SimulationSettings());
             while (simulation.Bots.Count < botCount && simulation.TryAddBot())
             {
             }
@@ -216,15 +228,14 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
             return points;
         }
 
-        private static void AssertNoSharedCells(WarehouseSimulation simulation, HashSet<GridPosition> takenCells)
+        private static void AssertNoSharedStandingCells(WarehouseSimulation simulation, HashSet<GridPosition> standingCells)
         {
-            takenCells.Clear();
+            standingCells.Clear();
             foreach (Bot bot in simulation.Bots)
             {
                 Assert.IsTrue(simulation.Layout.Grid.IsWalkable(bot.Cell), "Bot inside a box at " + bot.Cell);
-                Assert.IsTrue(takenCells.Add(bot.Cell), "Two bots on " + bot.Cell + " at tick " + simulation.TickCount);
-                if (bot.IsMoving)
-                    Assert.IsTrue(takenCells.Add(bot.NextCell), "Two bots on " + bot.NextCell + " at tick " + simulation.TickCount);
+                if (!bot.IsMoving)
+                    Assert.IsTrue(standingCells.Add(bot.Cell), "Two bots stand on " + bot.Cell + " at tick " + simulation.TickCount);
             }
         }
     }

@@ -44,7 +44,7 @@ namespace CvWarehouse.Core.Warehouse
                     continue;
 
                 closedInSearch[cell] = searchId;
-                ExpandNeighbours(cell, request);
+                ExpandNeighbours(cell, request.Goal);
             }
 
             return false;
@@ -59,12 +59,12 @@ namespace CvWarehouse.Core.Warehouse
             openCells.Push(startCell, 0);
         }
 
-        private void ExpandNeighbours(int cell, PathRequest request)
+        private void ExpandNeighbours(int cell, GridPosition goal)
         {
             GridPosition position = grid.PositionOf(cell);
             for (int direction = 0; direction < GridDirections.Count; direction++)
             {
-                if (!IsStepAllowed(position, direction, request))
+                if (!grid.CanStep(position, direction))
                     continue;
 
                 GridPosition neighbour = GridDirections.Step(position, direction);
@@ -76,16 +76,8 @@ namespace CvWarehouse.Core.Warehouse
                 reachedInSearch[neighbourCell] = searchId;
                 costFromStart[neighbourCell] = cost;
                 cameFrom[neighbourCell] = cell;
-                openCells.Push(neighbourCell, cost + GridDirections.OctileDistance(neighbour, request.Goal));
+                openCells.Push(neighbourCell, cost + GridDirections.OctileDistance(neighbour, goal));
             }
-        }
-
-        private bool IsStepAllowed(GridPosition from, int direction, PathRequest request)
-        {
-            if (!request.AvoidsBots || GridDirections.Step(from, direction) == request.Goal)
-                return grid.CanStep(from, direction);
-
-            return grid.IsStepFreeFor(from, direction, request.BotId);
         }
 
         private void BuildPath(int startCell, int goalCell, List<GridPosition> path)

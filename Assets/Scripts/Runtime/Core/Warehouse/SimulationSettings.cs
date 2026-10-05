@@ -14,10 +14,6 @@ namespace CvWarehouse.Core.Warehouse
 
         public int UnloadTicks { get; set; } = 20;
 
-        public int RepathWaitTicks { get; set; } = 15;
-
-        public int SidestepWaitTicks { get; set; } = 60;
-
         public int CarryPieces { get; set; } = 1;
 
         public int LightPiecePoints { get; set; } = 1;

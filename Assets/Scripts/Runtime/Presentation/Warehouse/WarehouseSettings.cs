@@ -11,8 +11,6 @@ namespace CvWarehouse.Presentation.Warehouse
         [SerializeField] private int ticksPerCell = 8;
         [SerializeField] private int extractTicks = 30;
         [SerializeField] private int unloadTicks = 20;
-        [SerializeField] private int repathWaitTicks = 15;
-        [SerializeField] private int sidestepWaitTicks = 60;
         [SerializeField] private int carryPieces = 1;
         [SerializeField] private int lightPiecePoints = 1;
         [SerializeField] private int mediumPiecePoints = 2;
@@ -30,8 +28,6 @@ namespace CvWarehouse.Presentation.Warehouse
                 TicksPerCell = ticksPerCell,
                 ExtractTicks = extractTicks,
                 UnloadTicks = unloadTicks,
-                RepathWaitTicks = repathWaitTicks,
-                SidestepWaitTicks = sidestepWaitTicks,
                 CarryPieces = carryPieces,
                 LightPiecePoints = lightPiecePoints,
                 MediumPiecePoints = mediumPiecePoints,

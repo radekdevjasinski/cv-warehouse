@@ -50,8 +50,6 @@ namespace CvWarehouse.Core.Warehouse
 
         internal int PathIndex { get; set; }
 
-        internal int WaitTicks { get; set; }
-
         internal int WorkTicksLeft { get; set; }
 
         internal bool HasPath => PathIndex < Path.Count;
@@ -60,7 +58,6 @@ namespace CvWarehouse.Core.Warehouse
         {
             Destination = destination;
             ClearPath();
-            WaitTicks = 0;
         }
 
         internal void ClearPath()

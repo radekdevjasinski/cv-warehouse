@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 namespace CvWarehouse.Core.Warehouse
@@ -13,13 +12,13 @@ namespace CvWarehouse.Core.Warehouse
         private float accumulatedSeconds;
         private int nextBotId;
 
-        public WarehouseSimulation(WarehouseLayout layout, SimulationSettings settings, Random random)
+        public WarehouseSimulation(WarehouseLayout layout, SimulationSettings settings)
         {
             Layout = layout;
             this.settings = settings;
             Score = new WarehouseScore(settings);
             reservations = new ReservationTable(layout.Grid);
-            mover = new BotMover(layout.Grid, settings, random);
+            mover = new BotMover(layout.Grid, settings);
             brain = new BotBrain(layout, settings, reservations, Score);
         }
 
@@ -77,7 +76,6 @@ namespace CvWarehouse.Core.Warehouse
                 State = BotState.Parked
             };
             reservations.TryReserve(parkingCell, bot.Id);
-            Layout.Grid.Occupy(parkingCell, bot.Id);
             bots.Add(bot);
             return true;
         }
@@ -89,8 +87,6 @@ namespace CvWarehouse.Core.Warehouse
 
             Bot bot = bots[bots.Count - 1];
             brain.AbandonWork(bot);
-            Layout.Grid.Vacate(bot.Cell, bot.Id);
-            Layout.Grid.Vacate(bot.NextCell, bot.Id);
             bots.RemoveAt(bots.Count - 1);
             return true;
         }
@@ -99,7 +95,7 @@ namespace CvWarehouse.Core.Warehouse
         {
             foreach (GridPosition parkingCell in Layout.ParkingCells)
             {
-                if (reservations.IsReserved(parkingCell) || Layout.Grid.GetBotAt(parkingCell) != WarehouseGrid.NoBot)
+                if (reservations.IsReserved(parkingCell))
                     continue;
 
                 freeCell = parkingCell;

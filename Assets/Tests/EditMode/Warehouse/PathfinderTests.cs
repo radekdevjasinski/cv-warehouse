@@ -8,8 +8,6 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
     {
         private const int GridSide = 5;
         private const int WallX = 2;
-        private const int MovingBot = 0;
-        private const int StandingBot = 1;
 
         private WarehouseGrid grid;
         private Pathfinder pathfinder;
@@ -64,31 +62,6 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
             Assert.IsFalse(pathfinder.TryFindPath(new PathRequest(new GridPosition(0, 0), new GridPosition(4, 0)), path));
 
             Assert.IsEmpty(path);
-        }
-
-        [Test]
-        public void TryFindPath_AvoidingBots_GoesAroundAStandingBot()
-        {
-            var start = new GridPosition(0, 2);
-            var goal = new GridPosition(4, 2);
-            var standing = new GridPosition(2, 2);
-            grid.Occupy(standing, StandingBot);
-
-            Assert.IsTrue(pathfinder.TryFindPath(PathRequest.AvoidingBots(start, goal, MovingBot), path));
-
-            CollectionAssert.DoesNotContain(path, standing);
-            Assert.AreEqual(goal, path[path.Count - 1]);
-        }
-
-        [Test]
-        public void TryFindPath_NotAvoidingBots_IgnoresAStandingBot()
-        {
-            var standing = new GridPosition(2, 2);
-            grid.Occupy(standing, StandingBot);
-
-            pathfinder.TryFindPath(new PathRequest(new GridPosition(0, 2), new GridPosition(4, 2)), path);
-
-            CollectionAssert.Contains(path, standing);
         }
 
         private void BuildWall(int gapY)
