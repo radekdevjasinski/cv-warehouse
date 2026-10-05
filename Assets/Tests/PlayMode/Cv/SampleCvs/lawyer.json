@@ -1,0 +1,78 @@
+{
+  "name": "Magdalena Kruk-Olszewska",
+  "title": "Attorney-at-Law • Employment and Data Protection",
+  "contacts": [
+    { "kind": "email", "text": "magdalena.kruk-olszewska@example.com", "link": "mailto:magdalena.kruk-olszewska@example.com" },
+    { "kind": "phone", "text": "+48 602 345 678", "link": "tel:+48602345678" }
+  ],
+  "sections": [
+    {
+      "title": "Profile",
+      "type": "paragraph",
+      "text": "Attorney-at-law admitted to the Warsaw Bar in 2017. Advises employers on restructuring, collective disputes and GDPR compliance. Has represented clients in over 140 labour court cases."
+    },
+    {
+      "title": "Professional Experience",
+      "type": "list",
+      "style": "rows",
+      "entries": [
+        {
+          "title": "Senior Associate",
+          "subtitle": "Nowak, Lis & Partners",
+          "meta": "2020 – present",
+          "bullets": [
+            "Led the legal side of a 600-person group redundancy for a logistics client.",
+            "Drafted remote-work policies for eleven companies after the 2023 Labour Code amendment.",
+            "Supervise two trainee attorneys."
+          ],
+          "weight": "heavy"
+        },
+        {
+          "title": "Associate",
+          "subtitle": "Grabowski Legal",
+          "meta": "2015 – 2020",
+          "description": "Employment litigation and day-to-day HR advisory for manufacturing and retail clients.",
+          "weight": "medium"
+        }
+      ]
+    },
+    {
+      "title": "Publications",
+      "type": "list",
+      "style": "bullets",
+      "entries": [
+        {
+          "title": "Monitoring employees after the whistleblower act: where legitimate interest ends",
+          "subtitle": "Labour Law Monthly",
+          "meta": "No. 4/2025",
+          "weight": "medium"
+        },
+        {
+          "title": "Remote work in practice",
+          "subtitle": "co-author, 2nd edition",
+          "meta": "2024",
+          "link": "https://example.com/books/remote-work-in-practice-second-edition",
+          "weight": "heavy"
+        }
+      ]
+    },
+    {
+      "title": "Education",
+      "type": "list",
+      "style": "rows",
+      "entries": [
+        { "title": "Attorney-at-law training", "subtitle": "Warsaw Bar Association", "meta": "2014 – 2017" },
+        { "title": "Master of Laws", "subtitle": "University of Warsaw, Faculty of Law and Administration", "meta": "2009 – 2014" }
+      ]
+    },
+    {
+      "title": "Languages",
+      "type": "list",
+      "style": "keyValue",
+      "entries": [
+        { "title": "English", "description": "C2, legal English certificate (TOLES Advanced)" },
+        { "title": "French", "description": "B2" }
+      ]
+    }
+  ]
+}

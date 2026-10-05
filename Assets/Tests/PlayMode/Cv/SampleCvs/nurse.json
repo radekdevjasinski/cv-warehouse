@@ -1,0 +1,77 @@
+{
+  "name": "Helena Wrona",
+  "title": "Registered Nurse • Intensive Care",
+  "contacts": [
+    { "kind": "phone", "text": "+48 600 100 200", "link": "tel:+48600100200" },
+    { "kind": "email", "text": "helena.wrona@example.com", "link": "mailto:helena.wrona@example.com" },
+    { "kind": "city", "text": "Lublin, Poland" }
+  ],
+  "categories": [
+    { "id": "clinical", "name": "Clinical" },
+    { "id": "people", "name": "People" }
+  ],
+  "sections": [
+    {
+      "title": "Profile",
+      "type": "paragraph",
+      "text": "Intensive care nurse with nine years on a twelve-bed cardiac unit. Trains new staff on ventilator care and leads the ward's hand-hygiene audits."
+    },
+    {
+      "title": "Experience",
+      "type": "list",
+      "style": "rows",
+      "entries": [
+        {
+          "title": "Senior Staff Nurse, Cardiac Intensive Care",
+          "subtitle": "Regional Clinical Hospital No. 4",
+          "meta": "2019 – present",
+          "bullets": [
+            "Care for two to three ventilated patients per shift, including post-surgery recovery.",
+            "Mentor four newly qualified nurses each year.",
+            "Run monthly audits that cut line infections on the ward by a third."
+          ],
+          "weight": "heavy",
+          "category": "clinical"
+        },
+        {
+          "title": "Staff Nurse, Internal Medicine",
+          "subtitle": "County Hospital in Zamość",
+          "meta": "2016 – 2019",
+          "description": "General ward of 34 beds. Medication rounds, wound care, patient education before discharge.",
+          "weight": "medium",
+          "category": "clinical"
+        }
+      ]
+    },
+    {
+      "title": "Education",
+      "type": "list",
+      "style": "rows",
+      "entries": [
+        { "title": "M.Sc. in Nursing", "subtitle": "Medical University of Lublin", "meta": "2014 – 2016", "weight": "heavy", "category": "clinical" },
+        { "title": "B.Sc. in Nursing", "subtitle": "Medical University of Lublin", "meta": "2011 – 2014", "weight": "medium", "category": "clinical" }
+      ]
+    },
+    {
+      "title": "Certificates",
+      "type": "list",
+      "style": "keyValue",
+      "entries": [
+        { "title": "ALS", "description": "Advanced Life Support provider, renewed 2025", "weight": "medium", "category": "clinical" },
+        { "title": "Anaesthesia and intensive care", "description": "Two-year specialisation, state exam passed with distinction", "weight": "heavy", "category": "clinical" },
+        { "title": "ECG", "description": "Interpretation course, 60 hours", "weight": "light", "category": "clinical" }
+      ]
+    },
+    {
+      "title": "Languages",
+      "type": "list",
+      "style": "inline",
+      "entries": [
+        { "title": "Polish (native)", "weight": "light", "category": "people" },
+        { "title": "English (B2, medical)", "weight": "light", "category": "people" },
+        { "title": "Ukrainian (A2)", "weight": "light", "category": "people" }
+      ]
+    }
+  ],
+  "footer": "References available on request."
+}

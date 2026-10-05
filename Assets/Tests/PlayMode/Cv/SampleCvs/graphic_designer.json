@@ -1,0 +1,84 @@
+{
+  "name": "Ola Sikora",
+  "title": "Brand and Editorial Designer",
+  "contacts": [
+    { "kind": "portfolio", "text": "olasikora.example.com", "link": "https://olasikora.example.com" },
+    { "kind": "email", "text": "hello@olasikora.example.com", "link": "mailto:hello@olasikora.example.com" },
+    { "kind": "behance", "text": "behance.net/olasikora", "link": "https://behance.net/olasikora" },
+    { "kind": "instagram", "text": "instagram.com/ola.sikora.design", "link": "https://instagram.com/ola.sikora.design" },
+    { "kind": "phone", "text": "+48 603 987 654", "link": "tel:+48603987654" }
+  ],
+  "categories": [
+    { "id": "craft", "name": "Craft" },
+    { "id": "client", "name": "Client work" }
+  ],
+  "sections": [
+    {
+      "title": "About",
+      "type": "paragraph",
+      "text": "I design identities and printed things for cultural institutions. Type first, colour second."
+    },
+    {
+      "title": "Work",
+      "type": "list",
+      "style": "bullets",
+      "entries": [
+        {
+          "title": "City Museum of Toruń",
+          "subtitle": "identity, wayfinding",
+          "link": "https://olasikora.example.com/work/city-museum",
+          "description": "New logo family, signage for four buildings and a 96-page guideline.",
+          "weight": "heavy",
+          "category": "client"
+        },
+        {
+          "title": "Kwartalnik Szum",
+          "subtitle": "editorial design",
+          "link": "https://olasikora.example.com/work/szum",
+          "description": "Art direction of a quarterly magazine, 12 issues.",
+          "weight": "medium",
+          "category": "client"
+        },
+        {
+          "title": "Mgła",
+          "subtitle": "typeface",
+          "description": "A soft grotesque in six weights with full Polish diacritics.",
+          "weight": "heavy",
+          "category": "craft"
+        }
+      ]
+    },
+    {
+      "title": "Tools",
+      "type": "list",
+      "style": "inline",
+      "entries": [
+        { "title": "InDesign", "category": "craft" },
+        { "title": "Illustrator", "category": "craft" },
+        { "title": "Figma", "category": "craft" },
+        { "title": "Glyphs", "category": "craft" },
+        { "title": "Photoshop", "category": "craft" },
+        { "title": "After Effects", "category": "craft" },
+        { "title": "Risograph printing", "category": "craft" },
+        { "title": "Bookbinding", "category": "craft" }
+      ]
+    },
+    {
+      "title": "Awards",
+      "type": "list",
+      "style": "rows",
+      "entries": [
+        { "title": "Polish Graphic Design Awards — shortlist, identity", "meta": "2024", "weight": "medium", "category": "client" },
+        { "title": "Most Beautiful Books of the Year — distinction", "meta": "2022", "weight": "medium", "category": "craft" }
+      ]
+    },
+    {
+      "title": "Education",
+      "type": "list",
+      "style": "rows",
+      "entries": [
+        { "title": "MA in Graphic Design", "subtitle": "Academy of Fine Arts in Katowice", "meta": "2015 – 2020" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "name": "Bartek Mazur",
+  "title": "Sous Chef",
+  "contacts": [
+    { "kind": "phone", "text": "+48 604 111 222", "link": "tel:+48604111222" },
+    { "kind": "email", "text": "bartek.mazur@example.com", "link": "mailto:bartek.mazur@example.com" }
+  ],
+  "sections": [
+    {
+      "title": "Kitchens",
+      "type": "list",
+      "style": "rows",
+      "entries": [
+        {
+          "title": "Sous Chef",
+          "subtitle": "Restauracja Pod Lipą, Gdańsk",
+          "meta": "2022 – present",
+          "bullets": [
+            "Run the pass for 90 covers a night.",
+            "Write the weekly fish menu around what the boats bring in.",
+            "Cut food waste by a fifth with a staff-meal plan."
+          ]
+        },
+        {
+          "title": "Chef de Partie, sauces",
+          "subtitle": "Hotel Bałtyk",
+          "meta": "2019 – 2022"
+        },
+        {
+          "title": "Commis",
+          "subtitle": "Bistro 12",
+          "meta": "2017 – 2019"
+        }
+      ]
+    },
+    {
+      "title": "Skills",
+      "type": "list",
+      "style": "inline",
+      "entries": [
+        { "title": "Fish butchery" },
+        { "title": "Fermentation" },
+        { "title": "Sourdough" },
+        { "title": "HACCP" },
+        { "title": "Stock control" }
+      ]
+    },
+    {
+      "title": "Training",
+      "type": "list",
+      "style": "keyValue",
+      "entries": [
+        { "title": "2017", "description": "Culinary Technical School in Gdynia, chef diploma" },
+        { "title": "2023", "description": "Two-week stage at a one-star restaurant in Copenhagen" }
+      ]
+    }
+  ]
+}

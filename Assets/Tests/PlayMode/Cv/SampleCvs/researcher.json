@@ -1,0 +1,106 @@
+{
+  "name": "Dr Paweł Orzechowski",
+  "title": "Postdoctoral Researcher in Molecular Biology • Plant Stress Signalling",
+  "contacts": [
+    { "kind": "email", "text": "p.orzechowski@institute.example.org", "link": "mailto:p.orzechowski@institute.example.org" },
+    { "kind": "orcid", "text": "orcid.org/0000-0000-0000-0000", "link": "https://orcid.org/0000-0000-0000-0000" },
+    { "kind": "scholar", "text": "scholar.example.org/citations?user=orzechowski", "link": "https://scholar.example.org/citations?user=orzechowski" }
+  ],
+  "categories": [
+    { "id": "research", "name": "Research" },
+    { "id": "teaching", "name": "Teaching" }
+  ],
+  "sections": [
+    {
+      "title": "Research Interests",
+      "type": "paragraph",
+      "text": "How plants sense drought at the level of single guard cells. Calcium signalling, live-cell imaging, CRISPR knock-outs in Arabidopsis and barley."
+    },
+    {
+      "title": "Appointments",
+      "type": "list",
+      "style": "rows",
+      "entries": [
+        {
+          "title": "Postdoctoral Researcher",
+          "subtitle": "Institute of Plant Physiology, Kraków",
+          "meta": "2022 – present",
+          "description": "Principal investigator of a three-year national grant on abscisic acid receptors.",
+          "weight": "heavy",
+          "category": "research"
+        },
+        {
+          "title": "Visiting Scientist",
+          "subtitle": "Department of Plant Sciences, example university abroad",
+          "meta": "Mar – Sep 2021",
+          "weight": "medium",
+          "category": "research"
+        }
+      ]
+    },
+    {
+      "title": "Selected Publications",
+      "type": "list",
+      "style": "bullets",
+      "entries": [
+        {
+          "title": "A calcium-dependent kinase cascade links osmotic stress perception to stomatal closure in Arabidopsis thaliana",
+          "subtitle": "first author",
+          "meta": "Plant Cell Reports, 2024",
+          "link": "https://doi.example.org/10.0000/pcr.2024.001234",
+          "weight": "heavy",
+          "category": "research"
+        },
+        {
+          "title": "Genome-wide identification of PYR/PYL/RCAR receptors in barley",
+          "subtitle": "corresponding author",
+          "meta": "J. Exp. Bot., 2023",
+          "link": "https://doi.example.org/10.0000/jxb.2023.004321",
+          "weight": "heavy",
+          "category": "research"
+        },
+        {
+          "title": "Imaging guard cells without killing them",
+          "subtitle": "methods chapter",
+          "meta": "2022",
+          "weight": "medium",
+          "category": "research"
+        }
+      ]
+    },
+    {
+      "title": "Grants and Awards",
+      "type": "list",
+      "style": "keyValue",
+      "entries": [
+        { "title": "2023 – 2026", "description": "National Science Centre, SONATA grant, principal investigator", "weight": "heavy", "category": "research" },
+        { "title": "2021", "description": "Scholarship for outstanding young scientists, Ministry of Education and Science", "weight": "medium", "category": "research" },
+        { "title": "2019", "description": "Best poster, European Plant Science Congress", "weight": "light", "category": "research" }
+      ]
+    },
+    {
+      "title": "Teaching",
+      "type": "list",
+      "style": "rows",
+      "entries": [
+        {
+          "title": "Molecular biology laboratory",
+          "meta": "2018 – 2022",
+          "description": "Practical classes for second-year students, 60 hours per semester.",
+          "weight": "light",
+          "category": "teaching"
+        }
+      ]
+    },
+    {
+      "title": "Education",
+      "type": "list",
+      "style": "rows",
+      "entries": [
+        { "title": "PhD in Biological Sciences", "subtitle": "Jagiellonian University", "meta": "2017 – 2022", "weight": "heavy", "category": "research" },
+        { "title": "M.Sc. in Biotechnology", "subtitle": "Jagiellonian University", "meta": "2012 – 2017", "weight": "medium", "category": "research" }
+      ]
+    }
+  ],
+  "footer": "Full publication list: 14 papers, h-index 7."
+}

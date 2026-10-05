@@ -1,0 +1,83 @@
+{
+  "name": "Maximiliana Konstantynopolitańczykowianeczka-Brzęczyszczykiewicz",
+  "title": "Principal Interdisciplinary Telecommunications-and-Electroencephalography Systems Architect • Head of Internationalization",
+  "contacts": [
+    { "kind": "email", "text": "maximiliana.konstantynopolitanczykowianeczka@very-long-company-domain-name.example.com", "link": "mailto:max@example.com" },
+    { "kind": "web", "text": "https://subdomain.very-long-company-domain-name.example.com/people/maximiliana/portfolio/2026", "link": "https://example.com" },
+    { "kind": "phone", "text": "+48 600 000 000" },
+    { "kind": "a", "text": "A" },
+    { "kind": "city", "text": "Szczebrzeszyn" },
+    { "kind": "extra", "text": "Available from January" },
+    { "kind": "extra", "text": "Open to relocation" }
+  ],
+  "sections": [
+    {
+      "title": "A Section With An Unusually Long Title That Has To Wrap On A Narrow Panel",
+      "type": "paragraph",
+      "text": "Word. Supercalifragilisticexpialidocious-pneumonoultramicroscopicsilicovolcanoconiosis-floccinaucinihilipilification. Short words after a very long one."
+    },
+    {
+      "title": "Rows",
+      "type": "list",
+      "style": "rows",
+      "entries": [
+        {
+          "title": "Chief Executive Vice President of Worldwide Interdepartmental Synchronization and Standardization",
+          "subtitle": "The International Consortium for Telecommunications Interoperability and Electroencephalography",
+          "meta": "September 2019 – December 2026 (part-time)",
+          "description": "One.",
+          "bullets": ["A", "A much longer bullet that keeps going past the edge of a narrow panel so that it has to wrap at least twice."]
+        },
+        {
+          "title": "X",
+          "meta": "https://subdomain.very-long-company-domain-name.example.com/a/very/long/path/that/does/not/fit",
+          "link": "https://example.com/x"
+        },
+        { "description": "An entry with a description only." },
+        { "meta": "Only meta", "subtitle": "Only subtitle and meta" }
+      ]
+    },
+    {
+      "title": "Bullets",
+      "type": "list",
+      "style": "bullets",
+      "entries": [
+        {
+          "title": "Electroencephalographically",
+          "subtitle": "Otorhinolaryngological, Psychoneuroendocrinological",
+          "link": "https://subdomain.very-long-company-domain-name.example.com/projects/electroencephalographically",
+          "description": "Body."
+        },
+        { "title": "Tiny", "meta": "1" },
+        { "title": "No meta and a long title that wraps around the panel width without anything on the right side" }
+      ]
+    },
+    {
+      "title": "Key Value",
+      "type": "list",
+      "style": "keyValue",
+      "entries": [
+        { "title": "K", "description": "V" },
+        { "title": "A key that is much longer than any reasonable key column", "description": "A value that also goes on for a while so that both columns have to wrap inside their own space." },
+        { "title": "Internationalization", "description": "Counterrevolutionaries" },
+        { "title": "With meta", "description": "Value", "meta": "2026", "link": "https://example.com/key-value-link" },
+        { "description": "A value without a key." },
+        { "title": "A key without a value" }
+      ]
+    },
+    {
+      "title": "Inline",
+      "type": "list",
+      "style": "inline",
+      "entries": [
+        { "title": "A" },
+        { "title": "A chip that is far too long to fit on one line of a narrow panel and therefore has to wrap inside itself" },
+        { "title": "B" },
+        { "title": "Electroencephalography" },
+        { "title": "C", "link": "https://example.com/c" },
+        { "description": "Chip from a description" }
+      ]
+    }
+  ],
+  "footer": "A footer that is long enough to wrap on the narrow panel. A footer that is long enough to wrap on the narrow panel. A footer that is long enough to wrap."
+}
