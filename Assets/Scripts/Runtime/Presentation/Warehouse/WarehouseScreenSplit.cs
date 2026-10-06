@@ -11,6 +11,7 @@ namespace CvWarehouse.Presentation.Warehouse
 
         [SerializeField] private Camera warehouseCamera;
         [SerializeField] private RectTransform waybillPanel;
+        [SerializeField] private RectTransform warehouseHudArea;
         [SerializeField, Range(0f, 1f)] private float waybillWidthFraction = 0.38f;
         [SerializeField] private Button expandButton;
         [SerializeField] private TMP_Text expandButtonLabel;
@@ -21,6 +22,8 @@ namespace CvWarehouse.Presentation.Warehouse
         private void Awake()
         {
             warehouseCamera.rect = new Rect(0f, 0f, 1f - waybillWidthFraction, 1f);
+            warehouseHudArea.anchorMin = Vector2.zero;
+            warehouseHudArea.anchorMax = new Vector2(1f - waybillWidthFraction, 1f);
             Apply();
         }
 

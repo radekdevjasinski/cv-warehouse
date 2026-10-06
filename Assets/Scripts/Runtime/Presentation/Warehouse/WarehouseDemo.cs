@@ -19,6 +19,8 @@ namespace CvWarehouse.Presentation.Warehouse
 
         public WarehouseSimulation Simulation { get; private set; }
 
+        public BotShop Shop { get; private set; }
+
         public int Seed => seed;
 
         private void Start()
@@ -28,13 +30,14 @@ namespace CvWarehouse.Presentation.Warehouse
             Simulation = new WarehouseSimulation(layout, settings.CreateSimulationSettings());
             for (int bot = 0; bot < settings.StartingBots; bot++)
                 Simulation.TryAddBot();
+            Shop = new BotShop(Simulation, settings.CreateShopSettings());
 
             shapes = new SquareShapeFactory(shapeMaterial);
             warehouseCamera.Frame(layout);
             gridView.Show(layout, shapes);
             boxesView.Show(layout, shapes);
             botsView.Show(Simulation, shapes);
-            hudView.Show(Simulation);
+            hudView.Show(Simulation, Shop);
         }
 
         private void Update()

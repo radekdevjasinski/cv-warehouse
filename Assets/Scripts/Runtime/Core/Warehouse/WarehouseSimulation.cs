@@ -16,7 +16,7 @@ namespace CvWarehouse.Core.Warehouse
         {
             Layout = layout;
             this.settings = settings;
-            Score = new WarehouseScore(settings);
+            Score = new WarehouseScore(settings, layout.Boxes);
             reservations = new ReservationTable(layout.Grid);
             mover = new BotMover(layout.Grid, settings);
             brain = new BotBrain(layout, settings, reservations, Score);
@@ -31,6 +31,8 @@ namespace CvWarehouse.Core.Warehouse
         public int MaxBots => Layout.ParkingCells.Count;
 
         public int TickCount { get; private set; }
+
+        public CarrySize CarrySize { get; private set; }
 
         public bool IsComplete => Score.DeliveredPieces == Layout.TotalPieces;
 
@@ -62,6 +64,12 @@ namespace CvWarehouse.Core.Warehouse
                 brain.Tick(bot);
                 mover.StartStep(bot);
             }
+        }
+
+        public void SetCarrySize(CarrySize carrySize)
+        {
+            CarrySize = carrySize;
+            brain.CarryPieces = settings.PiecesPerTrip(carrySize);
         }
 
         public bool TryAddBot()

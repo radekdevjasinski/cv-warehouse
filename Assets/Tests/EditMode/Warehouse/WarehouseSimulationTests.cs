@@ -41,9 +41,24 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         }
 
         [Test]
-        public void Tick_BotCarryingTwoPieces_DeliversTwoOnTheFirstTrip()
+        public void Tick_BotCarryingBoxes_EmptiesTheBoxInOneTrip()
         {
-            WarehouseSimulation simulation = NewSmallSimulation(new SimulationSettings { CarryPieces = 2 });
+            WarehouseSimulation simulation = NewSmallSimulation(new SimulationSettings());
+            simulation.SetCarrySize(CarrySize.Box);
+            simulation.TryAddBot();
+
+            for (int tick = 0; tick < MaxTicks && simulation.Score.DeliveredPieces == 0; tick++)
+                simulation.Tick();
+
+            Assert.AreEqual(SmallBoxPieces, simulation.Score.DeliveredPieces);
+            Assert.IsTrue(simulation.IsComplete);
+        }
+
+        [Test]
+        public void Tick_BotCarryingWords_DeliversAWordOnTheFirstTrip()
+        {
+            WarehouseSimulation simulation = NewSmallSimulation(new SimulationSettings { WordPieces = 2 });
+            simulation.SetCarrySize(CarrySize.Word);
             simulation.TryAddBot();
 
             for (int tick = 0; tick < MaxTicks && simulation.Score.DeliveredPieces == 0; tick++)
@@ -80,6 +95,7 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
 
             Assert.IsTrue(simulation.IsComplete, "The bots got stuck before emptying the warehouse.");
             Assert.AreEqual(expectedPoints, simulation.Score.Points);
+            Assert.AreEqual(expectedPoints, simulation.Score.MaxPoints);
         }
 
         [Test]

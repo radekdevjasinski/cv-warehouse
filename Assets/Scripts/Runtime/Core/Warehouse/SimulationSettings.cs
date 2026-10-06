@@ -14,13 +14,28 @@ namespace CvWarehouse.Core.Warehouse
 
         public int UnloadTicks { get; set; } = 20;
 
-        public int CarryPieces { get; set; } = 1;
+        public int LetterPieces { get; set; } = 1;
+
+        public int WordPieces { get; set; } = 2;
 
         public int LightPiecePoints { get; set; } = 1;
 
         public int MediumPiecePoints { get; set; } = 2;
 
         public int HeavyPiecePoints { get; set; } = 3;
+
+        public int PiecesPerTrip(CarrySize carrySize)
+        {
+            switch (carrySize)
+            {
+                case CarrySize.Box:
+                    return int.MaxValue;
+                case CarrySize.Word:
+                    return WordPieces;
+                default:
+                    return LetterPieces;
+            }
+        }
 
         public int PointsPerPiece(WeightClass weightClass)
         {

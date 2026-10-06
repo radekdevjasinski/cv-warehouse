@@ -9,33 +9,42 @@ namespace CvWarehouse.Presentation.Warehouse
     {
         private const int NothingShown = -1;
 
+        [SerializeField] private TMP_Text pointsText;
         [SerializeField] private TMP_Text botsText;
         [SerializeField] private TMP_Text deliveredText;
-        [SerializeField] private TMP_Text pointsText;
-        [SerializeField] private Button addBotButton;
+        [SerializeField] private Button buyBotButton;
+        [SerializeField] private TMP_Text buyBotLabel;
         [SerializeField] private Button removeBotButton;
+        [SerializeField] private Button upgradeCarryButton;
+        [SerializeField] private TMP_Text upgradeCarryLabel;
 
         private WarehouseSimulation simulation;
+        private BotShop shop;
+        private int shownPoints = NothingShown;
         private int shownBots = NothingShown;
         private int shownDelivered = NothingShown;
-        private int shownPoints = NothingShown;
+        private int shownBotPrice = NothingShown;
+        private int shownCarryPrice = NothingShown;
 
-        public void Show(WarehouseSimulation shownSimulation)
+        public void Show(WarehouseSimulation shownSimulation, BotShop shownShop)
         {
             simulation = shownSimulation;
+            shop = shownShop;
             Refresh();
         }
 
         private void OnEnable()
         {
-            addBotButton.onClick.AddListener(AddBot);
+            buyBotButton.onClick.AddListener(BuyBot);
             removeBotButton.onClick.AddListener(RemoveBot);
+            upgradeCarryButton.onClick.AddListener(UpgradeCarry);
         }
 
         private void OnDisable()
         {
-            addBotButton.onClick.RemoveListener(AddBot);
+            buyBotButton.onClick.RemoveListener(BuyBot);
             removeBotButton.onClick.RemoveListener(RemoveBot);
+            upgradeCarryButton.onClick.RemoveListener(UpgradeCarry);
         }
 
         private void LateUpdate()
@@ -44,9 +53,9 @@ namespace CvWarehouse.Presentation.Warehouse
                 Refresh();
         }
 
-        private void AddBot()
+        private void BuyBot()
         {
-            simulation.TryAddBot();
+            shop.TryBuyBot();
         }
 
         private void RemoveBot()
@@ -54,8 +63,26 @@ namespace CvWarehouse.Presentation.Warehouse
             simulation.TryRemoveBot();
         }
 
+        private void UpgradeCarry()
+        {
+            shop.TryUpgradeCarry();
+        }
+
         private void Refresh()
         {
+            RefreshCounters();
+            RefreshBuyBotButton();
+            RefreshUpgradeCarryButton();
+        }
+
+        private void RefreshCounters()
+        {
+            if (shownPoints != shop.Balance)
+            {
+                shownPoints = shop.Balance;
+                pointsText.SetText("{0} points", shownPoints);
+            }
+
             if (shownBots != simulation.Bots.Count)
             {
                 shownBots = simulation.Bots.Count;
@@ -67,12 +94,42 @@ namespace CvWarehouse.Presentation.Warehouse
                 shownDelivered = simulation.Score.DeliveredPieces;
                 deliveredText.SetText("Delivered {0}/{1}", shownDelivered, simulation.Layout.TotalPieces);
             }
+        }
 
-            if (shownPoints != simulation.Score.Points)
-            {
-                shownPoints = simulation.Score.Points;
-                pointsText.SetText("Points {0}", shownPoints);
-            }
+        private void RefreshBuyBotButton()
+        {
+            SetInteractable(buyBotButton, shop.CanBuyBot);
+            int botPrice = shop.HasBotSlot ? shop.BotPrice : 0;
+            if (shownBotPrice == botPrice)
+                return;
+
+            shownBotPrice = botPrice;
+            if (shop.HasBotSlot)
+                buyBotLabel.SetText("Buy bot ({0})", botPrice);
+            else
+                buyBotLabel.SetText("No free bot slots");
+        }
+
+        private void RefreshUpgradeCarryButton()
+        {
+            SetInteractable(upgradeCarryButton, shop.CanUpgradeCarry);
+            int carryPrice = shop.HasCarryUpgrade ? shop.CarryUpgradePrice : 0;
+            if (shownCarryPrice == carryPrice)
+                return;
+
+            shownCarryPrice = carryPrice;
+            if (!shop.HasCarryUpgrade)
+                upgradeCarryLabel.SetText("Bots carry whole boxes");
+            else if (simulation.CarrySize == CarrySize.Letter)
+                upgradeCarryLabel.SetText("Carry words ({0})", carryPrice);
+            else
+                upgradeCarryLabel.SetText("Carry whole boxes ({0})", carryPrice);
+        }
+
+        private static void SetInteractable(Button button, bool isInteractable)
+        {
+            if (button.interactable != isInteractable)
+                button.interactable = isInteractable;
         }
     }
 }

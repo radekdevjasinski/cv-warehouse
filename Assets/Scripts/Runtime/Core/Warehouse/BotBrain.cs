@@ -14,8 +14,11 @@ namespace CvWarehouse.Core.Warehouse
             this.settings = settings;
             this.reservations = reservations;
             this.score = score;
-            taskQueue = new TaskQueue(layout, reservations, settings);
+            taskQueue = new TaskQueue(layout, reservations);
+            CarryPieces = settings.PiecesPerTrip(CarrySize.Letter);
         }
+
+        public int CarryPieces { get; set; }
 
         public void Tick(Bot bot)
         {
@@ -65,7 +68,7 @@ namespace CvWarehouse.Core.Warehouse
 
         private void TickWithoutJob(Bot bot)
         {
-            if (taskQueue.TryAssign(bot))
+            if (taskQueue.TryAssign(bot, CarryPieces))
             {
                 LeaveParking(bot);
                 bot.State = BotState.GoingToBox;

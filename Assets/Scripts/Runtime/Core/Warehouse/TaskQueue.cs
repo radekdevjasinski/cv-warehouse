@@ -9,12 +9,10 @@ namespace CvWarehouse.Core.Warehouse
 
         private readonly List<Box> waitingBoxes = new List<Box>();
         private readonly ReservationTable reservations;
-        private readonly SimulationSettings settings;
 
-        public TaskQueue(WarehouseLayout layout, ReservationTable reservations, SimulationSettings settings)
+        public TaskQueue(WarehouseLayout layout, ReservationTable reservations)
         {
             this.reservations = reservations;
-            this.settings = settings;
             waitingBoxes.AddRange(layout.Boxes);
             Refresh();
         }
@@ -28,7 +26,7 @@ namespace CvWarehouse.Core.Warehouse
             waitingBoxes.Sort(NearestTruckFirst);
         }
 
-        public bool TryAssign(Bot bot)
+        public bool TryAssign(Bot bot, int carryPieces)
         {
             for (int index = 0; index < waitingBoxes.Count; index++)
             {
@@ -40,7 +38,7 @@ namespace CvWarehouse.Core.Warehouse
 
                 bot.JobBox = box;
                 bot.AccessCell = accessCell;
-                bot.ClaimedPieces = box.Claim(settings.CarryPieces);
+                bot.ClaimedPieces = box.Claim(carryPieces);
                 return true;
             }
 

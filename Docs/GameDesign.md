@@ -48,7 +48,7 @@ This is a living document. It is edited as development progresses.
 ## Bots
 
 - **One kind of bot:** every bot is a transport bot. It walks to a box, takes text out and carries it to the truck. Bots share a common task queue.
-- **Carry size:** how much text a bot takes per trip: a letter, a word or a block. Bots start with a letter. Carry size is raised by upgrades.
+- **Carry size:** how much text a bot takes per trip: a letter, a word or a whole box. Every bot starts with a letter. One upgrade raises the carry size of all bots at once, first to words and then to whole boxes.
 - **Specializations:** a bot can specialize in a category and carries boxes of that category faster.
 - **Category:** a list from the file (e.g. technical and soft, up to 4–5). Each gets a colour.
 - **Crowding:** more bots does not mean proportionally faster, because a box only has as many access cells as it has open sides and the truck only has a few drop cells. On top of that there is a limit on bot slots.
@@ -56,11 +56,13 @@ This is a living document. It is edited as development progresses.
 ## Player and Economy
 
 - **Start:** the player begins with a few bots that carry letters. Nothing else is given for free.
-- **Actions:** the player places and removes bots and buys upgrades and specializations.
+- **Actions:** the player buys and removes bots and buys upgrades and specializations. A removed bot is not refunded.
+- **Points on screen:** the points the player can spend are shown large at the top middle of the warehouse view. The buttons for buying a bot and for the next carry upgrade show their price and are greyed out until the player can afford them.
 - **Currency:** research points, earned for delivered text. Heavier boxes are worth more.
 - **Shop:** available at all times.
 - **First upgrade:** carrying a word is affordable right after the name has been delivered, whatever the size of the CV. The letter stage is a short opening, not a grind.
-- **Prices:** scaled to the size of the CV, so that a long file does not produce a game without challenge.
+- **Prices:** scaled to the size of the CV, so that a long file does not produce a game without challenge. Every price is a share of all the points in the warehouse.
+- **Bot price:** the starting bots are free. Each bought bot costs more than the one before.
 - **Upgrades:** named after projects. Effects come from a ready-made pool in code, and an entry in the file points to one of them.
 
 ## CV Data

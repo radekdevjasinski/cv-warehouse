@@ -3,6 +3,7 @@ using CvWarehouse.Core.Warehouse;
 using CvWarehouse.Presentation.Cv;
 using CvWarehouse.Presentation.Warehouse;
 using NUnit.Framework;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
@@ -16,7 +17,9 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
     public sealed class WarehouseDemoSceneTests
     {
         private const string ScenePath = "Assets/Scenes/WarehouseDemo.unity";
-        private const string AddBotButtonName = "AddBotButton";
+        private const string BuyBotButtonName = "BuyBotButton";
+        private const string UpgradeCarryButtonName = "UpgradeCarryButton";
+        private const string PointsTextName = "PointsText";
         private const string RemoveBotButtonName = "RemoveBotButton";
         private const int StartingBots = 3;
         private const string WaybillPanelPath = "CvCanvas/Panel";
@@ -50,15 +53,54 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
         }
 
         [UnityTest]
-        public IEnumerator Buttons_Clicked_AddAndRemoveABot()
+        public IEnumerator BuyBotButton_NotEnoughPoints_IsDisabled()
         {
-            GameObject.Find(AddBotButtonName).GetComponent<Button>().onClick.Invoke();
             yield return null;
-            Assert.AreEqual(StartingBots + 1, Object.FindAnyObjectByType<WarehouseBotsView>().VisibleBotCount);
 
+            Assert.IsFalse(GameObject.Find(BuyBotButtonName).GetComponent<Button>().interactable);
+            Assert.IsFalse(GameObject.Find(UpgradeCarryButtonName).GetComponent<Button>().interactable);
+            Assert.AreEqual("0 points", GameObject.Find(PointsTextName).GetComponent<TMP_Text>().text);
+        }
+
+        [UnityTest]
+        public IEnumerator BuyBotButton_ClickedWithEnoughPoints_AddsABotAndSpendsItsPrice()
+        {
+            Button buyBotButton = GameObject.Find(BuyBotButtonName).GetComponent<Button>();
+            TickUntil(() => demo.Shop.CanBuyBot);
+            int pointsBefore = demo.Shop.Balance;
+            int botPrice = demo.Shop.BotPrice;
+            yield return null;
+            Assert.IsTrue(buyBotButton.interactable);
+
+            buyBotButton.onClick.Invoke();
+            yield return null;
+
+            Assert.AreEqual(StartingBots + 1, Object.FindAnyObjectByType<WarehouseBotsView>().VisibleBotCount);
+            Assert.AreEqual(pointsBefore - botPrice, demo.Shop.Balance);
+            Assert.AreEqual(demo.Shop.Balance + " points", GameObject.Find(PointsTextName).GetComponent<TMP_Text>().text);
+        }
+
+        [UnityTest]
+        public IEnumerator RemoveBotButton_Clicked_RemovesABot()
+        {
             GameObject.Find(RemoveBotButtonName).GetComponent<Button>().onClick.Invoke();
             yield return null;
-            Assert.AreEqual(StartingBots, Object.FindAnyObjectByType<WarehouseBotsView>().VisibleBotCount);
+
+            Assert.AreEqual(StartingBots - 1, Object.FindAnyObjectByType<WarehouseBotsView>().VisibleBotCount);
+        }
+
+        [UnityTest]
+        public IEnumerator UpgradeCarryButton_ClickedWithEnoughPoints_MakesBotsCarryWords()
+        {
+            Button upgradeCarryButton = GameObject.Find(UpgradeCarryButtonName).GetComponent<Button>();
+            TickUntil(() => demo.Shop.CanUpgradeCarry);
+            yield return null;
+            Assert.IsTrue(upgradeCarryButton.interactable);
+
+            upgradeCarryButton.onClick.Invoke();
+            yield return null;
+
+            Assert.AreEqual(CarrySize.Word, demo.Simulation.CarrySize);
         }
 
         [UnityTest]
@@ -148,6 +190,14 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
             Assert.Greater(waybillPanel.anchorMin.x, 0f);
             Assert.IsTrue(warehouseCamera.gameObject.activeSelf);
             Assert.AreEqual(waybillPanel.anchorMin.x, warehouseCamera.GetComponent<Camera>().rect.xMax, AnchorTolerance);
+        }
+
+        private void TickUntil(System.Func<bool> isReached)
+        {
+            for (int tick = 0; tick < MaxTicks && !isReached(); tick++)
+                demo.Simulation.Tick();
+
+            Assert.IsTrue(isReached(), "The simulation never got that far.");
         }
 
         private static IEnumerator WaitForTheCv(CvScreen waybill)
