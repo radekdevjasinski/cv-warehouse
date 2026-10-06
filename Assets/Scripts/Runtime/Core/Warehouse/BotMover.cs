@@ -30,10 +30,16 @@ namespace CvWarehouse.Core.Warehouse
             BeginMove(bot, bot.Path[bot.PathIndex++]);
         }
 
+        public void PlanRoute(Bot bot)
+        {
+            TryFindPath(bot);
+        }
+
         private bool TryFindPath(Bot bot)
         {
+            GridPosition start = bot.IsMoving ? bot.NextCell : bot.Cell;
             bot.PathIndex = 0;
-            return pathfinder.TryFindPath(new PathRequest(bot.Cell, bot.Destination), bot.Path);
+            return pathfinder.TryFindPath(new PathRequest(start, bot.Destination), bot.Path);
         }
 
         private void BeginMove(Bot bot, GridPosition nextCell)

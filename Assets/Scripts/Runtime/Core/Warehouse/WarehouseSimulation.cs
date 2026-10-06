@@ -32,12 +32,22 @@ namespace CvWarehouse.Core.Warehouse
 
         public int TickCount { get; private set; }
 
-        public CarrySize CarrySize { get; private set; }
+        public bool IsPaused { get; private set; }
+
+        public bool CanRemoveBot => bots.Count > 1;
 
         public bool IsComplete => Score.DeliveredPieces == Layout.TotalPieces;
 
+        public void TogglePause()
+        {
+            IsPaused = !IsPaused;
+        }
+
         public void Advance(float deltaTime)
         {
+            if (IsPaused)
+                return;
+
             accumulatedSeconds += deltaTime;
             int ticks = 0;
             while (accumulatedSeconds >= settings.TickSeconds && ticks < settings.MaxTicksPerAdvance)
@@ -66,10 +76,19 @@ namespace CvWarehouse.Core.Warehouse
             }
         }
 
-        public void SetCarrySize(CarrySize carrySize)
+        public void SetCarrySize(Bot bot, CarrySize carrySize)
         {
-            CarrySize = carrySize;
-            brain.CarryPieces = settings.PiecesPerTrip(carrySize);
+            bot.CarrySize = carrySize;
+        }
+
+        public void SetFocus(Bot bot, BotFocus focus)
+        {
+            if (bot.Focus == focus)
+                return;
+
+            bot.Focus = focus;
+            if (brain.TryRetarget(bot))
+                mover.PlanRoute(bot);
         }
 
         public bool TryAddBot()
@@ -88,14 +107,12 @@ namespace CvWarehouse.Core.Warehouse
             return true;
         }
 
-        public bool TryRemoveBot()
+        public bool TryRemoveBot(Bot bot)
         {
-            if (bots.Count == 0)
+            if (!CanRemoveBot || !bots.Remove(bot))
                 return false;
 
-            Bot bot = bots[bots.Count - 1];
             brain.AbandonWork(bot);
-            bots.RemoveAt(bots.Count - 1);
             return true;
         }
 

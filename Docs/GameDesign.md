@@ -22,7 +22,7 @@ This is a living document. It is edited as development progresses.
 - **Buried boxes:** a box in the middle of a pile may have no free side at the start. It opens up when the boxes around it are emptied.
 - **Generator guarantees:** every box is placed, no box overlaps another or the ramp, and every box can be reached once the boxes in front of it are gone.
 - **Screen:** on a wide screen the warehouse takes the left side and the waybill stays visible the whole time as a panel on the right, so every delivery shows up on the CV straight away. The player scrolls the waybill with the mouse wheel or by dragging it; it never scrolls by itself. A button on the waybill expands it to the full screen and back, and the warehouse keeps working while it is expanded. The page narrows to fit the panel, and contacts and links wrap instead of overlapping.
-- **Camera:** the map is much bigger than the screen. The player drags, uses the keys or rests the mouse pointer at an edge of the warehouse view to move it, and scrolls to zoom. The view starts at the truck.
+- **Camera:** the map is much bigger than the screen. The player uses the keys, rests the mouse pointer at an edge of the warehouse view, or drags with the right or middle mouse button or with a finger to move it, and scrolls to zoom. Dragging with the left mouse button is the selection box. The view starts at the truck.
 - **One box per block:** every block of the CV is one box: the name, the job title, each contact, each paragraph and each list entry. The number of boxes does not depend on how the bots carry them.
 - **Emptying a box:** a bot takes out as much as it can carry: one of the remaining letters, the rest of one word, or everything that is left. Which letter or word comes out is picked by the seed. The box stays on its shelf until it is empty and then disappears. A bot that carries blocks empties a box in one trip.
 - **Placement:** the boxes that open the CV (name, job title, contacts) lie closest to the truck. The rest are spread over the warehouse by the seed.
@@ -40,7 +40,8 @@ This is a living document. It is edited as development progresses.
 - **Truck:** stands on the top edge of the grid. Bots unload on the drop cells in front of it; the rest of the truck is scenery.
 - **Parking:** bots without work wait on parking cells by the ramp. The number of parking cells is the limit on bot slots.
 - **Tight spots:** gaps between boxes can be one cell wide. Bots that meet in one drive through each other, so a narrow gap never jams.
-- **Jobs:** the shared queue hands out the box nearest the truck that still has unclaimed text and a free access cell. The order is worked out again every time a box disappears.
+- **Jobs:** the shared queue hands out the first box, in the order of the bot's focus, that still has unclaimed text and a free access cell. The order is worked out again every time a box disappears.
+- **Active pause:** the Space key or the pause button stops the simulation and the same key or button resumes it. While paused the player can still move the camera, select bots, buy bots and upgrades, change focus and read the waybill. A "paused" badge is shown, and no time is caught up after resuming.
 - **Removing a bot:** whatever it carries counts as delivered. A bot reserves its access cell, and later its drop cell, so two bots never head for the same spot.
 - **Standing bots:** a bot only stops on a cell it has reserved: its access cell, its drop cell or its parking cell. Two bots never stand on the same cell.
 - **Fixed tick:** the simulation runs at 60 ticks per second regardless of frame rate, so the same seed always plays out the same way.
@@ -48,7 +49,12 @@ This is a living document. It is edited as development progresses.
 ## Bots
 
 - **One kind of bot:** every bot is a transport bot. It walks to a box, takes text out and carries it to the truck. Bots share a common task queue.
-- **Carry size:** how much text a bot takes per trip: a letter, a word or a whole box. Every bot starts with a letter. One upgrade raises the carry size of all bots at once, first to words and then to whole boxes.
+- **Carry size:** how much text a bot takes per trip: a letter, a word or a whole box. Every bot starts with a letter, including a bot bought later. Upgrades belong to a single bot: the player raises the carry size of one bot at a time, first to words and then to whole boxes.
+- **Selecting a bot:** a click or tap on a bot selects it, and a click on empty floor deselects it. Every selected bot gets a highlight. When exactly one bot is selected, its route to where it is heading is drawn as a grey, half-transparent line with rounded corners.
+- **Selection box:** dragging with the left mouse button draws a rectangle, as in a strategy game, and releasing it selects every bot whose centre lies inside. A box that catches no bot clears the selection. The box is anchored to the warehouse, so it grows when the view moves during the drag. Touch has no selection box: a finger drag moves the view.
+- **Several bots selected:** a separate window says "Multiple bots selected" and offers only deleting them. The last bot is always kept, also when every bot is selected.
+- **Bot window:** while a bot is selected a window shows its name, its upgrades with the button for the next one, its focus, and a button to delete the bot. Bots are named by number in the order they joined.
+- **Focus:** each bot has a focus that decides which box it takes next, and the player switches it in the bot window for free. *Closest box* takes the box nearest the truck and is the default. *Biggest box* takes heavy boxes first, then medium, then light, and the nearest to the truck within one weight class. The bot window shows one focus at a time, with an arrow on each side to step to the previous or the next one. A bot on its way to a box drops that job and turns to the box of its new focus straight away, also while the game is paused. A bot already taking text out or carrying it back finishes the trip first.
 - **Specializations:** a bot can specialize in a category and carries boxes of that category faster.
 - **Category:** a list from the file (e.g. technical and soft, up to 4–5). Each gets a colour.
 - **Crowding:** more bots does not mean proportionally faster, because a box only has as many access cells as it has open sides and the truck only has a few drop cells. On top of that there is a limit on bot slots.
@@ -56,11 +62,12 @@ This is a living document. It is edited as development progresses.
 ## Player and Economy
 
 - **Start:** the player begins with a few bots that carry letters. Nothing else is given for free.
-- **Actions:** the player buys and removes bots and buys upgrades and specializations. A removed bot is not refunded.
-- **Points on screen:** the points the player can spend are shown large at the top middle of the warehouse view. The buttons for buying a bot and for the next carry upgrade show their price and are greyed out until the player can afford them.
+- **Actions:** the player buys and removes bots and buys upgrades and specializations. A removed bot is not refunded, and its upgrades are lost with it. The last bot cannot be removed, so the game can always be finished.
+- **Points on screen:** the points the player can spend are shown large at the top middle of the warehouse view. The button for buying a bot and, in the bot window, the button for that bot's next carry upgrade show their price and are greyed out until the player can afford them.
 - **Currency:** research points, earned for delivered text. Heavier boxes are worth more.
 - **Shop:** available at all times.
-- **First upgrade:** carrying a word is affordable right after the name has been delivered, whatever the size of the CV. The letter stage is a short opening, not a grind.
+- **First upgrade:** carrying a word on one bot is affordable right after the name has been delivered, whatever the size of the CV. The letter stage is a short opening, not a grind.
+- **Upgrade price:** paid per bot. Every bot pays the same price for the same step.
 - **Prices:** scaled to the size of the CV, so that a long file does not produce a game without challenge. Every price is a share of all the points in the warehouse.
 - **Bot price:** the starting bots are free. Each bought bot costs more than the one before.
 - **Upgrades:** named after projects. Effects come from a ready-made pool in code, and an entry in the file points to one of them.

@@ -21,8 +21,8 @@ namespace CvWarehouse.Presentation.Warehouse
         [Header("Shop prices, in thousandths of all the points in the warehouse")]
         [SerializeField] private int firstBotPricePermille = 15;
         [SerializeField] private int botPriceGrowthPercent = 125;
-        [SerializeField] private int wordCarryPricePermille = 30;
-        [SerializeField] private int boxCarryPricePermille = 120;
+        [SerializeField] private int wordCarryPricePermille = 10;
+        [SerializeField] private int boxCarryPricePermille = 40;
 
         public int StartingBots => startingBots;
 

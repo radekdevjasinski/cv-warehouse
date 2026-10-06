@@ -4,6 +4,8 @@ namespace CvWarehouse.Core.Warehouse
 {
     public sealed class Bot
     {
+        private const float HalfCell = 0.5f;
+
         public Bot(int id, GridPosition cell)
         {
             Id = id;
@@ -42,9 +44,19 @@ namespace CvWarehouse.Core.Warehouse
 
         public int CargoPieces { get; internal set; }
 
+        public CarrySize CarrySize { get; internal set; }
+
+        public BotFocus Focus { get; internal set; }
+
         public float MoveFraction => IsMoving ? (float)MoveTicks / MoveDuration : 0f;
 
+        public float CentreX => Cell.X + (NextCell.X - Cell.X) * MoveFraction + HalfCell;
+
+        public float CentreY => Cell.Y + (NextCell.Y - Cell.Y) * MoveFraction + HalfCell;
+
         public bool IsAtDestination => !IsMoving && Cell == Destination;
+
+        public int RouteLength => Path.Count - PathIndex;
 
         internal List<GridPosition> Path { get; } = new List<GridPosition>();
 
@@ -53,6 +65,11 @@ namespace CvWarehouse.Core.Warehouse
         internal int WorkTicksLeft { get; set; }
 
         internal bool HasPath => PathIndex < Path.Count;
+
+        public GridPosition RouteCell(int index)
+        {
+            return Path[PathIndex + index];
+        }
 
         internal void SetDestination(GridPosition destination)
         {

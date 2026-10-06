@@ -24,10 +24,6 @@ namespace CvWarehouse.Core.Warehouse
 
         public bool CanBuyBot => HasBotSlot && Balance >= BotPrice;
 
-        public bool HasCarryUpgrade => simulation.CarrySize != CarrySize.Box;
-
-        public bool CanUpgradeCarry => HasCarryUpgrade && Balance >= CarryUpgradePrice;
-
         public int BotPrice
         {
             get
@@ -40,9 +36,22 @@ namespace CvWarehouse.Core.Warehouse
             }
         }
 
-        public int CarryUpgradePrice => ShareOfAllPoints(simulation.CarrySize == CarrySize.Letter
-            ? settings.WordCarryPricePermille
-            : settings.BoxCarryPricePermille);
+        public static bool HasCarryUpgrade(Bot bot)
+        {
+            return bot.CarrySize != CarrySize.Box;
+        }
+
+        public bool CanUpgradeCarry(Bot bot)
+        {
+            return HasCarryUpgrade(bot) && Balance >= CarryUpgradePrice(bot);
+        }
+
+        public int CarryUpgradePrice(Bot bot)
+        {
+            return ShareOfAllPoints(bot.CarrySize == CarrySize.Letter
+                ? settings.WordCarryPricePermille
+                : settings.BoxCarryPricePermille);
+        }
 
         public bool TryBuyBot()
         {
@@ -54,13 +63,13 @@ namespace CvWarehouse.Core.Warehouse
             return true;
         }
 
-        public bool TryUpgradeCarry()
+        public bool TryUpgradeCarry(Bot bot)
         {
-            if (!CanUpgradeCarry)
+            if (!CanUpgradeCarry(bot))
                 return false;
 
-            spentPoints += CarryUpgradePrice;
-            simulation.SetCarrySize(simulation.CarrySize == CarrySize.Letter ? CarrySize.Word : CarrySize.Box);
+            spentPoints += CarryUpgradePrice(bot);
+            simulation.SetCarrySize(bot, bot.CarrySize == CarrySize.Letter ? CarrySize.Word : CarrySize.Box);
             return true;
         }
 

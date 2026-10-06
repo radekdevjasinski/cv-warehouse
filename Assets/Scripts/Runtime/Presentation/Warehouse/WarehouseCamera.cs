@@ -11,6 +11,8 @@ namespace CvWarehouse.Presentation.Warehouse
         private const string MoveActionName = "Player/Move";
         private const string PointActionName = "UI/Point";
         private const string PressActionName = "UI/Click";
+        private const string RightPressActionName = "UI/RightClick";
+        private const string MiddlePressActionName = "UI/MiddleClick";
         private const string ScrollActionName = "UI/ScrollWheel";
         private const float PressedThreshold = 0.5f;
 
@@ -28,6 +30,8 @@ namespace CvWarehouse.Presentation.Warehouse
         private InputAction moveAction;
         private InputAction pointAction;
         private InputAction pressAction;
+        private InputAction rightPressAction;
+        private InputAction middlePressAction;
         private InputAction scrollAction;
         private CameraFraming framing;
         private Vector2 lastPointer;
@@ -50,6 +54,8 @@ namespace CvWarehouse.Presentation.Warehouse
             moveAction = inputActions.FindAction(MoveActionName, true);
             pointAction = inputActions.FindAction(PointActionName, true);
             pressAction = inputActions.FindAction(PressActionName, true);
+            rightPressAction = inputActions.FindAction(RightPressActionName, true);
+            middlePressAction = inputActions.FindAction(MiddlePressActionName, true);
             scrollAction = inputActions.FindAction(ScrollActionName, true);
         }
 
@@ -58,6 +64,8 @@ namespace CvWarehouse.Presentation.Warehouse
             moveAction.Enable();
             pointAction.Enable();
             pressAction.Enable();
+            rightPressAction.Enable();
+            middlePressAction.Enable();
             scrollAction.Enable();
             pointAction.performed += RememberPointerDevice;
         }
@@ -68,6 +76,8 @@ namespace CvWarehouse.Presentation.Warehouse
             moveAction.Disable();
             pointAction.Disable();
             pressAction.Disable();
+            rightPressAction.Disable();
+            middlePressAction.Disable();
             scrollAction.Disable();
         }
 
@@ -91,10 +101,15 @@ namespace CvWarehouse.Presentation.Warehouse
                 framing.Pan(move * (framing.Size * 2f * keyPanViewsPerSecond * Time.unscaledDeltaTime));
         }
 
+        private static bool IsPressed(InputAction action)
+        {
+            return action.ReadValue<float>() > PressedThreshold;
+        }
+
         private void PanWithDrag()
         {
             Vector2 pointer = pointAction.ReadValue<Vector2>();
-            bool isPressed = pressAction.ReadValue<float>() > PressedThreshold;
+            bool isPressed = IsPanPressed();
             if (isPressed && !wasPressed)
                 isDragging = !eventSystem.IsPointerOverGameObject();
             else if (isPressed && isDragging)
@@ -102,6 +117,12 @@ namespace CvWarehouse.Presentation.Warehouse
 
             wasPressed = isPressed;
             lastPointer = pointer;
+        }
+
+        private bool IsPanPressed()
+        {
+            bool isTouchPressed = !isPointerAMouse && IsPressed(pressAction);
+            return isTouchPressed || IsPressed(rightPressAction) || IsPressed(middlePressAction);
         }
 
         private void PanWithScreenEdges()

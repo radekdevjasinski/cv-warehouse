@@ -15,10 +15,7 @@ namespace CvWarehouse.Core.Warehouse
             this.reservations = reservations;
             this.score = score;
             taskQueue = new TaskQueue(layout, reservations);
-            CarryPieces = settings.PiecesPerTrip(CarrySize.Letter);
         }
-
-        public int CarryPieces { get; set; }
 
         public void Tick(Bot bot)
         {
@@ -60,21 +57,42 @@ namespace CvWarehouse.Core.Warehouse
             reservations.ReleaseAll(bot.Id);
         }
 
+        public bool TryRetarget(Bot bot)
+        {
+            if (bot.State != BotState.GoingToBox)
+                return false;
+
+            bot.JobBox.ReleaseClaim(bot.ClaimedPieces);
+            reservations.Release(bot.AccessCell, bot.Id);
+            bot.JobBox = null;
+            bot.ClaimedPieces = 0;
+            bot.State = BotState.Idle;
+            return TryStartJob(bot);
+        }
+
         private static void StartWork(Bot bot, BotState workState, int workTicks)
         {
             bot.State = workState;
             bot.WorkTicksLeft = workTicks;
         }
 
+        private bool TryStartJob(Bot bot)
+        {
+            if (!taskQueue.TryAssign(bot, settings.PiecesPerTrip(bot.CarrySize)))
+                return false;
+
+            LeaveParking(bot);
+            bot.State = BotState.GoingToBox;
+            bot.SetDestination(bot.AccessCell);
+            return true;
+        }
+
         private void TickWithoutJob(Bot bot)
         {
-            if (taskQueue.TryAssign(bot, CarryPieces))
-            {
-                LeaveParking(bot);
-                bot.State = BotState.GoingToBox;
-                bot.SetDestination(bot.AccessCell);
-            }
-            else if (bot.State == BotState.Idle)
+            if (TryStartJob(bot))
+                return;
+
+            if (bot.State == BotState.Idle)
             {
                 TryGoToParking(bot);
             }

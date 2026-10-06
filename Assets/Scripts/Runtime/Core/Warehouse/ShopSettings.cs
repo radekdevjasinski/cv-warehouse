@@ -8,8 +8,8 @@ namespace CvWarehouse.Core.Warehouse
 
         public int BotPriceGrowthPercent { get; set; } = 125;
 
-        public int WordCarryPricePermille { get; set; } = 30;
+        public int WordCarryPricePermille { get; set; } = 10;
 
-        public int BoxCarryPricePermille { get; set; } = 120;
+        public int BoxCarryPricePermille { get; set; } = 40;
     }
 }

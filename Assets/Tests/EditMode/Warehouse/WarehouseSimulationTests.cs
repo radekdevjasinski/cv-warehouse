@@ -44,8 +44,8 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         public void Tick_BotCarryingBoxes_EmptiesTheBoxInOneTrip()
         {
             WarehouseSimulation simulation = NewSmallSimulation(new SimulationSettings());
-            simulation.SetCarrySize(CarrySize.Box);
             simulation.TryAddBot();
+            simulation.SetCarrySize(simulation.Bots[0], CarrySize.Box);
 
             for (int tick = 0; tick < MaxTicks && simulation.Score.DeliveredPieces == 0; tick++)
                 simulation.Tick();
@@ -58,8 +58,8 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         public void Tick_BotCarryingWords_DeliversAWordOnTheFirstTrip()
         {
             WarehouseSimulation simulation = NewSmallSimulation(new SimulationSettings { WordPieces = 2 });
-            simulation.SetCarrySize(CarrySize.Word);
             simulation.TryAddBot();
+            simulation.SetCarrySize(simulation.Bots[0], CarrySize.Word);
 
             for (int tick = 0; tick < MaxTicks && simulation.Score.DeliveredPieces == 0; tick++)
                 simulation.Tick();
@@ -157,7 +157,7 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
             {
                 for (int tick = 0; tick < 150; tick++)
                     simulation.Tick();
-                Assert.IsTrue(simulation.TryRemoveBot());
+                Assert.IsTrue(simulation.TryRemoveBot(simulation.Bots[removal]));
             }
 
             RunUntilComplete(simulation);
@@ -167,9 +167,106 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         }
 
         [Test]
-        public void TryRemoveBot_NoBots_ReturnsFalse()
+        public void TryRemoveBot_BotInTheMiddleOfTheCrew_RemovesOnlyThatBot()
         {
-            Assert.IsFalse(NewGeneratedSimulation(0).TryRemoveBot());
+            WarehouseSimulation simulation = NewGeneratedSimulation(3);
+            Bot firstBot = simulation.Bots[0];
+            Bot middleBot = simulation.Bots[1];
+            Bot lastBot = simulation.Bots[2];
+
+            Assert.IsTrue(simulation.TryRemoveBot(middleBot));
+
+            Assert.AreEqual(2, simulation.Bots.Count);
+            Assert.AreSame(firstBot, simulation.Bots[0]);
+            Assert.AreSame(lastBot, simulation.Bots[1]);
+        }
+
+        [Test]
+        public void TryRemoveBot_BotAlreadyRemoved_ReturnsFalse()
+        {
+            WarehouseSimulation simulation = NewGeneratedSimulation(3);
+            Bot removedBot = simulation.Bots[1];
+            simulation.TryRemoveBot(removedBot);
+
+            Assert.IsFalse(simulation.TryRemoveBot(removedBot));
+            Assert.AreEqual(2, simulation.Bots.Count);
+        }
+
+        [Test]
+        public void TryRemoveBot_LastBot_KeepsItSoTheGameCanStillBeFinished()
+        {
+            WarehouseSimulation simulation = NewGeneratedSimulation(1);
+
+            Assert.IsFalse(simulation.CanRemoveBot);
+            Assert.IsFalse(simulation.TryRemoveBot(simulation.Bots[0]));
+            Assert.AreEqual(1, simulation.Bots.Count);
+        }
+
+        [Test]
+        public void Tick_BotsWithDifferentCarrySizes_EachTakesItsOwnAmount()
+        {
+            WarehouseSimulation simulation = NewGeneratedSimulation(2);
+            simulation.SetCarrySize(simulation.Bots[1], CarrySize.Box);
+
+            simulation.Tick();
+
+            Bot letterBot = simulation.Bots[0];
+            Bot boxBot = simulation.Bots[1];
+            Assert.AreEqual(1, letterBot.ClaimedPieces);
+            Assert.Greater(boxBot.ClaimedPieces, 0);
+            Assert.AreEqual(0, boxBot.JobBox.UnclaimedPieces);
+        }
+
+        [Test]
+        public void RouteLength_BotSentToABox_LeadsStepByStepToItsDestination()
+        {
+            WarehouseSimulation simulation = NewGeneratedSimulation(1);
+            Bot bot = simulation.Bots[0];
+
+            simulation.Tick();
+
+            Assert.IsTrue(bot.IsMoving);
+            GridPosition previous = bot.NextCell;
+            for (int index = 0; index < bot.RouteLength; index++)
+            {
+                GridPosition cell = bot.RouteCell(index);
+                Assert.LessOrEqual(Math.Abs(cell.X - previous.X), 1);
+                Assert.LessOrEqual(Math.Abs(cell.Y - previous.Y), 1);
+                previous = cell;
+            }
+
+            Assert.AreEqual(bot.Destination, previous);
+        }
+
+        [Test]
+        public void RouteLength_BotStandingAtItsDestination_IsZero()
+        {
+            WarehouseSimulation simulation = NewGeneratedSimulation(1);
+            Bot bot = simulation.Bots[0];
+
+            Assert.AreEqual(0, bot.RouteLength);
+
+            for (int tick = 0; tick < MaxTicks && bot.State != BotState.Extracting; tick++)
+                simulation.Tick();
+
+            Assert.AreEqual(BotState.Extracting, bot.State);
+            Assert.AreEqual(0, bot.RouteLength);
+        }
+
+        [Test]
+        public void CentreX_BotHalfwayThroughAStep_LiesBetweenTheTwoCells()
+        {
+            WarehouseSimulation simulation = NewGeneratedSimulation(1);
+            Bot bot = simulation.Bots[0];
+            simulation.Tick();
+
+            while (bot.MoveTicks * 2 < bot.MoveDuration)
+                simulation.Tick();
+
+            float expectedX = (bot.Cell.X + bot.NextCell.X) * 0.5f + 0.5f;
+            float expectedY = (bot.Cell.Y + bot.NextCell.Y) * 0.5f + 0.5f;
+            Assert.AreEqual(expectedX, bot.CentreX, 0.2f);
+            Assert.AreEqual(expectedY, bot.CentreY, 0.2f);
         }
 
         [Test]
@@ -194,6 +291,46 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
             simulation.Advance(0f);
 
             Assert.AreEqual(5, simulation.TickCount);
+        }
+
+        [Test]
+        public void Advance_Paused_RunsNoTicks()
+        {
+            WarehouseSimulation simulation = NewSmallSimulation(new SimulationSettings { TickSeconds = TestTickSeconds });
+            simulation.TogglePause();
+
+            simulation.Advance(0.35f);
+
+            Assert.IsTrue(simulation.IsPaused);
+            Assert.AreEqual(0, simulation.TickCount);
+        }
+
+        [Test]
+        public void Advance_ResumedAfterAPause_DoesNotCatchUpOnThePausedTime()
+        {
+            WarehouseSimulation simulation = NewSmallSimulation(new SimulationSettings { TickSeconds = TestTickSeconds });
+            simulation.TogglePause();
+            simulation.Advance(0.35f);
+
+            simulation.TogglePause();
+            simulation.Advance(0.25f);
+
+            Assert.IsFalse(simulation.IsPaused);
+            Assert.AreEqual(2, simulation.TickCount);
+        }
+
+        [Test]
+        public void SetCarrySize_WhilePaused_StillApplies()
+        {
+            WarehouseSimulation simulation = NewSmallSimulation(new SimulationSettings());
+            simulation.TryAddBot();
+            simulation.TogglePause();
+
+            simulation.SetCarrySize(simulation.Bots[0], CarrySize.Word);
+            simulation.SetFocus(simulation.Bots[0], BotFocus.BiggestBox);
+
+            Assert.AreEqual(CarrySize.Word, simulation.Bots[0].CarrySize);
+            Assert.AreEqual(BotFocus.BiggestBox, simulation.Bots[0].Focus);
         }
 
         private static WarehouseSimulation NewSmallSimulation(SimulationSettings settings)

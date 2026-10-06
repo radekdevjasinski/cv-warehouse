@@ -18,6 +18,8 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         private WarehouseSimulation simulation;
         private BotShop shop;
 
+        private Bot FirstBot => simulation.Bots[0];
+
         [SetUp]
         public void SetUp()
         {
@@ -63,7 +65,7 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
             Earn(FirstBotPrice);
             shop.TryBuyBot();
 
-            simulation.TryRemoveBot();
+            Assert.IsTrue(simulation.TryRemoveBot(simulation.Bots[1]));
 
             Assert.AreEqual(FirstBotPrice, shop.BotPrice);
         }
@@ -83,8 +85,8 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         [Test]
         public void TryUpgradeCarry_NotEnoughPoints_KeepsCarryingLetters()
         {
-            Assert.IsFalse(shop.TryUpgradeCarry());
-            Assert.AreEqual(CarrySize.Letter, simulation.CarrySize);
+            Assert.IsFalse(shop.TryUpgradeCarry(FirstBot));
+            Assert.AreEqual(CarrySize.Letter, FirstBot.CarrySize);
         }
 
         [Test]
@@ -92,14 +94,14 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         {
             Earn(PlentyOfPoints);
             int pointsBefore = shop.Balance;
-            Assert.AreEqual(WordCarryPrice, shop.CarryUpgradePrice);
+            Assert.AreEqual(WordCarryPrice, shop.CarryUpgradePrice(FirstBot));
 
-            Assert.IsTrue(shop.TryUpgradeCarry());
-            Assert.AreEqual(CarrySize.Word, simulation.CarrySize);
-            Assert.AreEqual(BoxCarryPrice, shop.CarryUpgradePrice);
+            Assert.IsTrue(shop.TryUpgradeCarry(FirstBot));
+            Assert.AreEqual(CarrySize.Word, FirstBot.CarrySize);
+            Assert.AreEqual(BoxCarryPrice, shop.CarryUpgradePrice(FirstBot));
 
-            Assert.IsTrue(shop.TryUpgradeCarry());
-            Assert.AreEqual(CarrySize.Box, simulation.CarrySize);
+            Assert.IsTrue(shop.TryUpgradeCarry(FirstBot));
+            Assert.AreEqual(CarrySize.Box, FirstBot.CarrySize);
             Assert.AreEqual(pointsBefore - WordCarryPrice - BoxCarryPrice, shop.Balance);
         }
 
@@ -107,29 +109,57 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         public void TryUpgradeCarry_AlreadyCarryingBoxes_ReturnsFalse()
         {
             Earn(PlentyOfPoints);
-            shop.TryUpgradeCarry();
-            shop.TryUpgradeCarry();
+            shop.TryUpgradeCarry(FirstBot);
+            shop.TryUpgradeCarry(FirstBot);
 
-            Assert.IsFalse(shop.HasCarryUpgrade);
-            Assert.IsFalse(shop.TryUpgradeCarry());
+            Assert.IsFalse(BotShop.HasCarryUpgrade(FirstBot));
+            Assert.IsFalse(shop.TryUpgradeCarry(FirstBot));
+        }
+
+        [Test]
+        public void TryUpgradeCarry_OneBotUpgraded_LeavesTheOtherBotsCarryingLetters()
+        {
+            Earn(PlentyOfPoints);
+            shop.TryBuyBot();
+            Bot secondBot = simulation.Bots[1];
+
+            Assert.IsTrue(shop.TryUpgradeCarry(secondBot));
+
+            Assert.AreEqual(CarrySize.Word, secondBot.CarrySize);
+            Assert.AreEqual(CarrySize.Letter, FirstBot.CarrySize);
+            Assert.AreEqual(WordCarryPrice, shop.CarryUpgradePrice(FirstBot));
+            Assert.AreEqual(BoxCarryPrice, shop.CarryUpgradePrice(secondBot));
+        }
+
+        [Test]
+        public void TryBuyBot_AfterUpgradingEveryBot_AddsABotCarryingLetters()
+        {
+            Earn(PlentyOfPoints);
+            shop.TryUpgradeCarry(FirstBot);
+
+            shop.TryBuyBot();
+
+            Assert.AreEqual(CarrySize.Letter, simulation.Bots[1].CarrySize);
         }
 
         [Test]
         public void BotPrice_WarehouseWithTwiceThePoints_IsTwiceAsHigh()
         {
-            BotShop biggerShop = NewShop(NewSimulation(HeavyPieces * 2));
+            WarehouseSimulation biggerSimulation = NewSimulation(HeavyPieces * 2);
+            BotShop biggerShop = NewShop(biggerSimulation);
 
             Assert.AreEqual(FirstBotPrice * 2, biggerShop.BotPrice);
-            Assert.AreEqual(WordCarryPrice * 2, biggerShop.CarryUpgradePrice);
+            Assert.AreEqual(WordCarryPrice * 2, biggerShop.CarryUpgradePrice(biggerSimulation.Bots[0]));
         }
 
         [Test]
         public void BotPrice_TinyWarehouse_IsAtLeastOnePoint()
         {
-            BotShop tinyShop = NewShop(NewSimulation(1));
+            WarehouseSimulation tinySimulation = NewSimulation(1);
+            BotShop tinyShop = NewShop(tinySimulation);
 
             Assert.AreEqual(1, tinyShop.BotPrice);
-            Assert.AreEqual(1, tinyShop.CarryUpgradePrice);
+            Assert.AreEqual(1, tinyShop.CarryUpgradePrice(tinySimulation.Bots[0]));
         }
 
         private static WarehouseSimulation NewSimulation(int heavyPieces)
