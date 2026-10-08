@@ -1,6 +1,7 @@
 using System;
 using CvWarehouse.Core.Cv;
 using CvWarehouse.Core.Warehouse;
+using CvWarehouse.Tests.EditMode.Cv;
 using NUnit.Framework;
 
 namespace CvWarehouse.Tests.EditMode.Warehouse
@@ -8,6 +9,7 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
     public sealed class BotFocusTests
     {
         private const int GridSide = 10;
+        private const int Seed = 12345;
         private const int MaxTicks = 400000;
 
         private WarehouseSimulation simulation;
@@ -25,16 +27,16 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
                 .AddDropCell(new GridPosition(0, 9))
                 .AddParkingCell(new GridPosition(8, 9))
                 .AddParkingCell(new GridPosition(9, 9))
-                .AddBox(new GridPosition(1, 7), WeightClass.Light, 1)
-                .AddBox(new GridPosition(5, 5), WeightClass.Medium, 1)
-                .AddBox(new GridPosition(1, 3), WeightClass.Heavy, 1)
-                .AddBox(new GridPosition(6, 0), WeightClass.Heavy, 1)
+                .AddBox(new GridPosition(1, 7), WeightClass.Light, CvTestBlocks.WithLetters(1))
+                .AddBox(new GridPosition(5, 5), WeightClass.Medium, CvTestBlocks.WithLetters(1))
+                .AddBox(new GridPosition(1, 3), WeightClass.Heavy, CvTestBlocks.WithLetters(1))
+                .AddBox(new GridPosition(6, 0), WeightClass.Heavy, CvTestBlocks.WithLetters(1))
                 .Build();
             nearLightBox = layout.Boxes[0];
             farMediumBox = layout.Boxes[1];
             nearerHeavyBox = layout.Boxes[2];
             furtherHeavyBox = layout.Boxes[3];
-            simulation = new WarehouseSimulation(layout, new SimulationSettings());
+            simulation = new WarehouseSimulation(layout, new SimulationSettings(), new System.Random(Seed));
             simulation.TryAddBot();
         }
 

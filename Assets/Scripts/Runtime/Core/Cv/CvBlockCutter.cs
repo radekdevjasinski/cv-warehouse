@@ -20,6 +20,7 @@ namespace CvWarehouse.Core.Cv
             return new CvBlock
             {
                 Id = id,
+                Category = string.Empty,
                 Segments = segments,
                 SegmentFirstLetters = segmentFirstLetters,
                 Words = words,

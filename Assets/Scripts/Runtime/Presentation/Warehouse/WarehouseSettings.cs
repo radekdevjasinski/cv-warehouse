@@ -9,10 +9,10 @@ namespace CvWarehouse.Presentation.Warehouse
         [SerializeField] private int ticksPerSecond = 60;
         [SerializeField] private int maxTicksPerFrame = 5;
         [SerializeField] private int ticksPerCell = 8;
-        [SerializeField] private int extractTicks = 30;
+        [SerializeField] private int lightExtractTicks = 20;
+        [SerializeField] private int mediumExtractTicks = 30;
+        [SerializeField] private int heavyExtractTicks = 45;
         [SerializeField] private int unloadTicks = 20;
-        [SerializeField] private int letterPieces = 1;
-        [SerializeField] private int wordPieces = 2;
         [SerializeField] private int lightPiecePoints = 1;
         [SerializeField] private int mediumPiecePoints = 2;
         [SerializeField] private int heavyPiecePoints = 3;
@@ -45,10 +45,10 @@ namespace CvWarehouse.Presentation.Warehouse
                 TickSeconds = 1f / ticksPerSecond,
                 MaxTicksPerAdvance = maxTicksPerFrame,
                 TicksPerCell = ticksPerCell,
-                ExtractTicks = extractTicks,
+                LightExtractTicks = lightExtractTicks,
+                MediumExtractTicks = mediumExtractTicks,
+                HeavyExtractTicks = heavyExtractTicks,
                 UnloadTicks = unloadTicks,
-                LetterPieces = letterPieces,
-                WordPieces = wordPieces,
                 LightPiecePoints = lightPiecePoints,
                 MediumPiecePoints = mediumPiecePoints,
                 HeavyPiecePoints = heavyPiecePoints

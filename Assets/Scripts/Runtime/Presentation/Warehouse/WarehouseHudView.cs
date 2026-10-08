@@ -47,7 +47,8 @@ namespace CvWarehouse.Presentation.Warehouse
 
         private void BuyBot()
         {
-            shop.TryBuyBot();
+            if (shop != null)
+                shop.TryBuyBot();
         }
 
         private void Refresh()

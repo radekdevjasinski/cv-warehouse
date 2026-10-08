@@ -1,3 +1,5 @@
+using System;
+
 namespace CvWarehouse.Core.Warehouse
 {
     public sealed class BotBrain
@@ -8,13 +10,13 @@ namespace CvWarehouse.Core.Warehouse
         private readonly WarehouseScore score;
         private readonly TaskQueue taskQueue;
 
-        public BotBrain(WarehouseLayout layout, SimulationSettings settings, ReservationTable reservations, WarehouseScore score)
+        public BotBrain(WarehouseLayout layout, SimulationSettings settings, ReservationTable reservations, WarehouseScore score, Random random)
         {
             this.layout = layout;
             this.settings = settings;
             this.reservations = reservations;
             this.score = score;
-            taskQueue = new TaskQueue(layout, reservations);
+            taskQueue = new TaskQueue(layout, reservations, random);
         }
 
         public void Tick(Bot bot)
@@ -23,7 +25,7 @@ namespace CvWarehouse.Core.Warehouse
             {
                 case BotState.GoingToBox:
                     if (bot.IsAtDestination)
-                        StartWork(bot, BotState.Extracting, settings.ExtractTicks);
+                        StartWork(bot, BotState.Extracting, settings.ExtractTicks(bot.JobBox.WeightClass));
                     break;
                 case BotState.Extracting:
                     TickExtracting(bot);
@@ -44,10 +46,7 @@ namespace CvWarehouse.Core.Warehouse
         public void AbandonWork(Bot bot)
         {
             if (bot.JobBox != null)
-            {
-                bot.JobBox.ReleaseClaim(bot.ClaimedPieces);
-                score.Deliver(bot.JobBox, bot.CargoPieces);
-            }
+                DeliverOrRelease(bot);
 
             bot.JobBox = null;
             bot.ClaimedPieces = 0;
@@ -62,12 +61,22 @@ namespace CvWarehouse.Core.Warehouse
             if (bot.State != BotState.GoingToBox)
                 return false;
 
-            bot.JobBox.ReleaseClaim(bot.ClaimedPieces);
+            bot.JobBox.ReleaseClaim(bot.Letters);
             reservations.Release(bot.AccessCell, bot.Id);
             bot.JobBox = null;
             bot.ClaimedPieces = 0;
             bot.State = BotState.Idle;
             return TryStartJob(bot);
+        }
+
+        private void DeliverOrRelease(Bot bot)
+        {
+            if (bot.CargoPieces > 0)
+                score.Deliver(bot.JobBox, bot.Letters);
+            else
+                bot.JobBox.ReleaseClaim(bot.Letters);
+
+            bot.Letters.Clear();
         }
 
         private static void StartWork(Bot bot, BotState workState, int workTicks)
@@ -78,7 +87,7 @@ namespace CvWarehouse.Core.Warehouse
 
         private bool TryStartJob(Bot bot)
         {
-            if (!taskQueue.TryAssign(bot, settings.PiecesPerTrip(bot.CarrySize)))
+            if (!taskQueue.TryAssign(bot))
                 return false;
 
             LeaveParking(bot);
@@ -160,7 +169,8 @@ namespace CvWarehouse.Core.Warehouse
                 return;
             }
 
-            score.Deliver(bot.JobBox, bot.CargoPieces);
+            score.Deliver(bot.JobBox, bot.Letters);
+            bot.Letters.Clear();
             reservations.Release(bot.DropCell, bot.Id);
             bot.CargoPieces = 0;
             bot.JobBox = null;

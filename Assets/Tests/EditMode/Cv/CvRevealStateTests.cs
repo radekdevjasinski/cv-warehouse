@@ -43,6 +43,28 @@ namespace CvWarehouse.Tests.EditMode.Cv
         }
 
         [Test]
+        public void RevealLetters_ScatteredLetters_RevealsThemAllAndReportsTheBlockOnce()
+        {
+            int revealed = state.RevealLetters(CvItemId.Name, new[] { 0, 4, 9 });
+
+            CvBlockReveal block = GetBlock(CvItemId.Name);
+            Assert.AreEqual(3, revealed);
+            Assert.IsTrue(block.IsRevealed(0));
+            Assert.IsTrue(block.IsRevealed(4));
+            Assert.IsTrue(block.IsRevealed(9));
+            Assert.IsFalse(block.IsRevealed(1));
+            Assert.AreEqual(3, state.RevealedLetterCount);
+            CollectionAssert.AreEqual(new[] { CvItemId.Name }, changedBlocks);
+        }
+
+        [Test]
+        public void RevealLetters_UnknownBlock_RevealsNothing()
+        {
+            Assert.AreEqual(0, state.RevealLetters("no.such.block", new[] { 0 }));
+            Assert.IsEmpty(changedBlocks);
+        }
+
+        [Test]
         public void RevealLetter_SameLetterTwice_ChangesNothingTheSecondTime()
         {
             state.RevealLetter(CvItemId.Name, 4);

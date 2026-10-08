@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using CvWarehouse.Core.Cv;
 using CvWarehouse.Core.Warehouse;
+using CvWarehouse.Tests.EditMode.Cv;
 using NUnit.Framework;
 
 namespace CvWarehouse.Tests.EditMode.Warehouse
@@ -55,16 +56,97 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         }
 
         [Test]
-        public void Tick_BotCarryingWords_DeliversAWordOnTheFirstTrip()
+        public void Tick_BotCarryingWords_DeliversAWholeWordOnTheFirstTrip()
         {
-            WarehouseSimulation simulation = NewSmallSimulation(new SimulationSettings { WordPieces = 2 });
+            WarehouseSimulation simulation = NewSimulationWithOneBox(CvTestBlocks.FromText("ab cdef"), new SimulationSettings());
+            var deliveredLetters = new List<int>();
+            simulation.Score.Delivered += (block, letters) => deliveredLetters.AddRange(letters);
             simulation.TryAddBot();
             simulation.SetCarrySize(simulation.Bots[0], CarrySize.Word);
 
             for (int tick = 0; tick < MaxTicks && simulation.Score.DeliveredPieces == 0; tick++)
                 simulation.Tick();
 
-            Assert.AreEqual(2, simulation.Score.DeliveredPieces);
+            if (deliveredLetters.Count == 2)
+                CollectionAssert.AreEqual(new[] { 0, 1 }, deliveredLetters);
+            else
+                CollectionAssert.AreEqual(new[] { 2, 3, 4, 5 }, deliveredLetters);
+        }
+
+        [Test]
+        public void Tick_BotCarryingLetters_DeliversEveryLetterOfTheBlockExactlyOnce()
+        {
+            CvBlock block = CvTestBlocks.FromText("ab cdef");
+            WarehouseSimulation simulation = NewSimulationWithOneBox(block, new SimulationSettings());
+            var deliveredLetters = new List<int>();
+            int trips = 0;
+            simulation.Score.Delivered += (deliveredBlock, letters) =>
+            {
+                Assert.AreSame(block, deliveredBlock);
+                deliveredLetters.AddRange(letters);
+                trips++;
+            };
+            simulation.TryAddBot();
+
+            RunUntilComplete(simulation);
+
+            Assert.AreEqual(block.LetterCount, trips);
+            CollectionAssert.AreEquivalent(new[] { 0, 1, 2, 3, 4, 5 }, deliveredLetters);
+        }
+
+        [TestCase(WeightClass.Light, 20)]
+        [TestCase(WeightClass.Medium, 30)]
+        [TestCase(WeightClass.Heavy, 45)]
+        public void Tick_BotAtABox_SpendsLongerTakingTextOutOfABiggerBox(WeightClass weightClass, int expectedExtractTicks)
+        {
+            var settings = new SimulationSettings { LightExtractTicks = 20, MediumExtractTicks = 30, HeavyExtractTicks = 45 };
+            WarehouseSimulation simulation = NewSimulationWithOneBox(CvTestBlocks.WithLetters(SmallBoxPieces), settings, weightClass);
+            simulation.TryAddBot();
+            Bot bot = simulation.Bots[0];
+            for (int tick = 0; tick < MaxTicks && bot.State != BotState.Extracting; tick++)
+                simulation.Tick();
+
+            int extractTicks = 0;
+            for (int tick = 0; tick < MaxTicks && bot.State == BotState.Extracting; tick++)
+            {
+                simulation.Tick();
+                extractTicks++;
+            }
+
+            Assert.AreEqual(expectedExtractTicks + 1, extractTicks);
+        }
+
+        [Test]
+        public void TryRemoveBot_BotCarryingText_CountsItsLettersAsDelivered()
+        {
+            WarehouseSimulation simulation = NewSmallSimulation(new SimulationSettings());
+            simulation.TryAddBot();
+            simulation.TryAddBot();
+            Bot carrier = simulation.Bots[0];
+            simulation.SetCarrySize(carrier, CarrySize.Box);
+            for (int tick = 0; tick < MaxTicks && carrier.State != BotState.GoingToDrop; tick++)
+                simulation.Tick();
+
+            Assert.IsTrue(simulation.TryRemoveBot(carrier));
+
+            Assert.AreEqual(SmallBoxPieces, simulation.Score.DeliveredPieces);
+            Assert.IsTrue(simulation.IsComplete);
+        }
+
+        [Test]
+        public void TryRemoveBot_BotOnItsWayToABox_PutsItsLettersBackInTheBox()
+        {
+            WarehouseSimulation simulation = NewSmallSimulation(new SimulationSettings());
+            simulation.TryAddBot();
+            simulation.TryAddBot();
+            simulation.Tick();
+            Box box = simulation.Layout.Boxes[0];
+            Assert.AreEqual(SmallBoxPieces - 2, box.UnclaimedPieces);
+
+            Assert.IsTrue(simulation.TryRemoveBot(simulation.Bots[0]));
+
+            Assert.AreEqual(SmallBoxPieces - 1, box.UnclaimedPieces);
+            Assert.AreEqual(0, simulation.Score.DeliveredPieces);
         }
 
         [Test]
@@ -335,30 +417,34 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
 
         private static WarehouseSimulation NewSmallSimulation(SimulationSettings settings)
         {
+            return NewSimulationWithOneBox(CvTestBlocks.WithLetters(SmallBoxPieces), settings);
+        }
+
+        private static WarehouseSimulation NewSimulationWithOneBox(CvBlock block, SimulationSettings settings, WeightClass weightClass = WeightClass.Medium)
+        {
             WarehouseLayout layout = new WarehouseLayoutBuilder(SmallGridSide, SmallGridSide)
                 .AddDropCell(new GridPosition(0, 5))
                 .AddParkingCell(new GridPosition(5, 5))
-                .AddBox(new GridPosition(3, 2), WeightClass.Medium, SmallBoxPieces)
+                .AddParkingCell(new GridPosition(4, 5))
+                .AddBox(new GridPosition(2, 2), weightClass, block)
                 .Build();
-            return new WarehouseSimulation(layout, settings);
+            return new WarehouseSimulation(layout, settings, new Random(Seed));
         }
 
         private static WarehouseSimulation NewGeneratedSimulation(int botCount)
         {
             var generatorSettings = new GeneratorSettings
             {
-                Width = 36,
-                Height = 26,
+                FillPercent = 12,
+                MinWidth = 1,
                 TruckWidth = 6,
                 DropCells = 4,
                 ParkingPerSide = 4,
-                HeavyBoxes = 5,
-                MediumBoxes = 14,
-                LightBoxes = 45,
                 BigClusterRadius = 4
             };
-            WarehouseLayout layout = new WarehouseGenerator(generatorSettings, new Random(Seed)).Generate();
-            var simulation = new WarehouseSimulation(layout, new SimulationSettings());
+            var random = new Random(Seed);
+            WarehouseLayout layout = new WarehouseGenerator(generatorSettings, random).Generate(CvTestBlocks.BuildCv(5, 14, 45));
+            var simulation = new WarehouseSimulation(layout, new SimulationSettings(), random);
             while (simulation.Bots.Count < botCount && simulation.TryAddBot())
             {
             }

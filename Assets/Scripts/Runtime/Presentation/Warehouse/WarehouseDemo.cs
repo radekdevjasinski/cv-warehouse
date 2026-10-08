@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using CvWarehouse.Core.Cv;
 using CvWarehouse.Core.Warehouse;
 using UnityEngine;
 
@@ -31,11 +33,11 @@ namespace CvWarehouse.Presentation.Warehouse
 
         public int Seed => seed;
 
-        private void Start()
+        public void Begin(IReadOnlyList<CvBlock> blocks)
         {
             var random = new System.Random(seed);
-            WarehouseLayout layout = new WarehouseGenerator(generatorConfig.CreateGeneratorSettings(), random).Generate();
-            Simulation = new WarehouseSimulation(layout, settings.CreateSimulationSettings());
+            WarehouseLayout layout = new WarehouseGenerator(generatorConfig.CreateGeneratorSettings(), random).Generate(blocks);
+            Simulation = new WarehouseSimulation(layout, settings.CreateSimulationSettings(), random);
             for (int bot = 0; bot < settings.StartingBots; bot++)
                 Simulation.TryAddBot();
             Shop = new BotShop(Simulation, settings.CreateShopSettings());
@@ -67,7 +69,8 @@ namespace CvWarehouse.Presentation.Warehouse
 
         private void Update()
         {
-            Simulation.Advance(Time.deltaTime);
+            if (Simulation != null)
+                Simulation.Advance(Time.deltaTime);
         }
 
         private void OnDestroy()

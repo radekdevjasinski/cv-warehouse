@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace CvWarehouse.Core.Warehouse
@@ -12,14 +13,14 @@ namespace CvWarehouse.Core.Warehouse
         private float accumulatedSeconds;
         private int nextBotId;
 
-        public WarehouseSimulation(WarehouseLayout layout, SimulationSettings settings)
+        public WarehouseSimulation(WarehouseLayout layout, SimulationSettings settings, Random random)
         {
             Layout = layout;
             this.settings = settings;
             Score = new WarehouseScore(settings, layout.Boxes);
             reservations = new ReservationTable(layout.Grid);
             mover = new BotMover(layout.Grid, settings);
-            brain = new BotBrain(layout, settings, reservations, Score);
+            brain = new BotBrain(layout, settings, reservations, Score, random);
         }
 
         public WarehouseLayout Layout { get; }

@@ -17,17 +17,17 @@ This is a living document. It is edited as development progresses.
 
 ## Warehouse
 
-- **Map:** one per game, procedurally generated from parameters (map size, box counts, cluster sizes, ramp size). The random seed is visible on screen.
+- **Map:** one per game, procedurally generated from the CV file and a seed. The boxes come from the CV, one per block, and the map is sized to them: the generator adds up the floor the boxes take and leaves a set share of the storage floor free, so a longer CV gives a bigger warehouse of the same density. Cluster sizes, ramp size and the shape of the map are parameters. The random seed is visible on screen.
 - **A mess, not shelves:** the warehouse is one big open floor with boxes dumped on it. Heavy boxes land at random, medium and light boxes pile up around them in big clusters, light boxes also gather around medium ones in smaller clusters, and some light boxes stand alone.
 - **Buried boxes:** a box in the middle of a pile may have no free side at the start. It opens up when the boxes around it are emptied.
-- **Generator guarantees:** every box is placed, no box overlaps another or the ramp, and every box can be reached once the boxes in front of it are gone.
+- **Generator guarantees:** every block of the CV gets its box, no box overlaps another or the ramp, and every box can be reached once the boxes in front of it are gone. If the boxes do not fit, the map grows and is generated again.
 - **Screen:** on a wide screen the warehouse takes the left side and the waybill stays visible the whole time as a panel on the right, so every delivery shows up on the CV straight away. The player scrolls the waybill with the mouse wheel or by dragging it; it never scrolls by itself. A button on the waybill expands it to the full screen and back, and the warehouse keeps working while it is expanded. The page narrows to fit the panel, and contacts and links wrap instead of overlapping.
 - **Camera:** the map is much bigger than the screen. The player uses the keys, rests the mouse pointer at an edge of the warehouse view, or drags with the right or middle mouse button or with a finger to move it, and scrolls to zoom. Dragging with the left mouse button is the selection box. The view starts at the truck.
 - **One box per block:** every block of the CV is one box: the name, the job title, each contact, each paragraph and each list entry. The number of boxes does not depend on how the bots carry them.
-- **Emptying a box:** a bot takes out as much as it can carry: one of the remaining letters, the rest of one word, or everything that is left. Which letter or word comes out is picked by the seed. The box stays on its shelf until it is empty and then disappears. A bot that carries blocks empties a box in one trip.
+- **Emptying a box:** a box holds the letters of its block, and each of them leaves the box exactly once. A bot takes out as much as it can carry: one of the remaining letters, the rest of one word, or everything that is left. Which letter or word comes out is picked by the seed, and the same letters appear on the waybill when the bot unloads. Taking text out of a bigger box takes longer, per trip and whatever the bot carries. The box stays on its shelf until it is empty and then disappears. A bot that carries blocks empties a box in one trip.
 - **Placement:** the boxes that open the CV (name, job title, contacts) lie closest to the truck. The rest are spread over the warehouse by the seed.
 - **Boxes:** size shows the weight class and colour shows the category. The text inside is unknown until it arrives on the waybill. The board shows only icons; text appears only on the waybill.
-- **Weight:** three classes (light, medium, heavy). Weight is the importance of a block and sets how much it is worth. It does not limit which bot may carry it.
+- **Weight:** three classes (light, medium, heavy). Weight is the importance of a block: it sets the size of the box, how much each letter is worth and how long a bot needs to take text out. It does not limit which bot may carry it. Entries take their weight from the file. The name is heavy, the job title medium and each contact light, and these three are tunable.
 - **Truck:** scenery. It stands at the ramp as the place bots deliver to and drives away when the CV is complete. It has no capacity and no departures during the game.
 
 ## Grid and Movement
@@ -66,7 +66,7 @@ This is a living document. It is edited as development progresses.
 - **Points on screen:** the points the player can spend are shown large at the top middle of the warehouse view. The button for buying a bot and, in the bot window, the button for that bot's next carry upgrade show their price and are greyed out until the player can afford them.
 - **Currency:** research points, earned for delivered text. Heavier boxes are worth more.
 - **Shop:** available at all times.
-- **First upgrade:** carrying a word on one bot is affordable right after the name has been delivered, whatever the size of the CV. The letter stage is a short opening, not a grind.
+- **First upgrade:** carrying a word on one bot is affordable right after the name has been delivered, whatever the size of the CV: it never costs more than the name is worth. The letter stage is a short opening, not a grind.
 - **Upgrade price:** paid per bot. Every bot pays the same price for the same step.
 - **Prices:** scaled to the size of the CV, so that a long file does not produce a game without challenge. Every price is a share of all the points in the warehouse.
 - **Bot price:** the starting bots are free. Each bought bot costs more than the one before.

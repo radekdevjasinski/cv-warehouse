@@ -56,6 +56,17 @@ namespace CvWarehouse.Core.Cv
                 : 0;
         }
 
+        public int RevealLetters(string id, IReadOnlyList<int> letters)
+        {
+            if (!blocksById.TryGetValue(id, out CvBlockReveal block))
+                return 0;
+
+            int revealed = 0;
+            for (int index = 0; index < letters.Count; index++)
+                revealed += block.Reveal(letters[index], 1);
+            return Apply(block, revealed);
+        }
+
         public int RevealWord(string id, int wordIndex)
         {
             if (!blocksById.TryGetValue(id, out CvBlockReveal block))

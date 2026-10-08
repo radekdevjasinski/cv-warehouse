@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using CvWarehouse.Core.Cv;
 
 namespace CvWarehouse.Core.Warehouse
 {
@@ -10,8 +12,10 @@ namespace CvWarehouse.Core.Warehouse
         {
             this.settings = settings;
             foreach (Box box in boxes)
-                MaxPoints += box.TotalPieces * settings.PointsPerPiece(box.WeightClass);
+                MaxPoints += PointsIn(box);
         }
+
+        public event Action<CvBlock, IReadOnlyList<int>> Delivered;
 
         public int MaxPoints { get; }
 
@@ -19,10 +23,19 @@ namespace CvWarehouse.Core.Warehouse
 
         public int Points { get; private set; }
 
-        public void Deliver(Box box, int pieces)
+        public int PointsIn(Box box)
         {
-            DeliveredPieces += pieces;
-            Points += pieces * settings.PointsPerPiece(box.WeightClass);
+            return box.TotalPieces * settings.PointsPerPiece(box.WeightClass);
+        }
+
+        public void Deliver(Box box, IReadOnlyList<int> letters)
+        {
+            if (letters.Count == 0)
+                return;
+
+            DeliveredPieces += letters.Count;
+            Points += letters.Count * settings.PointsPerPiece(box.WeightClass);
+            Delivered?.Invoke(box.Block, letters);
         }
     }
 }

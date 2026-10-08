@@ -69,6 +69,34 @@ namespace CvWarehouse.Tests.EditMode.Cv
         }
 
         [Test]
+        public void Build_HeaderAndEntries_MarksTheRoleOfEveryBlock()
+        {
+            List<CvBlock> blocks = CvTestBlocks.BuildCv(1, 0, 0);
+
+            Assert.AreEqual(CvBlockRole.Name, blocks[0].Role);
+            Assert.AreEqual(CvBlockRole.JobTitle, blocks[1].Role);
+            Assert.AreEqual(CvBlockRole.Contact, blocks[2].Role);
+            Assert.AreEqual(CvBlockRole.Contact, blocks[3].Role);
+            Assert.AreEqual(CvBlockRole.Entry, blocks[4].Role);
+        }
+
+        [Test]
+        public void Build_Entry_CarriesItsWeightAndCategory()
+        {
+            CvBlock block = CvTestBlocks.Build(
+                "{\"categories\":[{\"id\":\"technical\",\"name\":\"Technical\"}],\"sections\":[{\"entries\":[{\"title\":\"Game\",\"weight\":\"heavy\",\"category\":\"technical\"}]}]}")[0];
+
+            Assert.AreEqual(WeightClass.Heavy, block.Weight);
+            Assert.AreEqual("technical", block.Category);
+        }
+
+        [Test]
+        public void Build_Name_HasNoCategory()
+        {
+            Assert.AreEqual(string.Empty, CvTestBlocks.Build(CvTestBlocks.NameAndProfileCv)[0].Category);
+        }
+
+        [Test]
         public void Build_MissingNameAndTitle_HaveNoBlocks()
         {
             List<CvBlock> blocks = CvTestBlocks.Build("{\"sections\":[{\"text\":\"Hello\"}]}");

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using CvWarehouse.Core.Cv;
 using CvWarehouse.Core.Warehouse;
+using CvWarehouse.Tests.EditMode.Cv;
 using NUnit.Framework;
 
 namespace CvWarehouse.Tests.EditMode.Warehouse
@@ -8,6 +9,7 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
     public sealed class BotPickerTests
     {
         private const int GridSide = 8;
+        private const int Seed = 12345;
         private const float PickRadius = 0.6f;
         private const float FirstBotCentreX = 5.5f;
         private const float SecondBotCentreX = 6.5f;
@@ -22,9 +24,9 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
                 .AddDropCell(new GridPosition(0, 7))
                 .AddParkingCell(new GridPosition(5, 7))
                 .AddParkingCell(new GridPosition(6, 7))
-                .AddBox(new GridPosition(3, 2), WeightClass.Heavy, 10)
+                .AddBox(new GridPosition(3, 2), WeightClass.Heavy, CvTestBlocks.WithLetters(10))
                 .Build();
-            simulation = new WarehouseSimulation(layout, new SimulationSettings());
+            simulation = new WarehouseSimulation(layout, new SimulationSettings(), new System.Random(Seed));
             simulation.TryAddBot();
             simulation.TryAddBot();
         }

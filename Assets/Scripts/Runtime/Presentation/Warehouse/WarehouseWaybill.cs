@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using CvWarehouse.Core.Cv;
 using CvWarehouse.Core.Warehouse;
 using CvWarehouse.Presentation.Cv;
@@ -11,7 +12,7 @@ namespace CvWarehouse.Presentation.Warehouse
         [SerializeField] private CvScreen screen;
         [SerializeField] private string cvFileName = "cv_en.json";
 
-        private CvDeliveryReveal reveal;
+        private WarehouseScore score;
 
         private async void Start()
         {
@@ -19,16 +20,35 @@ namespace CvWarehouse.Presentation.Warehouse
             if (this == null || screen.RevealState == null)
                 return;
 
-            reveal = new CvDeliveryReveal(screen.RevealState, new CvPiecePicker(new System.Random(demo.Seed)));
+            demo.Begin(BlocksOf(screen.RevealState));
+            score = demo.Simulation.Score;
+            if (isActiveAndEnabled)
+                score.Delivered += ShowDelivery;
         }
 
-        private void LateUpdate()
+        private void OnEnable()
         {
-            if (reveal == null)
-                return;
+            if (score != null)
+                score.Delivered += ShowDelivery;
+        }
 
-            WarehouseSimulation simulation = demo.Simulation;
-            reveal.ShowProgress(simulation.Score.DeliveredPieces, simulation.Layout.TotalPieces);
+        private void OnDisable()
+        {
+            if (score != null)
+                score.Delivered -= ShowDelivery;
+        }
+
+        private static List<CvBlock> BlocksOf(CvRevealState revealState)
+        {
+            var blocks = new List<CvBlock>(revealState.Blocks.Count);
+            foreach (CvBlockReveal block in revealState.Blocks)
+                blocks.Add(block.Block);
+            return blocks;
+        }
+
+        private void ShowDelivery(CvBlock block, IReadOnlyList<int> letters)
+        {
+            screen.RevealState.RevealLetters(block.Id, letters);
         }
     }
 }

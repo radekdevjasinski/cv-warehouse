@@ -52,18 +52,52 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
 #endif
             yield return null;
             yield return null;
-            demo =Object.FindAnyObjectByType<WarehouseDemo>();
+            demo = Object.FindAnyObjectByType<WarehouseDemo>();
             demo.enabled = false;
+            for (int frame = 0; frame < MaxFramesToWait && demo.Simulation == null; frame++)
+                yield return null;
+
+            Assert.IsNotNull(demo.Simulation, "The warehouse did not boot from the CV in time.");
         }
 
         [UnityTest]
-        public IEnumerator Scene_Booted_ShowsEveryBoxAndTheStartingBots()
+        public IEnumerator Scene_Booted_HasOneBoxForEveryBlockOfTheCv()
         {
             yield return null;
+            CvRevealState waybill = Object.FindAnyObjectByType<CvScreen>().RevealState;
 
-            Assert.AreEqual(StartingBots, demo.Simulation.Bots.Count);
-            Assert.AreEqual(StartingBots, Object.FindAnyObjectByType<WarehouseBotsView>().VisibleBotCount);
-            Assert.AreEqual(demo.Simulation.Layout.Boxes.Count, Object.FindAnyObjectByType<WarehouseBoxesView>().VisibleBoxCount);
+            Assert.AreEqual(waybill.Blocks.Count, demo.Simulation.Layout.Boxes.Count);
+            Assert.AreEqual(waybill.TotalLetterCount, demo.Simulation.Layout.TotalPieces);
+            foreach (Box box in demo.Simulation.Layout.Boxes)
+            {
+                Assert.IsTrue(waybill.TryGetBlock(box.Block.Id, out CvBlockReveal block));
+                Assert.AreEqual(block.Block.LetterCount, box.TotalPieces);
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator Simulation_FirstDelivery_ShowsThoseLettersInTheBlockOfTheirBox()
+        {
+            CvRevealState waybill = Object.FindAnyObjectByType<CvScreen>().RevealState;
+            WarehouseSimulation simulation = demo.Simulation;
+            var deliveredPerBlock = new System.Collections.Generic.Dictionary<string, int>();
+            simulation.Score.Delivered += (block, letters) =>
+            {
+                deliveredPerBlock.TryGetValue(block.Id, out int deliveredSoFar);
+                deliveredPerBlock[block.Id] = deliveredSoFar + letters.Count;
+            };
+
+            for (int tick = 0; tick < MaxTicks && simulation.Score.DeliveredPieces == 0; tick++)
+                simulation.Tick();
+            yield return null;
+
+            Assert.Greater(simulation.Score.DeliveredPieces, 0);
+            Assert.AreEqual(simulation.Score.DeliveredPieces, waybill.RevealedLetterCount);
+            foreach (System.Collections.Generic.KeyValuePair<string, int> delivered in deliveredPerBlock)
+            {
+                Assert.IsTrue(waybill.TryGetBlock(delivered.Key, out CvBlockReveal block));
+                Assert.AreEqual(delivered.Value, block.RevealedCount);
+            }
         }
 
         [UnityTest]

@@ -9,98 +9,183 @@ namespace CvWarehouse.Core.Warehouse
         private const int WallHeight = 2;
         private const int ClusterAttempts = 24;
         private const int FreeAttempts = 400;
+        private const int MaxGrowthSteps = 8;
         private const int Percent = 100;
 
         private readonly GeneratorSettings settings;
         private readonly Random random;
+        private readonly WarehouseSizer sizer;
         private readonly List<GridPosition> heavyOrigins = new List<GridPosition>();
         private readonly List<GridPosition> mediumOrigins = new List<GridPosition>();
         private WarehouseLayoutBuilder builder;
+        private GridSize storage;
 
         public WarehouseGenerator(GeneratorSettings settings, Random random)
         {
             this.settings = settings;
             this.random = random;
+            sizer = new WarehouseSizer(settings);
         }
 
-        private int WallY => settings.Height - WallHeight;
+        private int WallY => storage.Height + settings.RampDepth;
 
         private int RampY => WallY - 1;
 
-        private int StorageHeight => WallY - settings.RampDepth;
-
-        public WarehouseLayout Generate()
+        public WarehouseLayout Generate(IReadOnlyList<CvBlock> blocks)
         {
-            RequireRoomForTheRamp();
-            builder = new WarehouseLayoutBuilder(settings.Width, settings.Height);
+            int boxCells = sizer.CountBoxCells(blocks);
+            for (int growthSteps = 0; growthSteps <= MaxGrowthSteps; growthSteps++)
+                if (TryGenerate(blocks, sizer.StorageSizeFor(boxCells, growthSteps)))
+                    return builder.Build();
+
+            throw new InvalidOperationException("The warehouse could not fit its boxes.");
+        }
+
+        private bool TryGenerate(IReadOnlyList<CvBlock> blocks, GridSize storageSize)
+        {
+            storage = storageSize;
+            builder = new WarehouseLayoutBuilder(storage.Width, WallY + WallHeight);
             heavyOrigins.Clear();
             mediumOrigins.Clear();
             AddTruckWall();
             AddRamp();
-            PlaceHeavyBoxes();
-            PlaceMediumBoxes();
-            PlaceLightBoxes();
-            return builder.Build();
-        }
-
-        private void RequireRoomForTheRamp()
-        {
-            int rampWidth = Math.Max(settings.TruckWidth, settings.DropCells) + settings.ParkingPerSide * 2;
-            if (settings.Width < rampWidth || StorageHeight <= 0)
-                throw new ArgumentException("The warehouse is too small for the truck, the drop cells and the parking cells.");
+            return TryPlaceOpeningBoxes(blocks)
+                && TryPlaceEntryBoxes(blocks, WeightClass.Heavy)
+                && TryPlaceEntryBoxes(blocks, WeightClass.Medium)
+                && TryPlaceEntryBoxes(blocks, WeightClass.Light);
         }
 
         private void AddTruckWall()
         {
-            int truckX = (settings.Width - settings.TruckWidth) / 2;
+            int truckX = (storage.Width - settings.TruckWidth) / 2;
             int truckEndX = truckX + settings.TruckWidth;
             builder.Block(new GridPosition(0, WallY), new GridSize(truckX, WallHeight));
             builder.PlaceTruck(new GridPosition(truckX, WallY), new GridSize(settings.TruckWidth, WallHeight));
-            builder.Block(new GridPosition(truckEndX, WallY), new GridSize(settings.Width - truckEndX, WallHeight));
+            builder.Block(new GridPosition(truckEndX, WallY), new GridSize(storage.Width - truckEndX, WallHeight));
         }
 
         private void AddRamp()
         {
-            int firstDropX = (settings.Width - settings.DropCells) / 2;
+            int firstDropX = (storage.Width - settings.DropCells) / 2;
             for (int drop = 0; drop < settings.DropCells; drop++)
                 builder.AddDropCell(new GridPosition(firstDropX + drop, RampY));
 
             for (int parking = 0; parking < settings.ParkingPerSide; parking++)
             {
                 builder.AddParkingCell(new GridPosition(parking, RampY));
-                builder.AddParkingCell(new GridPosition(settings.Width - 1 - parking, RampY));
+                builder.AddParkingCell(new GridPosition(storage.Width - 1 - parking, RampY));
             }
         }
 
-        private void PlaceHeavyBoxes()
+        private bool TryPlaceOpeningBoxes(IReadOnlyList<CvBlock> blocks)
         {
-            for (int box = 0; box < settings.HeavyBoxes; box++)
-                heavyOrigins.Add(PlaceAnywhere(WeightClass.Heavy, settings.HeavyPieces));
-        }
-
-        private void PlaceMediumBoxes()
-        {
-            for (int box = 0; box < settings.MediumBoxes; box++)
+            foreach (CvBlock block in blocks)
             {
-                bool joinsHeavy = heavyOrigins.Count > 0 && random.Next(Percent) < settings.MediumNearHeavyPercent;
-                mediumOrigins.Add(joinsHeavy
-                    ? PlaceNear(PickFrom(heavyOrigins), settings.BigClusterRadius, WeightClass.Medium)
-                    : PlaceAnywhere(WeightClass.Medium, settings.MediumPieces));
+                if (block.Role == CvBlockRole.Entry)
+                    continue;
+
+                WeightClass weightClass = settings.WeightOf(block);
+                if (!TryFindSpotByTheRamp(weightClass, out GridPosition origin))
+                    return false;
+
+                builder.AddBox(origin, weightClass, block);
             }
+
+            return true;
         }
 
-        private void PlaceLightBoxes()
+        private bool TryPlaceEntryBoxes(IReadOnlyList<CvBlock> blocks, WeightClass weightClass)
         {
-            for (int box = 0; box < settings.LightBoxes; box++)
+            foreach (CvBlock block in blocks)
+                if (block.Role == CvBlockRole.Entry && block.Weight == weightClass && !TryPlaceEntryBox(block))
+                    return false;
+            return true;
+        }
+
+        private bool TryPlaceEntryBox(CvBlock block)
+        {
+            if (!TryFindSpotInACluster(block.Weight, out GridPosition origin) && !TryFindSpotAnywhere(block.Weight, out origin))
+                return false;
+
+            builder.AddBox(origin, block.Weight, block);
+            if (block.Weight == WeightClass.Heavy)
+                heavyOrigins.Add(origin);
+            else if (block.Weight == WeightClass.Medium)
+                mediumOrigins.Add(origin);
+            return true;
+        }
+
+        private bool TryFindSpotByTheRamp(WeightClass weightClass, out GridPosition origin)
+        {
+            int topRow = storage.Height - BoxFootprints.For(weightClass).Height;
+            for (int attempt = 0; attempt < FreeAttempts; attempt++)
             {
-                int roll = random.Next(Percent);
-                if (heavyOrigins.Count > 0 && roll < settings.LightNearHeavyPercent)
-                    PlaceNear(PickFrom(heavyOrigins), settings.BigClusterRadius, WeightClass.Light);
-                else if (mediumOrigins.Count > 0 && roll < settings.LightNearHeavyPercent + settings.LightNearMediumPercent)
-                    PlaceNear(PickFrom(mediumOrigins), settings.MediumClusterRadius, WeightClass.Light);
-                else
-                    PlaceAnywhere(WeightClass.Light, settings.LightPieces);
+                int reach = settings.OpeningRadius + attempt / ClusterAttempts;
+                origin = new GridPosition(storage.Width / 2 + random.Next(-reach, reach + 1), topRow - random.Next(reach));
+                if (CanPlace(origin, weightClass))
+                    return true;
             }
+
+            origin = default;
+            return false;
+        }
+
+        private bool TryFindSpotInACluster(WeightClass weightClass, out GridPosition origin)
+        {
+            origin = default;
+            if (!TryPickCluster(weightClass, out GridPosition clusterOrigin, out int radius))
+                return false;
+
+            for (int attempt = 0; attempt < ClusterAttempts; attempt++)
+            {
+                origin = clusterOrigin.Offset(OffsetWithin(radius), OffsetWithin(radius));
+                if (CanPlace(origin, weightClass))
+                    return true;
+            }
+
+            return false;
+        }
+
+        private bool TryPickCluster(WeightClass weightClass, out GridPosition clusterOrigin, out int radius)
+        {
+            clusterOrigin = default;
+            radius = settings.BigClusterRadius;
+            if (weightClass == WeightClass.Heavy)
+                return false;
+
+            int roll = random.Next(Percent);
+            int nearHeavyPercent = weightClass == WeightClass.Medium ? settings.MediumNearHeavyPercent : settings.LightNearHeavyPercent;
+            if (heavyOrigins.Count > 0 && roll < nearHeavyPercent)
+            {
+                clusterOrigin = PickFrom(heavyOrigins);
+                return true;
+            }
+
+            if (weightClass != WeightClass.Light || mediumOrigins.Count == 0 || roll >= nearHeavyPercent + settings.LightNearMediumPercent)
+                return false;
+
+            clusterOrigin = PickFrom(mediumOrigins);
+            radius = settings.MediumClusterRadius;
+            return true;
+        }
+
+        private bool TryFindSpotAnywhere(WeightClass weightClass, out GridPosition origin)
+        {
+            for (int attempt = 0; attempt < FreeAttempts; attempt++)
+            {
+                origin = new GridPosition(random.Next(storage.Width), random.Next(storage.Height));
+                if (CanPlace(origin, weightClass))
+                    return true;
+            }
+
+            origin = default;
+            return false;
+        }
+
+        private bool CanPlace(GridPosition origin, WeightClass weightClass)
+        {
+            GridSize size = BoxFootprints.For(weightClass);
+            return origin.Y + size.Height <= storage.Height && builder.IsFree(origin, size);
         }
 
         private GridPosition PickFrom(List<GridPosition> origins)
@@ -108,49 +193,9 @@ namespace CvWarehouse.Core.Warehouse
             return origins[random.Next(origins.Count)];
         }
 
-        private GridPosition PlaceNear(GridPosition clusterOrigin, int radius, WeightClass weightClass)
-        {
-            int pieces = PiecesOf(weightClass);
-            for (int attempt = 0; attempt < ClusterAttempts; attempt++)
-            {
-                GridPosition origin = clusterOrigin.Offset(OffsetWithin(radius), OffsetWithin(radius));
-                if (TryPlace(origin, weightClass, pieces))
-                    return origin;
-            }
-
-            return PlaceAnywhere(weightClass, pieces);
-        }
-
-        private GridPosition PlaceAnywhere(WeightClass weightClass, int pieces)
-        {
-            for (int attempt = 0; attempt < FreeAttempts; attempt++)
-            {
-                var origin = new GridPosition(random.Next(settings.Width), random.Next(StorageHeight));
-                if (TryPlace(origin, weightClass, pieces))
-                    return origin;
-            }
-
-            throw new InvalidOperationException("The warehouse is too small for its boxes.");
-        }
-
-        private bool TryPlace(GridPosition origin, WeightClass weightClass, int pieces)
-        {
-            GridSize size = BoxFootprints.For(weightClass);
-            if (origin.Y + size.Height > StorageHeight || !builder.IsFree(origin, size))
-                return false;
-
-            builder.AddBox(origin, weightClass, pieces);
-            return true;
-        }
-
         private int OffsetWithin(int radius)
         {
             return (random.Next(-radius, radius + 1) + random.Next(-radius, radius + 1)) / 2;
-        }
-
-        private int PiecesOf(WeightClass weightClass)
-        {
-            return weightClass == WeightClass.Medium ? settings.MediumPieces : settings.LightPieces;
         }
     }
 }

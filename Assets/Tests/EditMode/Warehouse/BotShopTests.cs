@@ -1,5 +1,6 @@
 using CvWarehouse.Core.Cv;
 using CvWarehouse.Core.Warehouse;
+using CvWarehouse.Tests.EditMode.Cv;
 using NUnit.Framework;
 
 namespace CvWarehouse.Tests.EditMode.Warehouse
@@ -7,6 +8,7 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
     public sealed class BotShopTests
     {
         private const int GridSide = 8;
+        private const int Seed = 12345;
         private const int HeavyPieces = 100;
         private const int MaxTicks = 400000;
         private const int FirstBotPrice = 6;
@@ -162,6 +164,42 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
             Assert.AreEqual(1, tinyShop.CarryUpgradePrice(tinySimulation.Bots[0]));
         }
 
+        [TestCase(2, 4, 8)]
+        [TestCase(20, 40, 80)]
+        [TestCase(60, 120, 240)]
+        public void CarryUpgradePrice_AnyCvSize_WordCarryCostsNoMoreThanTheNameIsWorth(int heavyEntries, int mediumEntries, int lightEntries)
+        {
+            WarehouseSimulation cvSimulation = NewCvSimulation(heavyEntries, mediumEntries, lightEntries);
+            var cvShop = new BotShop(cvSimulation, new ShopSettings());
+            Box nameBox = null;
+            foreach (Box box in cvSimulation.Layout.Boxes)
+                if (box.Block.Role == CvBlockRole.Name)
+                    nameBox = box;
+
+            Assert.LessOrEqual(cvShop.CarryUpgradePrice(cvSimulation.Bots[0]), cvSimulation.Score.PointsIn(nameBox));
+        }
+
+        [Test]
+        public void CarryUpgradePrice_LongCv_WordCarryIsCheaperThanItsShareOfAllPoints()
+        {
+            WarehouseSimulation cvSimulation = NewCvSimulation(60, 120, 240);
+            var settings = new ShopSettings();
+
+            int price = new BotShop(cvSimulation, settings).CarryUpgradePrice(cvSimulation.Bots[0]);
+
+            Assert.Less(price, cvSimulation.Score.MaxPoints * settings.WordCarryPricePermille / 1000);
+        }
+
+        private static WarehouseSimulation NewCvSimulation(int heavyEntries, int mediumEntries, int lightEntries)
+        {
+            var random = new System.Random(Seed);
+            WarehouseLayout layout = new WarehouseGenerator(new GeneratorSettings(), random)
+                .Generate(CvTestBlocks.BuildCv(heavyEntries, mediumEntries, lightEntries));
+            var cvSimulation = new WarehouseSimulation(layout, new SimulationSettings(), random);
+            cvSimulation.TryAddBot();
+            return cvSimulation;
+        }
+
         private static WarehouseSimulation NewSimulation(int heavyPieces)
         {
             WarehouseLayout layout = new WarehouseLayoutBuilder(GridSide, GridSide)
@@ -169,9 +207,9 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
                 .AddParkingCell(new GridPosition(5, 7))
                 .AddParkingCell(new GridPosition(6, 7))
                 .AddParkingCell(new GridPosition(7, 7))
-                .AddBox(new GridPosition(3, 2), WeightClass.Heavy, heavyPieces)
+                .AddBox(new GridPosition(3, 2), WeightClass.Heavy, CvTestBlocks.WithLetters(heavyPieces))
                 .Build();
-            var newSimulation = new WarehouseSimulation(layout, new SimulationSettings());
+            var newSimulation = new WarehouseSimulation(layout, new SimulationSettings(), new System.Random(Seed));
             newSimulation.TryAddBot();
             return newSimulation;
         }

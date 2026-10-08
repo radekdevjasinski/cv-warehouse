@@ -1,4 +1,5 @@
 using System;
+using CvWarehouse.Core.Cv;
 
 namespace CvWarehouse.Core.Warehouse
 {
@@ -10,12 +11,14 @@ namespace CvWarehouse.Core.Warehouse
 
         private readonly WarehouseSimulation simulation;
         private readonly ShopSettings settings;
+        private readonly int wordCarryPrice;
         private int spentPoints;
 
         public BotShop(WarehouseSimulation simulation, ShopSettings settings)
         {
             this.simulation = simulation;
             this.settings = settings;
+            wordCarryPrice = Math.Min(ShareOfAllPoints(settings.WordCarryPricePermille), PointsInTheName());
         }
 
         public int Balance => simulation.Score.Points - spentPoints;
@@ -48,9 +51,9 @@ namespace CvWarehouse.Core.Warehouse
 
         public int CarryUpgradePrice(Bot bot)
         {
-            return ShareOfAllPoints(bot.CarrySize == CarrySize.Letter
-                ? settings.WordCarryPricePermille
-                : settings.BoxCarryPricePermille);
+            return bot.CarrySize == CarrySize.Letter
+                ? wordCarryPrice
+                : ShareOfAllPoints(settings.BoxCarryPricePermille);
         }
 
         public bool TryBuyBot()
@@ -71,6 +74,14 @@ namespace CvWarehouse.Core.Warehouse
             spentPoints += CarryUpgradePrice(bot);
             simulation.SetCarrySize(bot, bot.CarrySize == CarrySize.Letter ? CarrySize.Word : CarrySize.Box);
             return true;
+        }
+
+        private int PointsInTheName()
+        {
+            foreach (Box box in simulation.Layout.Boxes)
+                if (box.Block.Role == CvBlockRole.Name)
+                    return simulation.Score.PointsIn(box);
+            return int.MaxValue;
         }
 
         private int ShareOfAllPoints(int permille)

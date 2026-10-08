@@ -11,10 +11,12 @@ namespace CvWarehouse.Core.Warehouse
         private readonly List<Box> closestBoxes = new List<Box>();
         private readonly List<Box> biggestBoxes = new List<Box>();
         private readonly ReservationTable reservations;
+        private readonly Random random;
 
-        public TaskQueue(WarehouseLayout layout, ReservationTable reservations)
+        public TaskQueue(WarehouseLayout layout, ReservationTable reservations, Random random)
         {
             this.reservations = reservations;
+            this.random = random;
             closestBoxes.AddRange(layout.Boxes);
             biggestBoxes.AddRange(layout.Boxes);
             Refresh();
@@ -28,7 +30,7 @@ namespace CvWarehouse.Core.Warehouse
             biggestBoxes.Sort(BiggestFirst);
         }
 
-        public bool TryAssign(Bot bot, int carryPieces)
+        public bool TryAssign(Bot bot)
         {
             List<Box> waitingBoxes = bot.Focus == BotFocus.BiggestBox ? biggestBoxes : closestBoxes;
             for (int index = 0; index < waitingBoxes.Count; index++)
@@ -41,7 +43,7 @@ namespace CvWarehouse.Core.Warehouse
 
                 bot.JobBox = box;
                 bot.AccessCell = accessCell;
-                bot.ClaimedPieces = box.Claim(carryPieces);
+                bot.ClaimedPieces = box.Claim(bot.CarrySize, random, bot.Letters);
                 return true;
             }
 

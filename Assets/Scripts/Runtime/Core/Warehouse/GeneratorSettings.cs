@@ -1,10 +1,16 @@
+using CvWarehouse.Core.Cv;
+
 namespace CvWarehouse.Core.Warehouse
 {
     public sealed class GeneratorSettings
     {
-        public int Width { get; set; } = 80;
+        public int FillPercent { get; set; } = 6;
 
-        public int Height { get; set; } = 56;
+        public int WidthToHeightPercent { get; set; } = 150;
+
+        public int MinWidth { get; set; } = 30;
+
+        public int MinStorageHeight { get; set; } = 12;
 
         public int TruckWidth { get; set; } = 10;
 
@@ -14,17 +20,13 @@ namespace CvWarehouse.Core.Warehouse
 
         public int RampDepth { get; set; } = 4;
 
-        public int HeavyBoxes { get; set; } = 10;
+        public WeightClass NameWeight { get; set; } = WeightClass.Heavy;
 
-        public int MediumBoxes { get; set; } = 30;
+        public WeightClass JobTitleWeight { get; set; } = WeightClass.Medium;
 
-        public int LightBoxes { get; set; } = 90;
+        public WeightClass ContactWeight { get; set; } = WeightClass.Light;
 
-        public int HeavyPieces { get; set; } = 6;
-
-        public int MediumPieces { get; set; } = 4;
-
-        public int LightPieces { get; set; } = 2;
+        public int OpeningRadius { get; set; } = 4;
 
         public int BigClusterRadius { get; set; } = 6;
 
@@ -35,5 +37,20 @@ namespace CvWarehouse.Core.Warehouse
         public int LightNearHeavyPercent { get; set; } = 35;
 
         public int LightNearMediumPercent { get; set; } = 45;
+
+        public WeightClass WeightOf(CvBlock block)
+        {
+            switch (block.Role)
+            {
+                case CvBlockRole.Name:
+                    return NameWeight;
+                case CvBlockRole.JobTitle:
+                    return JobTitleWeight;
+                case CvBlockRole.Contact:
+                    return ContactWeight;
+                default:
+                    return block.Weight;
+            }
+        }
     }
 }

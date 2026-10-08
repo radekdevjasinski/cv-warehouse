@@ -7,15 +7,18 @@ namespace CvWarehouse.Core.Warehouse
     public sealed class Box
     {
         private readonly List<GridPosition> accessCells = new List<GridPosition>();
+        private readonly BoxLetters letters;
 
-        public Box(int id, GridPosition origin, WeightClass weightClass, int pieceCount)
+        public Box(int id, GridPosition origin, WeightClass weightClass, CvBlock block)
         {
             Id = id;
             Origin = origin;
             WeightClass = weightClass;
+            Block = block;
             Size = BoxFootprints.For(weightClass);
-            TotalPieces = pieceCount;
-            RemainingPieces = pieceCount;
+            letters = new BoxLetters(block);
+            TotalPieces = block.LetterCount;
+            RemainingPieces = block.LetterCount;
             TruckDistance = DistanceField.Unreachable;
         }
 
@@ -27,35 +30,43 @@ namespace CvWarehouse.Core.Warehouse
 
         public WeightClass WeightClass { get; }
 
+        public CvBlock Block { get; }
+
         public int TotalPieces { get; }
 
         public int RemainingPieces { get; private set; }
-
-        public int ClaimedPieces { get; private set; }
 
         public int TruckDistance { get; private set; }
 
         public IReadOnlyList<GridPosition> AccessCells => accessCells;
 
-        public int UnclaimedPieces => RemainingPieces - ClaimedPieces;
+        public int UnclaimedPieces => letters.UnclaimedCount;
 
         public bool IsEmpty => RemainingPieces == 0;
 
-        public int Claim(int wantedPieces)
+        public int Claim(CarrySize carrySize, Random random, List<int> claimed)
         {
-            int claimed = Math.Min(wantedPieces, UnclaimedPieces);
-            ClaimedPieces += claimed;
-            return claimed;
+            claimed.Clear();
+            if (UnclaimedPieces == 0)
+                return 0;
+
+            if (carrySize == CarrySize.Box)
+                letters.ClaimRest(claimed);
+            else if (carrySize == CarrySize.Word)
+                letters.ClaimWord(random, claimed);
+            else
+                letters.ClaimLetter(random, claimed);
+            return claimed.Count;
         }
 
-        public void ReleaseClaim(int pieces)
+        public void ReleaseClaim(List<int> claimed)
         {
-            ClaimedPieces -= pieces;
+            letters.Release(claimed);
+            claimed.Clear();
         }
 
         public void TakeClaimed(int pieces)
         {
-            ClaimedPieces -= pieces;
             RemainingPieces -= pieces;
         }
 

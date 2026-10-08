@@ -10,13 +10,13 @@ namespace CvWarehouse.Core.Warehouse
 
         public int TicksPerCell { get; set; } = 8;
 
-        public int ExtractTicks { get; set; } = 30;
+        public int LightExtractTicks { get; set; } = 20;
+
+        public int MediumExtractTicks { get; set; } = 30;
+
+        public int HeavyExtractTicks { get; set; } = 45;
 
         public int UnloadTicks { get; set; } = 20;
-
-        public int LetterPieces { get; set; } = 1;
-
-        public int WordPieces { get; set; } = 2;
 
         public int LightPiecePoints { get; set; } = 1;
 
@@ -24,16 +24,16 @@ namespace CvWarehouse.Core.Warehouse
 
         public int HeavyPiecePoints { get; set; } = 3;
 
-        public int PiecesPerTrip(CarrySize carrySize)
+        public int ExtractTicks(WeightClass weightClass)
         {
-            switch (carrySize)
+            switch (weightClass)
             {
-                case CarrySize.Box:
-                    return int.MaxValue;
-                case CarrySize.Word:
-                    return WordPieces;
+                case WeightClass.Heavy:
+                    return HeavyExtractTicks;
+                case WeightClass.Medium:
+                    return MediumExtractTicks;
                 default:
-                    return LetterPieces;
+                    return LightExtractTicks;
             }
         }
 

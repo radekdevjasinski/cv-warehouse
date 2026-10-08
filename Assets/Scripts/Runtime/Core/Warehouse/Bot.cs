@@ -62,6 +62,8 @@ namespace CvWarehouse.Core.Warehouse
 
         internal int PathIndex { get; set; }
 
+        internal List<int> Letters { get; } = new List<int>();
+
         internal int WorkTicksLeft { get; set; }
 
         internal bool HasPath => PathIndex < Path.Count;
