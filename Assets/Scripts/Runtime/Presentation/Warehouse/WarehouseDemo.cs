@@ -18,6 +18,8 @@ namespace CvWarehouse.Presentation.Warehouse
         [SerializeField] private BotRouteView routeView;
         [SerializeField] private BotPanelView botPanelView;
         [SerializeField] private BotGroupPanelView botGroupPanelView;
+        [SerializeField] private BoxPanelView boxPanelView;
+        [SerializeField] private BoxHighlightView boxHighlightView;
         [SerializeField] private SelectionBoxView selectionBoxView;
         [SerializeField] private WarehouseBotSelector botSelector;
         [SerializeField] private WarehousePauseControl pauseControl;
@@ -31,6 +33,8 @@ namespace CvWarehouse.Presentation.Warehouse
 
         public BotSelection Selection { get; private set; }
 
+        public BoxSelection BoxSelection { get; private set; }
+
         public int Seed => seed;
 
         public void Begin(IReadOnlyList<CvBlock> blocks)
@@ -42,6 +46,7 @@ namespace CvWarehouse.Presentation.Warehouse
                 Simulation.TryAddBot();
             Shop = new BotShop(Simulation, settings.CreateShopSettings());
             Selection = new BotSelection();
+            BoxSelection = new BoxSelection();
 
             shapes = new SquareShapeFactory(shapeMaterial);
             warehouseCamera.Frame(layout);
@@ -53,6 +58,7 @@ namespace CvWarehouse.Presentation.Warehouse
         {
             gridView.Show(layout, shapes);
             boxesView.Show(layout, shapes);
+            boxHighlightView.Show(BoxSelection, shapes);
             botsView.Show(Simulation, Selection, shapes);
             routeView.Show(Selection, shapeMaterial);
             selectionBoxView.Show(shapes);
@@ -63,7 +69,8 @@ namespace CvWarehouse.Presentation.Warehouse
             hudView.Show(Simulation, Shop);
             botPanelView.Show(Simulation, Shop, Selection);
             botGroupPanelView.Show(Simulation, Selection);
-            botSelector.Connect(Simulation, Selection);
+            boxPanelView.Show(BoxSelection);
+            botSelector.Connect(Simulation, Selection, BoxSelection);
             pauseControl.Show(Simulation);
         }
 

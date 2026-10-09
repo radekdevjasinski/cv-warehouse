@@ -16,15 +16,25 @@ namespace CvWarehouse.Core.Cv
                 AddBlock(blocks, cutter.Cut(contact.Id, contact.Text), CvBlockRole.Contact);
             foreach (CvSection section in document.Sections)
                 foreach (CvEntry entry in section.Entries)
-                    AddBlock(blocks, CutEntry(entry, section.Style), CvBlockRole.Entry);
+                    AddBlock(blocks, CutEntry(entry, section.Style, document.Categories), CvBlockRole.Entry);
             return blocks;
         }
 
-        private CvBlock CutEntry(CvEntry entry, CvListStyle style)
+        private static string NameOf(string categoryId, IReadOnlyList<CvCategory> categories)
+        {
+            foreach (CvCategory category in categories)
+                if (category.Id == categoryId)
+                    return category.Name;
+
+            return string.Empty;
+        }
+
+        private CvBlock CutEntry(CvEntry entry, CvListStyle style, IReadOnlyList<CvCategory> categories)
         {
             CvBlock block = CutEntryText(entry, style);
             block.Weight = entry.Weight;
             block.Category = entry.Category ?? string.Empty;
+            block.CategoryName = NameOf(block.Category, categories);
             return block;
         }
 

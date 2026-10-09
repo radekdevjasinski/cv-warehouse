@@ -88,12 +88,25 @@ namespace CvWarehouse.Tests.EditMode.Cv
 
             Assert.AreEqual(WeightClass.Heavy, block.Weight);
             Assert.AreEqual("technical", block.Category);
+            Assert.AreEqual("Technical", block.CategoryName);
+        }
+
+        [Test]
+        public void Build_EntryWithoutCategory_HasNoCategoryName()
+        {
+            CvBlock block = CvTestBlocks.Build(
+                "{\"categories\":[{\"id\":\"technical\",\"name\":\"Technical\"}],\"sections\":[{\"entries\":[{\"title\":\"Game\"}]}]}")[0];
+
+            Assert.AreEqual(string.Empty, block.CategoryName);
         }
 
         [Test]
         public void Build_Name_HasNoCategory()
         {
-            Assert.AreEqual(string.Empty, CvTestBlocks.Build(CvTestBlocks.NameAndProfileCv)[0].Category);
+            CvBlock name = CvTestBlocks.Build(CvTestBlocks.NameAndProfileCv)[0];
+
+            Assert.AreEqual(string.Empty, name.Category);
+            Assert.AreEqual(string.Empty, name.CategoryName);
         }
 
         [Test]

@@ -21,6 +21,7 @@ namespace CvWarehouse.Core.Cv
             {
                 Id = id,
                 Category = string.Empty,
+                CategoryName = string.Empty,
                 Segments = segments,
                 SegmentFirstLetters = segmentFirstLetters,
                 Words = words,

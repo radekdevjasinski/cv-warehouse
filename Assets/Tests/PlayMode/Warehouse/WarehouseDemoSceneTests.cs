@@ -32,6 +32,10 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
         private const string BotGroupWindowName = "BotGroupWindow";
         private const string BotGroupTextName = "BotGroupText";
         private const string DeleteBotsButtonName = "DeleteBotsButton";
+        private const string BoxWindowName = "BoxWindow";
+        private const string BoxWeightTextName = "BoxWeightText";
+        private const string BoxCategoryTextName = "BoxCategoryText";
+        private const string CloseBoxWindowButtonName = "CloseBoxWindowButton";
         private const string PauseButtonName = "PauseButton";
         private const string PausedBadgeName = "PausedBadge";
         private const float PositionTolerance = 0.001f;
@@ -551,6 +555,155 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
             Assert.IsFalse(boxView.IsVisible);
         }
 
+        [UnityTest]
+        public IEnumerator BoxWindow_NoBoxSelected_IsHiddenAlongWithTheHighlight()
+        {
+            yield return null;
+
+            Assert.IsNull(GameObject.Find(BoxWindowName));
+            Assert.IsFalse(Object.FindAnyObjectByType<BoxHighlightView>().IsVisible);
+        }
+
+        [UnityTest]
+        public IEnumerator BotSelector_TapOnABox_OpensItsWindowWithWeightAndCategoryAndHighlightsIt()
+        {
+            Box box = FirstBox(candidate => candidate.Block.CategoryName.Length > 0);
+            BoxHighlightView highlight = Object.FindAnyObjectByType<BoxHighlightView>();
+
+            TapOn(box);
+            yield return null;
+
+            Assert.AreSame(box, demo.BoxSelection.SelectedBox);
+            Assert.AreEqual(
+                "Weight: " + box.WeightClass.ToString().ToLowerInvariant(),
+                GameObject.Find(BoxWeightTextName).GetComponent<TMP_Text>().text);
+            Assert.AreEqual("Category: " + box.Block.CategoryName, GameObject.Find(BoxCategoryTextName).GetComponent<TMP_Text>().text);
+            Assert.IsTrue(highlight.IsVisible);
+            Assert.AreEqual(box.Origin.X + box.Size.Width * 0.5f, highlight.Position.x, PositionTolerance);
+            Assert.AreEqual(box.Origin.Y + box.Size.Height * 0.5f, highlight.Position.y, PositionTolerance);
+        }
+
+        [UnityTest]
+        public IEnumerator BotSelector_TapOnABoxWithoutCategory_SaysItHasNone()
+        {
+            Box nameBox = FirstBox(candidate => candidate.Block.Role == CvBlockRole.Name);
+
+            TapOn(nameBox);
+            yield return null;
+
+            Assert.AreEqual("Weight: heavy", GameObject.Find(BoxWeightTextName).GetComponent<TMP_Text>().text);
+            Assert.AreEqual("Category: none", GameObject.Find(BoxCategoryTextName).GetComponent<TMP_Text>().text);
+        }
+
+        [UnityTest]
+        public IEnumerator BotSelector_TapOnAnotherBox_ShowsThatBoxInstead()
+        {
+            Box lightBox = FirstBox(candidate => candidate.WeightClass == WeightClass.Light);
+            Box heavyBox = FirstBox(candidate => candidate.WeightClass == WeightClass.Heavy);
+            TapOn(lightBox);
+            yield return null;
+
+            TapOn(heavyBox);
+            yield return null;
+
+            Assert.AreSame(heavyBox, demo.BoxSelection.SelectedBox);
+            Assert.AreEqual("Weight: heavy", GameObject.Find(BoxWeightTextName).GetComponent<TMP_Text>().text);
+        }
+
+        [UnityTest]
+        public IEnumerator BotSelector_TapOnABoxWhileABotIsSelected_SwapsTheBotWindowForTheBoxWindow()
+        {
+            TapOn(demo.Simulation.Bots[0]);
+            yield return null;
+
+            TapOn(demo.Simulation.Layout.Boxes[0]);
+            yield return null;
+
+            Assert.AreEqual(0, demo.Selection.Count);
+            Assert.IsNull(GameObject.Find(BotWindowName));
+            Assert.IsNotNull(GameObject.Find(BoxWindowName));
+        }
+
+        [UnityTest]
+        public IEnumerator BotSelector_TapOnABotWhileABoxIsInspected_SwapsTheBoxWindowForTheBotWindow()
+        {
+            TapOn(demo.Simulation.Layout.Boxes[0]);
+            yield return null;
+
+            TapOn(demo.Simulation.Bots[0]);
+            yield return null;
+
+            Assert.IsFalse(demo.BoxSelection.HasBox);
+            Assert.IsNull(GameObject.Find(BoxWindowName));
+            Assert.IsNotNull(GameObject.Find(BotWindowName));
+        }
+
+        [UnityTest]
+        public IEnumerator BotSelector_BoxAroundBotsWhileABoxIsInspected_ClosesTheBoxWindow()
+        {
+            TapOn(demo.Simulation.Layout.Boxes[0]);
+            yield return null;
+
+            Object.FindAnyObjectByType<WarehouseBotSelector>().SelectInside(AreaAround(demo.Simulation.Bots));
+            yield return null;
+
+            Assert.IsFalse(demo.BoxSelection.HasBox);
+            Assert.IsNull(GameObject.Find(BoxWindowName));
+        }
+
+        [UnityTest]
+        public IEnumerator BotSelector_TapOnEmptyFloor_ClosesTheBoxWindow()
+        {
+            TapOn(demo.Simulation.Layout.Boxes[0]);
+            yield return null;
+
+            Object.FindAnyObjectByType<WarehouseBotSelector>().SelectAt(new Vector2(-10f, -10f));
+            yield return null;
+
+            Assert.IsFalse(demo.BoxSelection.HasBox);
+            Assert.IsNull(GameObject.Find(BoxWindowName));
+            Assert.IsFalse(Object.FindAnyObjectByType<BoxHighlightView>().IsVisible);
+        }
+
+        [UnityTest]
+        public IEnumerator CloseBoxWindowButton_Clicked_ClearsTheBoxSelection()
+        {
+            TapOn(demo.Simulation.Layout.Boxes[0]);
+            yield return null;
+
+            GameObject.Find(CloseBoxWindowButtonName).GetComponent<Button>().onClick.Invoke();
+            yield return null;
+
+            Assert.IsFalse(demo.BoxSelection.HasBox);
+            Assert.IsNull(GameObject.Find(BoxWindowName));
+        }
+
+        [UnityTest]
+        public IEnumerator BoxWindow_InspectedBoxEmptied_ClosesAlongWithTheHighlight()
+        {
+            Box nameBox = FirstBox(candidate => candidate.Block.Role == CvBlockRole.Name);
+            TapOn(nameBox);
+            yield return null;
+            Assert.IsNotNull(GameObject.Find(BoxWindowName));
+
+            TickUntil(() => nameBox.IsEmpty);
+            yield return null;
+
+            Assert.IsNull(GameObject.Find(BoxWindowName));
+            Assert.IsFalse(Object.FindAnyObjectByType<BoxHighlightView>().IsVisible);
+        }
+
+        [UnityTest]
+        public IEnumerator BoxWindow_WhilePaused_StillOpens()
+        {
+            GameObject.Find(PauseButtonName).GetComponent<Button>().onClick.Invoke();
+
+            TapOn(demo.Simulation.Layout.Boxes[0]);
+            yield return null;
+
+            Assert.IsNotNull(GameObject.Find(BoxWindowName));
+        }
+
         private static SelectionArea AreaAround(System.Collections.Generic.IReadOnlyList<Bot> bots)
         {
             float minX = float.MaxValue;
@@ -571,6 +724,22 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
         private static void TapOn(Bot bot)
         {
             Object.FindAnyObjectByType<WarehouseBotSelector>().SelectAt(new Vector2(bot.CentreX, bot.CentreY));
+        }
+
+        private static void TapOn(Box box)
+        {
+            var centre = new Vector2(box.Origin.X + box.Size.Width * 0.5f, box.Origin.Y + box.Size.Height * 0.5f);
+            Object.FindAnyObjectByType<WarehouseBotSelector>().SelectAt(centre);
+        }
+
+        private Box FirstBox(System.Predicate<Box> isWanted)
+        {
+            foreach (Box box in demo.Simulation.Layout.Boxes)
+                if (isWanted(box))
+                    return box;
+
+            Assert.Fail("The warehouse has no such box.");
+            return null;
         }
 
         private void TickUntil(System.Func<bool> isReached)

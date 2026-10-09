@@ -22,7 +22,9 @@ namespace CvWarehouse.Presentation.Warehouse
         private readonly TapDetector tapDetector = new TapDetector();
         private readonly List<Bot> pickedBots = new List<Bot>();
         private IReadOnlyList<Bot> bots;
+        private IReadOnlyList<Box> boxes;
         private BotSelection selection;
+        private BoxSelection boxSelection;
         private InputAction pointAction;
         private InputAction pressAction;
         private Vector2 pressWorldPoint;
@@ -31,10 +33,12 @@ namespace CvWarehouse.Presentation.Warehouse
         private bool isTracking;
         private bool isMousePress;
 
-        public void Connect(WarehouseSimulation simulation, BotSelection botSelection)
+        public void Connect(WarehouseSimulation simulation, BotSelection botSelection, BoxSelection inspectedBox)
         {
             bots = simulation.Bots;
+            boxes = simulation.Layout.Boxes;
             selection = botSelection;
+            boxSelection = inspectedBox;
         }
 
         public void SelectAt(Vector2 worldPoint)
@@ -42,10 +46,16 @@ namespace CvWarehouse.Presentation.Warehouse
             if (selection == null)
                 return;
 
+            boxSelection.Clear();
             if (BotPicker.TryPick(bots, worldPoint.x, worldPoint.y, pickRadius, out Bot picked))
+            {
                 selection.Select(picked);
-            else
-                selection.Clear();
+                return;
+            }
+
+            selection.Clear();
+            if (BoxPicker.TryPick(boxes, worldPoint.x, worldPoint.y, out Box pickedBox))
+                boxSelection.Select(pickedBox);
         }
 
         public void SelectInside(SelectionArea area)
@@ -53,6 +63,7 @@ namespace CvWarehouse.Presentation.Warehouse
             if (selection == null)
                 return;
 
+            boxSelection.Clear();
             BotPicker.PickInside(bots, area, pickedBots);
             selection.SelectAll(pickedBots);
         }
