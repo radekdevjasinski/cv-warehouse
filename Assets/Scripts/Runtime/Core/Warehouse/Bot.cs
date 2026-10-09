@@ -4,6 +4,8 @@ namespace CvWarehouse.Core.Warehouse
 {
     public sealed class Bot
     {
+        public const int FirstLevel = 1;
+
         private const float HalfCell = 0.5f;
 
         public Bot(int id, GridPosition cell)
@@ -44,7 +46,9 @@ namespace CvWarehouse.Core.Warehouse
 
         public int CargoPieces { get; internal set; }
 
-        public CarrySize CarrySize { get; internal set; }
+        public int CarryLevel { get; internal set; } = FirstLevel;
+
+        public int SpeedLevel { get; internal set; } = FirstLevel;
 
         public BotFocus Focus { get; internal set; }
 
@@ -67,6 +71,11 @@ namespace CvWarehouse.Core.Warehouse
         internal int WorkTicksLeft { get; set; }
 
         internal bool HasPath => PathIndex < Path.Count;
+
+        public int LevelOf(BotUpgrade upgrade)
+        {
+            return upgrade == BotUpgrade.Speed ? SpeedLevel : CarryLevel;
+        }
 
         public GridPosition RouteCell(int index)
         {

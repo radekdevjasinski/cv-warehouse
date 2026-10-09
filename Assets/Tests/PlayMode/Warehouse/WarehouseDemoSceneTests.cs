@@ -24,6 +24,8 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
         private const string BotNameTextName = "BotNameText";
         private const string BotCarryTextName = "BotCarryText";
         private const string BotUpgradeCarryButtonName = "BotUpgradeCarryButton";
+        private const string BotSpeedTextName = "BotSpeedText";
+        private const string BotUpgradeSpeedButtonName = "BotUpgradeSpeedButton";
         private const string DeleteBotButtonName = "DeleteBotButton";
         private const string CloseBotWindowButtonName = "CloseBotWindowButton";
         private const string PreviousFocusButtonName = "PreviousFocusButton";
@@ -152,7 +154,8 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
 
             Assert.AreSame(secondBot, demo.Selection.SingleBot);
             Assert.AreEqual("Bot 2", GameObject.Find(BotNameTextName).GetComponent<TMP_Text>().text);
-            Assert.AreEqual("Carries letters", GameObject.Find(BotCarryTextName).GetComponent<TMP_Text>().text);
+            Assert.AreEqual("Words per haul: 1", GameObject.Find(BotCarryTextName).GetComponent<TMP_Text>().text);
+            Assert.AreEqual("Speed: 1", GameObject.Find(BotSpeedTextName).GetComponent<TMP_Text>().text);
             Assert.AreEqual(1, botsView.VisibleHighlightCount);
             Assert.AreEqual(secondBot.CentreX, botsView.HighlightPosition(0).x, PositionTolerance);
             Assert.AreEqual(secondBot.CentreY, botsView.HighlightPosition(0).y, PositionTolerance);
@@ -235,7 +238,7 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
         }
 
         [UnityTest]
-        public IEnumerator BotUpgradeCarryButton_ClickedWithEnoughPoints_MakesOnlyThatBotCarryWords()
+        public IEnumerator BotUpgradeCarryButton_ClickedWithEnoughPoints_MakesOnlyThatBotCarryTwoWords()
         {
             Bot firstBot = demo.Simulation.Bots[0];
             TapOn(firstBot);
@@ -243,16 +246,63 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
             Button upgradeCarryButton = GameObject.Find(BotUpgradeCarryButtonName).GetComponent<Button>();
             Assert.IsFalse(upgradeCarryButton.interactable);
 
-            TickUntil(() => demo.Shop.CanUpgradeCarry(firstBot));
+            TickUntil(() => demo.Shop.CanUpgrade(firstBot, BotUpgrade.Carry));
+            int price = demo.Shop.UpgradePrice(firstBot, BotUpgrade.Carry);
+            int pointsBefore = demo.Shop.Balance;
             yield return null;
             Assert.IsTrue(upgradeCarryButton.interactable);
+            Assert.AreEqual("More words (" + price + ")", upgradeCarryButton.GetComponentInChildren<TMP_Text>().text);
 
             upgradeCarryButton.onClick.Invoke();
             yield return null;
 
-            Assert.AreEqual(CarrySize.Word, firstBot.CarrySize);
-            Assert.AreEqual(CarrySize.Letter, demo.Simulation.Bots[1].CarrySize);
-            Assert.AreEqual("Carries words", GameObject.Find(BotCarryTextName).GetComponent<TMP_Text>().text);
+            Assert.AreEqual(2, firstBot.CarryLevel);
+            Assert.AreEqual(1, firstBot.SpeedLevel);
+            Assert.AreEqual(1, demo.Simulation.Bots[1].CarryLevel);
+            Assert.AreEqual(pointsBefore - price, demo.Shop.Balance);
+            Assert.AreEqual("Words per haul: 2", GameObject.Find(BotCarryTextName).GetComponent<TMP_Text>().text);
+        }
+
+        [UnityTest]
+        public IEnumerator BotUpgradeSpeedButton_ClickedWithEnoughPoints_MakesOnlyThatBotFaster()
+        {
+            Bot firstBot = demo.Simulation.Bots[0];
+            TapOn(firstBot);
+            yield return null;
+            Button upgradeSpeedButton = GameObject.Find(BotUpgradeSpeedButtonName).GetComponent<Button>();
+            Assert.IsFalse(upgradeSpeedButton.interactable);
+
+            TickUntil(() => demo.Shop.CanUpgrade(firstBot, BotUpgrade.Speed));
+            int price = demo.Shop.UpgradePrice(firstBot, BotUpgrade.Speed);
+            yield return null;
+            Assert.IsTrue(upgradeSpeedButton.interactable);
+            Assert.AreEqual("More speed (" + price + ")", upgradeSpeedButton.GetComponentInChildren<TMP_Text>().text);
+
+            upgradeSpeedButton.onClick.Invoke();
+            yield return null;
+
+            Assert.AreEqual(2, firstBot.SpeedLevel);
+            Assert.AreEqual(1, firstBot.CarryLevel);
+            Assert.AreEqual(1, demo.Simulation.Bots[1].SpeedLevel);
+            Assert.AreEqual("Speed: 2", GameObject.Find(BotSpeedTextName).GetComponent<TMP_Text>().text);
+        }
+
+        [UnityTest]
+        public IEnumerator BotUpgradeButtons_BotAtTheLastLevel_AreHidden()
+        {
+            Bot firstBot = demo.Simulation.Bots[0];
+            while (demo.Shop.HasUpgrade(firstBot, BotUpgrade.Carry))
+                demo.Simulation.Upgrade(firstBot, BotUpgrade.Carry);
+            while (demo.Shop.HasUpgrade(firstBot, BotUpgrade.Speed))
+                demo.Simulation.Upgrade(firstBot, BotUpgrade.Speed);
+
+            TapOn(firstBot);
+            yield return null;
+
+            Assert.IsNull(GameObject.Find(BotUpgradeCarryButtonName));
+            Assert.IsNull(GameObject.Find(BotUpgradeSpeedButtonName));
+            Assert.AreEqual("Words per haul: 5", GameObject.Find(BotCarryTextName).GetComponent<TMP_Text>().text);
+            Assert.AreEqual("Speed: 5", GameObject.Find(BotSpeedTextName).GetComponent<TMP_Text>().text);
         }
 
         [UnityTest]
@@ -410,6 +460,12 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
             nextButton.onClick.Invoke();
             yield return null;
 
+            Assert.AreEqual(BotFocus.SmallestBox, firstBot.Focus);
+            Assert.AreEqual("Smallest box", focusName.text);
+
+            nextButton.onClick.Invoke();
+            yield return null;
+
             Assert.AreEqual(BotFocus.ClosestBox, firstBot.Focus);
             Assert.AreEqual("Closest box", focusName.text);
         }
@@ -424,8 +480,8 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
             GameObject.Find(PreviousFocusButtonName).GetComponent<Button>().onClick.Invoke();
             yield return null;
 
-            Assert.AreEqual(BotFocus.BiggestBox, firstBot.Focus);
-            Assert.AreEqual("Biggest box", GameObject.Find(FocusNameTextName).GetComponent<TMP_Text>().text);
+            Assert.AreEqual(BotFocus.SmallestBox, firstBot.Focus);
+            Assert.AreEqual("Smallest box", GameObject.Find(FocusNameTextName).GetComponent<TMP_Text>().text);
         }
 
         [UnityTest]

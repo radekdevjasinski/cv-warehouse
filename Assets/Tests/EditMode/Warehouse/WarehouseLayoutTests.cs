@@ -57,7 +57,7 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
             Box neighbour = layout.Boxes[1];
             Assert.IsEmpty(buried.AccessCells);
 
-            neighbour.TakeClaimed(neighbour.Claim(CarrySize.Box, new Random(0), new List<int>()));
+            neighbour.TakeClaimed(neighbour.Claim(int.MaxValue, new Random(0), new List<int>()));
             layout.RemoveEmptyBox(neighbour);
 
             CollectionAssert.AreEqual(new[] { freedCell }, buried.AccessCells);

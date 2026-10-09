@@ -2,7 +2,7 @@ namespace CvWarehouse.Core.Warehouse
 {
     public static class BotFocusCycle
     {
-        private const int FocusCount = 2;
+        private const int FocusCount = 3;
 
         public static BotFocus Next(BotFocus focus)
         {

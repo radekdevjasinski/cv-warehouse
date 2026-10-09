@@ -77,9 +77,12 @@ namespace CvWarehouse.Core.Warehouse
             }
         }
 
-        public void SetCarrySize(Bot bot, CarrySize carrySize)
+        public void Upgrade(Bot bot, BotUpgrade upgrade)
         {
-            bot.CarrySize = carrySize;
+            if (upgrade == BotUpgrade.Speed)
+                bot.SpeedLevel++;
+            else
+                bot.CarryLevel++;
         }
 
         public void SetFocus(Bot bot, BotFocus focus)

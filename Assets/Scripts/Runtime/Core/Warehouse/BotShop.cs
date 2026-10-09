@@ -1,5 +1,4 @@
 using System;
-using CvWarehouse.Core.Cv;
 
 namespace CvWarehouse.Core.Warehouse
 {
@@ -11,14 +10,12 @@ namespace CvWarehouse.Core.Warehouse
 
         private readonly WarehouseSimulation simulation;
         private readonly ShopSettings settings;
-        private readonly int wordCarryPrice;
         private int spentPoints;
 
         public BotShop(WarehouseSimulation simulation, ShopSettings settings)
         {
             this.simulation = simulation;
             this.settings = settings;
-            wordCarryPrice = Math.Min(ShareOfAllPoints(settings.WordCarryPricePermille), PointsInTheName());
         }
 
         public int Balance => simulation.Score.Points - spentPoints;
@@ -31,29 +28,28 @@ namespace CvWarehouse.Core.Warehouse
         {
             get
             {
-                int price = ShareOfAllPoints(settings.FirstBotPricePermille);
                 int paidBots = Math.Max(0, simulation.Bots.Count - settings.FreeBots);
-                for (int bot = 0; bot < paidBots; bot++)
-                    price = Math.Max(price + 1, price * settings.BotPriceGrowthPercent / Percent);
-                return price;
+                return Grow(ShareOfAllPoints(settings.FirstBotPricePermille), paidBots, settings.BotPriceGrowthPercent);
             }
         }
 
-        public static bool HasCarryUpgrade(Bot bot)
+        public bool HasUpgrade(Bot bot, BotUpgrade upgrade)
         {
-            return bot.CarrySize != CarrySize.Box;
+            return bot.LevelOf(upgrade) < settings.MaxUpgradeLevel;
         }
 
-        public bool CanUpgradeCarry(Bot bot)
+        public bool CanUpgrade(Bot bot, BotUpgrade upgrade)
         {
-            return HasCarryUpgrade(bot) && Balance >= CarryUpgradePrice(bot);
+            return HasUpgrade(bot, upgrade) && Balance >= UpgradePrice(bot, upgrade);
         }
 
-        public int CarryUpgradePrice(Bot bot)
+        public int UpgradePrice(Bot bot, BotUpgrade upgrade)
         {
-            return bot.CarrySize == CarrySize.Letter
-                ? wordCarryPrice
-                : ShareOfAllPoints(settings.BoxCarryPricePermille);
+            int firstPricePermille = upgrade == BotUpgrade.Speed
+                ? settings.SpeedUpgradePricePermille
+                : settings.CarryUpgradePricePermille;
+            int boughtLevels = bot.LevelOf(upgrade) - Bot.FirstLevel;
+            return Grow(ShareOfAllPoints(firstPricePermille), boughtLevels, settings.UpgradePriceGrowthPercent);
         }
 
         public bool TryBuyBot()
@@ -66,22 +62,21 @@ namespace CvWarehouse.Core.Warehouse
             return true;
         }
 
-        public bool TryUpgradeCarry(Bot bot)
+        public bool TryUpgrade(Bot bot, BotUpgrade upgrade)
         {
-            if (!CanUpgradeCarry(bot))
+            if (!CanUpgrade(bot, upgrade))
                 return false;
 
-            spentPoints += CarryUpgradePrice(bot);
-            simulation.SetCarrySize(bot, bot.CarrySize == CarrySize.Letter ? CarrySize.Word : CarrySize.Box);
+            spentPoints += UpgradePrice(bot, upgrade);
+            simulation.Upgrade(bot, upgrade);
             return true;
         }
 
-        private int PointsInTheName()
+        private static int Grow(int price, int steps, int growthPercent)
         {
-            foreach (Box box in simulation.Layout.Boxes)
-                if (box.Block.Role == CvBlockRole.Name)
-                    return simulation.Score.PointsIn(box);
-            return int.MaxValue;
+            for (int step = 0; step < steps; step++)
+                price = Math.Max(price + 1, price * growthPercent / Percent);
+            return price;
         }
 
         private int ShareOfAllPoints(int permille)

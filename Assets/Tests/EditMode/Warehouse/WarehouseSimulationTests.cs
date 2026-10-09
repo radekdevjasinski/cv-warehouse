@@ -13,6 +13,7 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         private const int MaxTicks = 400000;
         private const int SmallGridSide = 6;
         private const int SmallBoxPieces = 3;
+        private const string SmallBoxText = "a b c";
         private const int TicksToPark = 3000;
         private const int EveryBotSlot = int.MaxValue;
         private const float TestTickSeconds = 0.1f;
@@ -42,11 +43,12 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         }
 
         [Test]
-        public void Tick_BotCarryingBoxes_EmptiesTheBoxInOneTrip()
+        public void Tick_BotUpgradedToCarryEveryWord_EmptiesTheBoxInOneTrip()
         {
             WarehouseSimulation simulation = NewSmallSimulation(new SimulationSettings());
             simulation.TryAddBot();
-            simulation.SetCarrySize(simulation.Bots[0], CarrySize.Box);
+            simulation.Upgrade(simulation.Bots[0], BotUpgrade.Carry);
+            simulation.Upgrade(simulation.Bots[0], BotUpgrade.Carry);
 
             for (int tick = 0; tick < MaxTicks && simulation.Score.DeliveredPieces == 0; tick++)
                 simulation.Tick();
@@ -56,13 +58,12 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         }
 
         [Test]
-        public void Tick_BotCarryingWords_DeliversAWholeWordOnTheFirstTrip()
+        public void Tick_NewBot_DeliversAWholeWordOnTheFirstTrip()
         {
             WarehouseSimulation simulation = NewSimulationWithOneBox(CvTestBlocks.FromText("ab cdef"), new SimulationSettings());
             var deliveredLetters = new List<int>();
             simulation.Score.Delivered += (block, letters) => deliveredLetters.AddRange(letters);
             simulation.TryAddBot();
-            simulation.SetCarrySize(simulation.Bots[0], CarrySize.Word);
 
             for (int tick = 0; tick < MaxTicks && simulation.Score.DeliveredPieces == 0; tick++)
                 simulation.Tick();
@@ -74,7 +75,7 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         }
 
         [Test]
-        public void Tick_BotCarryingLetters_DeliversEveryLetterOfTheBlockExactlyOnce()
+        public void Tick_NewBot_MakesOneTripPerWordAndDeliversEveryLetterExactlyOnce()
         {
             CvBlock block = CvTestBlocks.FromText("ab cdef");
             WarehouseSimulation simulation = NewSimulationWithOneBox(block, new SimulationSettings());
@@ -90,8 +91,39 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
 
             RunUntilComplete(simulation);
 
-            Assert.AreEqual(block.LetterCount, trips);
+            Assert.AreEqual(block.Words.Count, trips);
             CollectionAssert.AreEquivalent(new[] { 0, 1, 2, 3, 4, 5 }, deliveredLetters);
+        }
+
+        [Test]
+        public void Tick_BotWithMoreSpeed_FinishesSooner()
+        {
+            int slowTicks = TicksToEmptyTheSmallWarehouse(Bot.FirstLevel);
+            int fasterTicks = TicksToEmptyTheSmallWarehouse(Bot.FirstLevel + 1);
+            int fastestTicks = TicksToEmptyTheSmallWarehouse(Bot.FirstLevel + 4);
+
+            Assert.Less(fasterTicks, slowTicks);
+            Assert.Less(fastestTicks, fasterTicks);
+        }
+
+        [TestCase(1, 8, 11)]
+        [TestCase(2, 6, 8)]
+        [TestCase(3, 5, 7)]
+        [TestCase(5, 4, 5)]
+        public void StepTicks_HigherSpeedLevel_TakesFewerTicksPerStep(int speedLevel, int straightTicks, int diagonalTicks)
+        {
+            var settings = new SimulationSettings { TicksPerCell = 8, SpeedStepPercent = 25 };
+
+            Assert.AreEqual(straightTicks, settings.StepTicks(speedLevel, GridDirections.StraightCost));
+            Assert.AreEqual(diagonalTicks, settings.StepTicks(speedLevel, GridDirections.DiagonalCost));
+        }
+
+        [Test]
+        public void StepTicks_AbsurdSpeed_StillTakesOneTick()
+        {
+            var settings = new SimulationSettings { TicksPerCell = 1, SpeedStepPercent = 1000 };
+
+            Assert.AreEqual(1, settings.StepTicks(5, GridDirections.StraightCost));
         }
 
         [TestCase(WeightClass.Light, 20)]
@@ -123,14 +155,12 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
             simulation.TryAddBot();
             simulation.TryAddBot();
             Bot carrier = simulation.Bots[0];
-            simulation.SetCarrySize(carrier, CarrySize.Box);
             for (int tick = 0; tick < MaxTicks && carrier.State != BotState.GoingToDrop; tick++)
                 simulation.Tick();
 
             Assert.IsTrue(simulation.TryRemoveBot(carrier));
 
-            Assert.AreEqual(SmallBoxPieces, simulation.Score.DeliveredPieces);
-            Assert.IsTrue(simulation.IsComplete);
+            Assert.AreEqual(1, simulation.Score.DeliveredPieces);
         }
 
         [Test]
@@ -285,18 +315,19 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         }
 
         [Test]
-        public void Tick_BotsWithDifferentCarrySizes_EachTakesItsOwnAmount()
+        public void Tick_BotsWithDifferentCarryLevels_EachTakesItsOwnNumberOfWords()
         {
-            WarehouseSimulation simulation = NewGeneratedSimulation(2);
-            simulation.SetCarrySize(simulation.Bots[1], CarrySize.Box);
+            WarehouseSimulation simulation = NewSimulationWithOneBox(CvTestBlocks.FromText("a b c d e f"), new SimulationSettings());
+            simulation.TryAddBot();
+            simulation.TryAddBot();
+            simulation.Upgrade(simulation.Bots[1], BotUpgrade.Carry);
+            simulation.Upgrade(simulation.Bots[1], BotUpgrade.Carry);
 
             simulation.Tick();
 
-            Bot letterBot = simulation.Bots[0];
-            Bot boxBot = simulation.Bots[1];
-            Assert.AreEqual(1, letterBot.ClaimedPieces);
-            Assert.Greater(boxBot.ClaimedPieces, 0);
-            Assert.AreEqual(0, boxBot.JobBox.UnclaimedPieces);
+            Assert.AreEqual(1, simulation.Bots[0].ClaimedPieces);
+            Assert.AreEqual(3, simulation.Bots[1].ClaimedPieces);
+            Assert.AreEqual(2, simulation.Layout.Boxes[0].UnclaimedPieces);
         }
 
         [Test]
@@ -402,22 +433,37 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         }
 
         [Test]
-        public void SetCarrySize_WhilePaused_StillApplies()
+        public void Upgrade_WhilePaused_StillApplies()
         {
             WarehouseSimulation simulation = NewSmallSimulation(new SimulationSettings());
             simulation.TryAddBot();
             simulation.TogglePause();
 
-            simulation.SetCarrySize(simulation.Bots[0], CarrySize.Word);
+            simulation.Upgrade(simulation.Bots[0], BotUpgrade.Carry);
+            simulation.Upgrade(simulation.Bots[0], BotUpgrade.Speed);
             simulation.SetFocus(simulation.Bots[0], BotFocus.BiggestBox);
 
-            Assert.AreEqual(CarrySize.Word, simulation.Bots[0].CarrySize);
+            Assert.AreEqual(2, simulation.Bots[0].CarryLevel);
+            Assert.AreEqual(2, simulation.Bots[0].SpeedLevel);
             Assert.AreEqual(BotFocus.BiggestBox, simulation.Bots[0].Focus);
         }
 
         private static WarehouseSimulation NewSmallSimulation(SimulationSettings settings)
         {
-            return NewSimulationWithOneBox(CvTestBlocks.WithLetters(SmallBoxPieces), settings);
+            return NewSimulationWithOneBox(CvTestBlocks.FromText(SmallBoxText), settings);
+        }
+
+        private static int TicksToEmptyTheSmallWarehouse(int speedLevel)
+        {
+            WarehouseSimulation simulation = NewSmallSimulation(new SimulationSettings());
+            simulation.TryAddBot();
+            while (simulation.Bots[0].SpeedLevel < speedLevel)
+                simulation.Upgrade(simulation.Bots[0], BotUpgrade.Speed);
+
+            RunUntilComplete(simulation);
+
+            Assert.IsTrue(simulation.IsComplete);
+            return simulation.TickCount;
         }
 
         private static WarehouseSimulation NewSimulationWithOneBox(CvBlock block, SimulationSettings settings, WeightClass weightClass = WeightClass.Medium)

@@ -72,6 +72,40 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         }
 
         [Test]
+        public void Tick_BotFocusedOnTheSmallestBox_WorksUpFromLightToHeavy()
+        {
+            simulation.SetFocus(FirstBot, BotFocus.SmallestBox);
+
+            Assert.AreSame(nearLightBox, NextJobBox());
+            Assert.AreSame(farMediumBox, NextJobBox());
+            Assert.AreSame(nearerHeavyBox, NextJobBox());
+            Assert.AreSame(furtherHeavyBox, NextJobBox());
+        }
+
+        [Test]
+        public void SetFocus_FromBiggestToSmallestOnTheWay_TurnsToTheLightBox()
+        {
+            simulation.SetFocus(FirstBot, BotFocus.BiggestBox);
+            simulation.Tick();
+            Assert.AreSame(nearerHeavyBox, FirstBot.JobBox);
+
+            simulation.SetFocus(FirstBot, BotFocus.SmallestBox);
+
+            Assert.AreSame(nearLightBox, FirstBot.JobBox);
+        }
+
+        [Test]
+        public void Tick_BotFocusedOnTheSmallestBox_StillEmptiesTheWholeWarehouse()
+        {
+            simulation.SetFocus(FirstBot, BotFocus.SmallestBox);
+
+            for (int tick = 0; tick < MaxTicks && !simulation.IsComplete; tick++)
+                simulation.Tick();
+
+            Assert.IsTrue(simulation.IsComplete);
+        }
+
+        [Test]
         public void Tick_BotsWithDifferentFocus_EachFollowsItsOwn()
         {
             simulation.TryAddBot();
@@ -185,13 +219,15 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         public void Next_LastFocus_WrapsAroundToTheFirst()
         {
             Assert.AreEqual(BotFocus.BiggestBox, BotFocusCycle.Next(BotFocus.ClosestBox));
-            Assert.AreEqual(BotFocus.ClosestBox, BotFocusCycle.Next(BotFocus.BiggestBox));
+            Assert.AreEqual(BotFocus.SmallestBox, BotFocusCycle.Next(BotFocus.BiggestBox));
+            Assert.AreEqual(BotFocus.ClosestBox, BotFocusCycle.Next(BotFocus.SmallestBox));
         }
 
         [Test]
         public void Previous_FirstFocus_WrapsAroundToTheLast()
         {
-            Assert.AreEqual(BotFocus.BiggestBox, BotFocusCycle.Previous(BotFocus.ClosestBox));
+            Assert.AreEqual(BotFocus.SmallestBox, BotFocusCycle.Previous(BotFocus.ClosestBox));
+            Assert.AreEqual(BotFocus.BiggestBox, BotFocusCycle.Previous(BotFocus.SmallestBox));
             Assert.AreEqual(BotFocus.ClosestBox, BotFocusCycle.Previous(BotFocus.BiggestBox));
         }
 

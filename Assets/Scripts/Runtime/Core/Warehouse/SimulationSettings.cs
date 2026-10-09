@@ -1,14 +1,20 @@
+using System;
 using CvWarehouse.Core.Cv;
 
 namespace CvWarehouse.Core.Warehouse
 {
     public sealed class SimulationSettings
     {
+        private const int Percent = 100;
+        private const int ShortestStepTicks = 1;
+
         public float TickSeconds { get; set; } = 1f / 60f;
 
         public int MaxTicksPerAdvance { get; set; } = 5;
 
         public int TicksPerCell { get; set; } = 8;
+
+        public int SpeedStepPercent { get; set; } = 25;
 
         public int LightExtractTicks { get; set; } = 20;
 
@@ -23,6 +29,12 @@ namespace CvWarehouse.Core.Warehouse
         public int MediumPiecePoints { get; set; } = 2;
 
         public int HeavyPiecePoints { get; set; } = 3;
+
+        public int StepTicks(int speedLevel, int stepCost)
+        {
+            int speedPercent = Percent + (speedLevel - Bot.FirstLevel) * SpeedStepPercent;
+            return Math.Max(ShortestStepTicks, TicksPerCell * stepCost * Percent / (GridDirections.StraightCost * speedPercent));
+        }
 
         public int ExtractTicks(WeightClass weightClass)
         {

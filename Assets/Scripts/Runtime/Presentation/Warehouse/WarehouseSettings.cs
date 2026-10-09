@@ -9,6 +9,7 @@ namespace CvWarehouse.Presentation.Warehouse
         [SerializeField] private int ticksPerSecond = 60;
         [SerializeField] private int maxTicksPerFrame = 5;
         [SerializeField] private int ticksPerCell = 8;
+        [SerializeField] private int speedStepPercent = 25;
         [SerializeField] private int lightExtractTicks = 20;
         [SerializeField] private int mediumExtractTicks = 30;
         [SerializeField] private int heavyExtractTicks = 45;
@@ -21,8 +22,10 @@ namespace CvWarehouse.Presentation.Warehouse
         [Header("Shop prices, in thousandths of all the points in the warehouse")]
         [SerializeField] private int firstBotPricePermille = 15;
         [SerializeField] private int botPriceGrowthPercent = 125;
-        [SerializeField] private int wordCarryPricePermille = 10;
-        [SerializeField] private int boxCarryPricePermille = 40;
+        [SerializeField] private int maxUpgradeLevel = 5;
+        [SerializeField] private int carryUpgradePricePermille = 10;
+        [SerializeField] private int speedUpgradePricePermille = 10;
+        [SerializeField] private int upgradePriceGrowthPercent = 150;
 
         public int StartingBots => startingBots;
 
@@ -33,8 +36,10 @@ namespace CvWarehouse.Presentation.Warehouse
                 FreeBots = startingBots,
                 FirstBotPricePermille = firstBotPricePermille,
                 BotPriceGrowthPercent = botPriceGrowthPercent,
-                WordCarryPricePermille = wordCarryPricePermille,
-                BoxCarryPricePermille = boxCarryPricePermille
+                MaxUpgradeLevel = maxUpgradeLevel,
+                CarryUpgradePricePermille = carryUpgradePricePermille,
+                SpeedUpgradePricePermille = speedUpgradePricePermille,
+                UpgradePriceGrowthPercent = upgradePriceGrowthPercent
             };
         }
 
@@ -45,6 +50,7 @@ namespace CvWarehouse.Presentation.Warehouse
                 TickSeconds = 1f / ticksPerSecond,
                 MaxTicksPerAdvance = maxTicksPerFrame,
                 TicksPerCell = ticksPerCell,
+                SpeedStepPercent = speedStepPercent,
                 LightExtractTicks = lightExtractTicks,
                 MediumExtractTicks = mediumExtractTicks,
                 HeavyExtractTicks = heavyExtractTicks,

@@ -13,6 +13,7 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         private const string Text = "Hello big world";
         private const int LetterCount = 13;
         private const int WordCount = 3;
+        private const int EveryWord = int.MaxValue;
 
         private Box box;
         private Random random;
@@ -35,28 +36,13 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         }
 
         [Test]
-        public void Claim_Letter_TakesOneLetterAtATimeAndNeverTheSameOneTwice()
-        {
-            var everyLetter = new HashSet<int>();
-
-            for (int trip = 0; trip < LetterCount; trip++)
-            {
-                Assert.AreEqual(1, box.Claim(CarrySize.Letter, random, claimed));
-                Assert.IsTrue(everyLetter.Add(claimed[0]));
-            }
-
-            Assert.AreEqual(LetterCount, everyLetter.Count);
-            Assert.AreEqual(0, box.UnclaimedPieces);
-        }
-
-        [Test]
-        public void Claim_Word_TakesAWholeWordPerTrip()
+        public void Claim_OneWord_TakesAWholeWordPerTrip()
         {
             var wordLengths = new List<int>();
 
             for (int trip = 0; trip < WordCount; trip++)
             {
-                box.Claim(CarrySize.Word, random, claimed);
+                box.Claim(1, random, claimed);
                 wordLengths.Add(claimed.Count);
                 for (int index = 1; index < claimed.Count; index++)
                     Assert.AreEqual(claimed[index - 1] + 1, claimed[index]);
@@ -67,67 +53,66 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         }
 
         [Test]
-        public void Claim_WordAfterALetterWasTaken_TakesOnlyTheRestOfThatWord()
+        public void Claim_TwoWords_TakesTwoDifferentWholeWords()
         {
-            var bigBox = new Box(0, new GridPosition(0, 0), WeightClass.Light, CvTestBlocks.FromText("big"));
-            bigBox.Claim(CarrySize.Letter, random, claimed);
-            int takenLetter = claimed[0];
+            int claimedLetters = box.Claim(2, random, claimed);
 
-            Assert.AreEqual(2, bigBox.Claim(CarrySize.Word, random, claimed));
-
-            CollectionAssert.DoesNotContain(claimed, takenLetter);
+            Assert.That(claimedLetters, Is.EqualTo(8).Or.EqualTo(10));
+            CollectionAssert.AllItemsAreUnique(claimed);
+            Assert.AreEqual(LetterCount - claimedLetters, box.UnclaimedPieces);
         }
 
         [Test]
-        public void Claim_Box_TakesEverythingThatIsLeft()
+        public void Claim_MoreWordsThanAreLeft_TakesEverythingThatIsLeft()
         {
-            box.Claim(CarrySize.Letter, random, claimed);
+            box.Claim(1, random, claimed);
+            int firstWordLetters = claimed.Count;
 
-            Assert.AreEqual(LetterCount - 1, box.Claim(CarrySize.Box, random, claimed));
+            Assert.AreEqual(LetterCount - firstWordLetters, box.Claim(5, random, claimed));
             Assert.AreEqual(0, box.UnclaimedPieces);
         }
 
         [Test]
         public void Claim_NothingLeftUnclaimed_ClaimsNothing()
         {
-            box.Claim(CarrySize.Box, random, claimed);
+            box.Claim(EveryWord, random, claimed);
 
-            Assert.AreEqual(0, box.Claim(CarrySize.Letter, random, claimed));
+            Assert.AreEqual(0, box.Claim(1, random, claimed));
             Assert.IsEmpty(claimed);
         }
 
         [Test]
         public void ReleaseClaim_ClaimedWord_PutsItsLettersBack()
         {
-            box.Claim(CarrySize.Word, random, claimed);
+            box.Claim(1, random, claimed);
 
             box.ReleaseClaim(claimed);
 
             Assert.AreEqual(LetterCount, box.UnclaimedPieces);
             Assert.IsEmpty(claimed);
-            Assert.AreEqual(LetterCount, box.Claim(CarrySize.Box, random, claimed));
+            Assert.AreEqual(LetterCount, box.Claim(EveryWord, random, claimed));
         }
 
         [Test]
         public void TakeClaimed_EveryLetter_EmptiesTheBox()
         {
-            box.TakeClaimed(box.Claim(CarrySize.Box, random, claimed));
+            box.TakeClaimed(box.Claim(EveryWord, random, claimed));
 
             Assert.IsTrue(box.IsEmpty);
         }
 
         [Test]
-        public void Claim_SameSeed_PicksTheSameLetters()
+        public void Claim_SameSeed_PicksTheSameWords()
         {
             var otherBox = new Box(0, new GridPosition(0, 0), WeightClass.Medium, CvTestBlocks.FromText(Text));
             var otherRandom = new Random(Seed);
             var otherClaimed = new List<int>();
 
-            for (int trip = 0; trip < LetterCount; trip++)
+            for (int trip = 0; trip < WordCount; trip++)
             {
-                box.Claim(CarrySize.Letter, random, claimed);
-                otherBox.Claim(CarrySize.Letter, otherRandom, otherClaimed);
-                Assert.AreEqual(claimed[0], otherClaimed[0]);
+                box.Claim(1, random, claimed);
+                otherBox.Claim(1, otherRandom, otherClaimed);
+                CollectionAssert.AreEqual(claimed, otherClaimed);
             }
         }
     }

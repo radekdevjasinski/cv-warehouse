@@ -256,7 +256,7 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
                     if (box.IsEmpty || box.AccessCells.Count == 0)
                         continue;
 
-                    box.TakeClaimed(box.Claim(CarrySize.Box, random, letters));
+                    box.TakeClaimed(box.Claim(int.MaxValue, random, letters));
                     layout.RemoveEmptyBox(box);
                     boxesLeft--;
                     emptiedAny = true;

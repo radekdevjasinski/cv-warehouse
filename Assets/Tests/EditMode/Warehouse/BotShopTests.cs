@@ -13,9 +13,11 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         private const int MaxTicks = 400000;
         private const int FirstBotPrice = 6;
         private const int SecondBotPrice = 9;
-        private const int WordCarryPrice = 15;
-        private const int BoxCarryPrice = 30;
+        private const int LastLevel = 5;
         private const int PlentyOfPoints = 150;
+
+        private static readonly int[] CarryPrices = { 15, 22, 33, 49 };
+        private static readonly int[] SpeedPrices = { 6, 9, 13, 19 };
 
         private WarehouseSimulation simulation;
         private BotShop shop;
@@ -85,63 +87,98 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         }
 
         [Test]
-        public void TryUpgradeCarry_NotEnoughPoints_KeepsCarryingLetters()
+        public void TryAddBot_NewBot_StartsAtTheFirstLevelOfEveryUpgrade()
         {
-            Assert.IsFalse(shop.TryUpgradeCarry(FirstBot));
-            Assert.AreEqual(CarrySize.Letter, FirstBot.CarrySize);
+            Assert.AreEqual(1, FirstBot.CarryLevel);
+            Assert.AreEqual(1, FirstBot.SpeedLevel);
+        }
+
+        [TestCase(BotUpgrade.Carry)]
+        [TestCase(BotUpgrade.Speed)]
+        public void TryUpgrade_NotEnoughPoints_KeepsTheLevel(BotUpgrade upgrade)
+        {
+            Assert.IsTrue(shop.HasUpgrade(FirstBot, upgrade));
+            Assert.IsFalse(shop.CanUpgrade(FirstBot, upgrade));
+            Assert.IsFalse(shop.TryUpgrade(FirstBot, upgrade));
+            Assert.AreEqual(1, FirstBot.LevelOf(upgrade));
         }
 
         [Test]
-        public void TryUpgradeCarry_EnoughPoints_GoesFromLettersToWordsToBoxes()
+        public void TryUpgrade_Carry_GoesUpALevelAtATimeAndEveryLevelCostsMore()
         {
             Earn(PlentyOfPoints);
             int pointsBefore = shop.Balance;
-            Assert.AreEqual(WordCarryPrice, shop.CarryUpgradePrice(FirstBot));
 
-            Assert.IsTrue(shop.TryUpgradeCarry(FirstBot));
-            Assert.AreEqual(CarrySize.Word, FirstBot.CarrySize);
-            Assert.AreEqual(BoxCarryPrice, shop.CarryUpgradePrice(FirstBot));
+            for (int level = 0; level < CarryPrices.Length; level++)
+            {
+                Assert.AreEqual(CarryPrices[level], shop.UpgradePrice(FirstBot, BotUpgrade.Carry));
+                Assert.IsTrue(shop.TryUpgrade(FirstBot, BotUpgrade.Carry));
+                Assert.AreEqual(level + 2, FirstBot.CarryLevel);
+            }
 
-            Assert.IsTrue(shop.TryUpgradeCarry(FirstBot));
-            Assert.AreEqual(CarrySize.Box, FirstBot.CarrySize);
-            Assert.AreEqual(pointsBefore - WordCarryPrice - BoxCarryPrice, shop.Balance);
+            Assert.AreEqual(pointsBefore - 15 - 22 - 33 - 49, shop.Balance);
+            Assert.AreEqual(1, FirstBot.SpeedLevel);
         }
 
         [Test]
-        public void TryUpgradeCarry_AlreadyCarryingBoxes_ReturnsFalse()
+        public void TryUpgrade_Speed_GoesUpALevelAtATimeAndEveryLevelCostsMore()
         {
             Earn(PlentyOfPoints);
-            shop.TryUpgradeCarry(FirstBot);
-            shop.TryUpgradeCarry(FirstBot);
+            int pointsBefore = shop.Balance;
 
-            Assert.IsFalse(BotShop.HasCarryUpgrade(FirstBot));
-            Assert.IsFalse(shop.TryUpgradeCarry(FirstBot));
+            for (int level = 0; level < SpeedPrices.Length; level++)
+            {
+                Assert.AreEqual(SpeedPrices[level], shop.UpgradePrice(FirstBot, BotUpgrade.Speed));
+                Assert.IsTrue(shop.TryUpgrade(FirstBot, BotUpgrade.Speed));
+                Assert.AreEqual(level + 2, FirstBot.SpeedLevel);
+            }
+
+            Assert.AreEqual(pointsBefore - 6 - 9 - 13 - 19, shop.Balance);
+            Assert.AreEqual(1, FirstBot.CarryLevel);
+        }
+
+        [TestCase(BotUpgrade.Carry)]
+        [TestCase(BotUpgrade.Speed)]
+        public void TryUpgrade_AlreadyAtTheLastLevel_ReturnsFalse(BotUpgrade upgrade)
+        {
+            Earn(PlentyOfPoints);
+            for (int level = 1; level < LastLevel; level++)
+                Assert.IsTrue(shop.TryUpgrade(FirstBot, upgrade));
+            int pointsBefore = shop.Balance;
+
+            Assert.AreEqual(LastLevel, FirstBot.LevelOf(upgrade));
+            Assert.IsFalse(shop.HasUpgrade(FirstBot, upgrade));
+            Assert.IsFalse(shop.TryUpgrade(FirstBot, upgrade));
+            Assert.AreEqual(LastLevel, FirstBot.LevelOf(upgrade));
+            Assert.AreEqual(pointsBefore, shop.Balance);
         }
 
         [Test]
-        public void TryUpgradeCarry_OneBotUpgraded_LeavesTheOtherBotsCarryingLetters()
+        public void TryUpgrade_OneBotUpgraded_LeavesTheOtherBotsAlone()
         {
             Earn(PlentyOfPoints);
             shop.TryBuyBot();
             Bot secondBot = simulation.Bots[1];
 
-            Assert.IsTrue(shop.TryUpgradeCarry(secondBot));
+            Assert.IsTrue(shop.TryUpgrade(secondBot, BotUpgrade.Carry));
 
-            Assert.AreEqual(CarrySize.Word, secondBot.CarrySize);
-            Assert.AreEqual(CarrySize.Letter, FirstBot.CarrySize);
-            Assert.AreEqual(WordCarryPrice, shop.CarryUpgradePrice(FirstBot));
-            Assert.AreEqual(BoxCarryPrice, shop.CarryUpgradePrice(secondBot));
+            Assert.AreEqual(2, secondBot.CarryLevel);
+            Assert.AreEqual(1, FirstBot.CarryLevel);
+            Assert.AreEqual(CarryPrices[0], shop.UpgradePrice(FirstBot, BotUpgrade.Carry));
+            Assert.AreEqual(CarryPrices[1], shop.UpgradePrice(secondBot, BotUpgrade.Carry));
         }
 
         [Test]
-        public void TryBuyBot_AfterUpgradingEveryBot_AddsABotCarryingLetters()
+        public void TryBuyBot_AfterUpgradingEveryBot_AddsABotWithoutUpgrades()
         {
             Earn(PlentyOfPoints);
-            shop.TryUpgradeCarry(FirstBot);
+            shop.TryUpgrade(FirstBot, BotUpgrade.Carry);
+            shop.TryUpgrade(FirstBot, BotUpgrade.Speed);
 
             shop.TryBuyBot();
 
-            Assert.AreEqual(CarrySize.Letter, simulation.Bots[1].CarrySize);
+            Assert.AreEqual(1, simulation.Bots[1].CarryLevel);
+            Assert.AreEqual(1, simulation.Bots[1].SpeedLevel);
         }
 
         [Test]
@@ -151,7 +188,8 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
             BotShop biggerShop = NewShop(biggerSimulation);
 
             Assert.AreEqual(FirstBotPrice * 2, biggerShop.BotPrice);
-            Assert.AreEqual(WordCarryPrice * 2, biggerShop.CarryUpgradePrice(biggerSimulation.Bots[0]));
+            Assert.AreEqual(CarryPrices[0] * 2, biggerShop.UpgradePrice(biggerSimulation.Bots[0], BotUpgrade.Carry));
+            Assert.AreEqual(SpeedPrices[0] * 2, biggerShop.UpgradePrice(biggerSimulation.Bots[0], BotUpgrade.Speed));
         }
 
         [Test]
@@ -161,43 +199,20 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
             BotShop tinyShop = NewShop(tinySimulation);
 
             Assert.AreEqual(1, tinyShop.BotPrice);
-            Assert.AreEqual(1, tinyShop.CarryUpgradePrice(tinySimulation.Bots[0]));
-        }
-
-        [TestCase(2, 4, 8)]
-        [TestCase(20, 40, 80)]
-        [TestCase(60, 120, 240)]
-        public void CarryUpgradePrice_AnyCvSize_WordCarryCostsNoMoreThanTheNameIsWorth(int heavyEntries, int mediumEntries, int lightEntries)
-        {
-            WarehouseSimulation cvSimulation = NewCvSimulation(heavyEntries, mediumEntries, lightEntries);
-            var cvShop = new BotShop(cvSimulation, new ShopSettings());
-            Box nameBox = null;
-            foreach (Box box in cvSimulation.Layout.Boxes)
-                if (box.Block.Role == CvBlockRole.Name)
-                    nameBox = box;
-
-            Assert.LessOrEqual(cvShop.CarryUpgradePrice(cvSimulation.Bots[0]), cvSimulation.Score.PointsIn(nameBox));
+            Assert.AreEqual(1, tinyShop.UpgradePrice(tinySimulation.Bots[0], BotUpgrade.Carry));
+            Assert.AreEqual(1, tinyShop.UpgradePrice(tinySimulation.Bots[0], BotUpgrade.Speed));
         }
 
         [Test]
-        public void CarryUpgradePrice_LongCv_WordCarryIsCheaperThanItsShareOfAllPoints()
+        public void UpgradePrice_TinyWarehouse_StillGrowsWithEveryLevel()
         {
-            WarehouseSimulation cvSimulation = NewCvSimulation(60, 120, 240);
-            var settings = new ShopSettings();
+            WarehouseSimulation tinySimulation = NewSimulation(1);
+            BotShop tinyShop = NewShop(tinySimulation);
+            Bot bot = tinySimulation.Bots[0];
 
-            int price = new BotShop(cvSimulation, settings).CarryUpgradePrice(cvSimulation.Bots[0]);
+            tinySimulation.Upgrade(bot, BotUpgrade.Carry);
 
-            Assert.Less(price, cvSimulation.Score.MaxPoints * settings.WordCarryPricePermille / 1000);
-        }
-
-        private static WarehouseSimulation NewCvSimulation(int heavyEntries, int mediumEntries, int lightEntries)
-        {
-            var random = new System.Random(Seed);
-            WarehouseLayout layout = new WarehouseGenerator(new GeneratorSettings(), random)
-                .Generate(CvTestBlocks.BuildCv(heavyEntries, mediumEntries, lightEntries));
-            var cvSimulation = new WarehouseSimulation(layout, new SimulationSettings(), random);
-            cvSimulation.TryAddBot();
-            return cvSimulation;
+            Assert.AreEqual(2, tinyShop.UpgradePrice(bot, BotUpgrade.Carry));
         }
 
         private static WarehouseSimulation NewSimulation(int heavyPieces)
@@ -221,8 +236,10 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
                 FreeBots = 1,
                 FirstBotPricePermille = 20,
                 BotPriceGrowthPercent = 150,
-                WordCarryPricePermille = 50,
-                BoxCarryPricePermille = 100
+                MaxUpgradeLevel = LastLevel,
+                CarryUpgradePricePermille = 50,
+                SpeedUpgradePricePermille = 20,
+                UpgradePriceGrowthPercent = 150
             });
         }
 

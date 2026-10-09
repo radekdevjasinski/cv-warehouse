@@ -48,7 +48,7 @@ namespace CvWarehouse.Core.Warehouse
             bot.NextCell = nextCell;
             bot.IsMoving = true;
             bot.MoveTicks = 0;
-            bot.MoveDuration = settings.TicksPerCell * GridDirections.CostOf(direction) / GridDirections.StraightCost;
+            bot.MoveDuration = settings.StepTicks(bot.SpeedLevel, GridDirections.CostOf(direction));
         }
     }
 }

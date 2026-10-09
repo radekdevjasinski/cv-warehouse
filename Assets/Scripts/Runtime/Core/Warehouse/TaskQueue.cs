@@ -6,10 +6,12 @@ namespace CvWarehouse.Core.Warehouse
     public sealed class TaskQueue
     {
         private static readonly Comparison<Box> NearestTruckFirst = CompareByTruckDistance;
-        private static readonly Comparison<Box> BiggestFirst = CompareBySize;
+        private static readonly Comparison<Box> BiggestFirst = CompareBiggestFirst;
+        private static readonly Comparison<Box> SmallestFirst = CompareSmallestFirst;
 
         private readonly List<Box> closestBoxes = new List<Box>();
         private readonly List<Box> biggestBoxes = new List<Box>();
+        private readonly List<Box> smallestBoxes = new List<Box>();
         private readonly ReservationTable reservations;
         private readonly Random random;
 
@@ -19,6 +21,7 @@ namespace CvWarehouse.Core.Warehouse
             this.random = random;
             closestBoxes.AddRange(layout.Boxes);
             biggestBoxes.AddRange(layout.Boxes);
+            smallestBoxes.AddRange(layout.Boxes);
             Refresh();
         }
 
@@ -26,13 +29,15 @@ namespace CvWarehouse.Core.Warehouse
         {
             RemoveEmptyBoxes(closestBoxes);
             RemoveEmptyBoxes(biggestBoxes);
+            RemoveEmptyBoxes(smallestBoxes);
             closestBoxes.Sort(NearestTruckFirst);
             biggestBoxes.Sort(BiggestFirst);
+            smallestBoxes.Sort(SmallestFirst);
         }
 
         public bool TryAssign(Bot bot)
         {
-            List<Box> waitingBoxes = bot.Focus == BotFocus.BiggestBox ? biggestBoxes : closestBoxes;
+            List<Box> waitingBoxes = BoxesFor(bot.Focus);
             for (int index = 0; index < waitingBoxes.Count; index++)
             {
                 Box box = waitingBoxes[index];
@@ -43,7 +48,7 @@ namespace CvWarehouse.Core.Warehouse
 
                 bot.JobBox = box;
                 bot.AccessCell = accessCell;
-                bot.ClaimedPieces = box.Claim(bot.CarrySize, random, bot.Letters);
+                bot.ClaimedPieces = box.Claim(bot.CarryLevel, random, bot.Letters);
                 return true;
             }
 
@@ -63,10 +68,29 @@ namespace CvWarehouse.Core.Warehouse
             return byDistance != 0 ? byDistance : left.Id.CompareTo(right.Id);
         }
 
-        private static int CompareBySize(Box left, Box right)
+        private static int CompareBiggestFirst(Box left, Box right)
         {
             int bySize = ((int)right.WeightClass).CompareTo((int)left.WeightClass);
             return bySize != 0 ? bySize : CompareByTruckDistance(left, right);
+        }
+
+        private static int CompareSmallestFirst(Box left, Box right)
+        {
+            int bySize = ((int)left.WeightClass).CompareTo((int)right.WeightClass);
+            return bySize != 0 ? bySize : CompareByTruckDistance(left, right);
+        }
+
+        private List<Box> BoxesFor(BotFocus focus)
+        {
+            switch (focus)
+            {
+                case BotFocus.BiggestBox:
+                    return biggestBoxes;
+                case BotFocus.SmallestBox:
+                    return smallestBoxes;
+                default:
+                    return closestBoxes;
+            }
         }
     }
 }

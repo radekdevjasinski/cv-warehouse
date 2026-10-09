@@ -18,15 +18,6 @@ namespace CvWarehouse.Core.Warehouse
 
         public int UnclaimedCount { get; private set; }
 
-        public void ClaimLetter(Random random, List<int> claimed)
-        {
-            int unclaimedToSkip = random.Next(UnclaimedCount);
-            int letter = 0;
-            while (claimedLetters[letter] || unclaimedToSkip-- > 0)
-                letter++;
-            Claim(letter, claimed);
-        }
-
         public void ClaimWord(Random random, List<int> claimed)
         {
             int openWordsToSkip = random.Next(CountOpenWords());
@@ -36,13 +27,6 @@ namespace CvWarehouse.Core.Warehouse
 
             CvWord word = block.Words[wordIndex];
             for (int letter = word.FirstLetter; letter < word.FirstLetter + word.LetterCount; letter++)
-                if (!claimedLetters[letter])
-                    Claim(letter, claimed);
-        }
-
-        public void ClaimRest(List<int> claimed)
-        {
-            for (int letter = 0; letter < claimedLetters.Length; letter++)
                 if (!claimedLetters[letter])
                     Claim(letter, claimed);
         }

@@ -44,18 +44,11 @@ namespace CvWarehouse.Core.Warehouse
 
         public bool IsEmpty => RemainingPieces == 0;
 
-        public int Claim(CarrySize carrySize, Random random, List<int> claimed)
+        public int Claim(int words, Random random, List<int> claimed)
         {
             claimed.Clear();
-            if (UnclaimedPieces == 0)
-                return 0;
-
-            if (carrySize == CarrySize.Box)
-                letters.ClaimRest(claimed);
-            else if (carrySize == CarrySize.Word)
+            for (int word = 0; word < words && UnclaimedPieces > 0; word++)
                 letters.ClaimWord(random, claimed);
-            else
-                letters.ClaimLetter(random, claimed);
             return claimed.Count;
         }
 
