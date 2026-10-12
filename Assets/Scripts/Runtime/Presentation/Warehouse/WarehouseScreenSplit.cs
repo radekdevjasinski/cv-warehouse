@@ -1,3 +1,4 @@
+using CvWarehouse.Presentation.Cv;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -20,6 +21,7 @@ namespace CvWarehouse.Presentation.Warehouse
         [SerializeField] private Button expandButton;
         [SerializeField] private TMP_Text expandButtonLabel;
         [SerializeField] private GameObject[] warehouseOnlyObjects;
+        [SerializeField] private CvAutoScroll waybillAutoScroll;
 
         public bool IsWaybillExpanded { get; private set; }
 
@@ -59,6 +61,7 @@ namespace CvWarehouse.Presentation.Warehouse
             waybillPanel.anchorMin = new Vector2(waybillLeftEdge, 0f);
             waybillPanel.anchorMax = new Vector2(1f, 1f - topBarHeightFraction);
             expandButtonLabel.SetText(IsWaybillExpanded ? CollapseLabel : ExpandLabel);
+            waybillAutoScroll.enabled = !IsWaybillExpanded;
             foreach (GameObject warehouseOnlyObject in warehouseOnlyObjects)
                 warehouseOnlyObject.SetActive(!IsWaybillExpanded);
         }

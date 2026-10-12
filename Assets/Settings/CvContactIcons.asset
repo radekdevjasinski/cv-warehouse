@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 425738e74e92522468971932881abe56, type: 3}
+  m_Name: CvContactIcons
+  m_EditorClassIdentifier: CvWarehouse.Runtime::CvWarehouse.Presentation.Cv.CvContactIcons
+  icons:
+  - kind: phone
+    sprite: {fileID: 21300000, guid: c34ea15dc45fd6349a484fd78bd027a8, type: 3}
+  - kind: email
+    sprite: {fileID: 21300000, guid: ae76c79c18bfeba40b1c0d6b35af9732, type: 3}
+  - kind: github
+    sprite: {fileID: 21300000, guid: 05dfbdf07db850b43b54f9b1bbf5ea3b, type: 3}
+  - kind: itch
+    sprite: {fileID: 21300000, guid: 65e0921fd932fd547a8d0f2158887581, type: 3}
+  - kind: linkedin
+    sprite: {fileID: 21300000, guid: 488f6efa4ed6e5e4e817f9ba28782c8f, type: 3}
+  - kind: location
+    sprite: {fileID: 21300000, guid: a95698da5a7e37d4bb961996e6ff5e95, type: 3}
+  iconOfAnyOtherKind: {fileID: 21300000, guid: 499a1b924dd797347a1b0017723cfac7, type: 3}

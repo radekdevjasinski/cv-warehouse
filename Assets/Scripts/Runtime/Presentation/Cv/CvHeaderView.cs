@@ -27,7 +27,7 @@ namespace CvWarehouse.Presentation.Cv
                     continue;
 
                 CvChipView chip = Instantiate(chipPrefab, contactsRoot);
-                chip.Show(blockReveal, contact.Link);
+                chip.ShowContact(blockReveal, contact);
                 revealables[contact.Id] = chip.Revealable;
             }
         }

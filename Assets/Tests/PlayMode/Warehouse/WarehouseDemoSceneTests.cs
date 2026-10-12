@@ -48,10 +48,15 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
         private const int StartingBots = 3;
         private const string WaybillPanelPath = "CvCanvas/Panel";
         private const string ExpandButtonName = "ExpandButton";
+        private const string AutoButtonName = "AutoButton";
         private const int MaxTicks = 600000;
         private const int MaxFramesToWait = 300;
         private const float AnchorTolerance = 0.0001f;
         private const float SpriteMargin = 0.2f;
+        private const float HighlightSeconds = 2f;
+        private const float LongAfterAnyHighlight = 60f;
+        private const float FarDownThePage = 100f;
+        private const int FramesToSettle = 30;
 
         private WarehouseDemo demo;
 
@@ -1130,6 +1135,164 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
             yield return null;
 
             Assert.IsFalse(scanlines.gameObject.activeInHierarchy);
+        }
+
+        [UnityTest]
+        public IEnumerator Waybill_Delivery_HighlightsTheNewLettersUntilTheirTimeIsUp()
+        {
+            CvRevealState waybill = Object.FindAnyObjectByType<CvScreen>().RevealState;
+            CvDocumentView page = Object.FindAnyObjectByType<CvDocumentView>();
+            yield return null;
+            Assert.AreEqual(0, page.FreshMarkCount);
+
+            TickUntil(() => demo.Simulation.Score.DeliveredPieces > 0);
+
+            Assert.Greater(page.FreshMarkCount, 0);
+
+            waybill.Advance(LongAfterAnyHighlight);
+
+            Assert.AreEqual(0, page.FreshMarkCount);
+        }
+
+        [UnityTest]
+        public IEnumerator AutoScroll_DeliveryFarDownThePage_ScrollsThereWhenNobodyTouchesTheCv()
+        {
+            CvRevealState waybill = Object.FindAnyObjectByType<CvScreen>().RevealState;
+            CvAutoScroll autoScroll = Object.FindAnyObjectByType<CvAutoScroll>();
+            yield return null;
+            Assert.IsTrue(autoScroll.IsFollowing);
+            Assert.AreEqual(0f, autoScroll.Offset, PositionTolerance);
+
+            DeliverToTheLastBlock(waybill);
+            for (int frame = 0; frame < MaxFramesToWait && autoScroll.Offset < FarDownThePage; frame++)
+                yield return null;
+
+            Assert.GreaterOrEqual(autoScroll.Offset, FarDownThePage);
+        }
+
+        [UnityTest]
+        public IEnumerator AutoScroll_PointerOverTheCv_LeavesThePageWhereItIs()
+        {
+            CvRevealState waybill = Object.FindAnyObjectByType<CvScreen>().RevealState;
+            CvAutoScroll autoScroll = Object.FindAnyObjectByType<CvAutoScroll>();
+            yield return null;
+
+            autoScroll.OnPointerEnter(null);
+            DeliverToTheLastBlock(waybill);
+            for (int frame = 0; frame < FramesToSettle; frame++)
+                yield return null;
+
+            Assert.IsFalse(autoScroll.IsFollowing);
+            Assert.AreEqual(0f, autoScroll.Offset, PositionTolerance);
+        }
+
+        [UnityTest]
+        public IEnumerator AutoScroll_DeliveryToABlockAlreadyInView_DoesNotMoveThePage()
+        {
+            CvRevealState waybill = Object.FindAnyObjectByType<CvScreen>().RevealState;
+            CvAutoScroll autoScroll = Object.FindAnyObjectByType<CvAutoScroll>();
+            yield return null;
+
+            waybill.DeliverLetters(waybill.Blocks[0].Block.Id, new[] { 0 }, HighlightSeconds);
+            for (int frame = 0; frame < FramesToSettle; frame++)
+                yield return null;
+
+            Assert.AreEqual(0f, autoScroll.Offset, PositionTolerance);
+        }
+
+        [UnityTest]
+        public IEnumerator AutoScroll_WaybillExpanded_IsSwitchedOffAndBackOnWhenCollapsed()
+        {
+            CvAutoScroll autoScroll = Object.FindAnyObjectByType<CvAutoScroll>();
+            Button expandButton = GameObject.Find(ExpandButtonName).GetComponent<Button>();
+
+            expandButton.onClick.Invoke();
+            yield return null;
+            Assert.IsFalse(autoScroll.enabled);
+
+            expandButton.onClick.Invoke();
+            yield return null;
+            Assert.IsTrue(autoScroll.enabled);
+        }
+
+        [UnityTest]
+        public IEnumerator Waybill_Booted_ShowsAnIconOfItsKindBesideEveryContact()
+        {
+            yield return null;
+            CvChipView[] chips = Object.FindObjectsByType<CvChipView>(FindObjectsSortMode.None);
+            var shownIcons = new System.Collections.Generic.List<string>();
+            foreach (CvChipView chip in chips)
+                if (chip.HasIcon)
+                    shownIcons.Add(chip.ShownIcon.name);
+
+            CollectionAssert.AreEquivalent(new[] { "ContactPhone", "ContactEmail", "ContactGithub", "ContactItch" }, shownIcons);
+        }
+
+        [UnityTest]
+        public IEnumerator AutoButton_Clicked_StopsThePageFollowingUntilClickedAgain()
+        {
+            CvRevealState waybill = Object.FindAnyObjectByType<CvScreen>().RevealState;
+            CvAutoScroll autoScroll = Object.FindAnyObjectByType<CvAutoScroll>();
+            Button autoButton = GameObject.Find(AutoButtonName).GetComponent<Button>();
+            yield return null;
+            Sprite onLook = autoButton.GetComponent<Image>().sprite;
+
+            autoButton.onClick.Invoke();
+            DeliverToTheLastBlock(waybill);
+            for (int frame = 0; frame < FramesToSettle; frame++)
+                yield return null;
+
+            Assert.IsFalse(autoScroll.IsSwitchedOn);
+            Assert.IsFalse(autoScroll.IsFollowing);
+            Assert.AreEqual(0f, autoScroll.Offset, PositionTolerance);
+            Assert.AreNotSame(onLook, autoButton.GetComponent<Image>().sprite);
+
+            autoButton.onClick.Invoke();
+            DeliverToTheLastBlock(waybill);
+            for (int frame = 0; frame < MaxFramesToWait && autoScroll.Offset < FarDownThePage; frame++)
+                yield return null;
+
+            Assert.IsTrue(autoScroll.IsSwitchedOn);
+            Assert.GreaterOrEqual(autoScroll.Offset, FarDownThePage);
+            Assert.AreSame(onLook, autoButton.GetComponent<Image>().sprite);
+        }
+
+        [UnityTest]
+        public IEnumerator AutoButton_WaybillExpanded_CannotBeClicked()
+        {
+            Button autoButton = GameObject.Find(AutoButtonName).GetComponent<Button>();
+            yield return null;
+            Assert.IsTrue(autoButton.interactable);
+
+            GameObject.Find(ExpandButtonName).GetComponent<Button>().onClick.Invoke();
+            yield return null;
+            yield return null;
+
+            Assert.IsFalse(autoButton.interactable);
+        }
+
+        [UnityTest]
+        public IEnumerator Waybill_ContactNotDeliveredYet_KeepsItsIconHiddenUntilTheFirstLetterArrives()
+        {
+            CvRevealState waybill = Object.FindAnyObjectByType<CvScreen>().RevealState;
+            yield return null;
+            CvChipView contactChip = null;
+            foreach (CvChipView chip in Object.FindObjectsByType<CvChipView>(FindObjectsSortMode.None))
+                if (chip.HasIcon)
+                    contactChip = chip;
+
+            Assert.IsNotNull(contactChip);
+            Assert.IsFalse(contactChip.IsIconVisible);
+
+            waybill.DeliverLetters(contactChip.Revealable.Reveal.Block.Id, new[] { 0 }, HighlightSeconds);
+
+            Assert.IsTrue(contactChip.IsIconVisible);
+        }
+
+        private static void DeliverToTheLastBlock(CvRevealState waybill)
+        {
+            CvBlock lastBlock = waybill.Blocks[waybill.Blocks.Count - 1].Block;
+            waybill.DeliverLetters(lastBlock.Id, new[] { 0 }, HighlightSeconds);
         }
 
         private static SelectionArea AreaAround(System.Collections.Generic.IReadOnlyList<Bot> bots)

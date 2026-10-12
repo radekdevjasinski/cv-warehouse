@@ -9,6 +9,7 @@ namespace CvWarehouse.Core.Cv
 
         private readonly List<CvBlockReveal> blocks = new List<CvBlockReveal>();
         private readonly Dictionary<string, CvBlockReveal> blocksById = new Dictionary<string, CvBlockReveal>();
+        private readonly List<CvBlockReveal> freshBlocks = new List<CvBlockReveal>();
 
         public CvRevealState(IReadOnlyList<CvBlock> cvBlocks)
         {
@@ -22,6 +23,8 @@ namespace CvWarehouse.Core.Cv
         }
 
         public event Action<string> BlockChanged;
+
+        public event Action<string> Delivered;
 
         public IReadOnlyList<CvBlockReveal> Blocks => blocks;
 
@@ -69,6 +72,36 @@ namespace CvWarehouse.Core.Cv
             for (int index = 0; index < letters.Count; index++)
                 revealed += block.Reveal(letters[index], 1);
             return Apply(block, revealed);
+        }
+
+        public int DeliverLetters(string id, IReadOnlyList<int> letters, float freshSeconds)
+        {
+            if (!blocksById.TryGetValue(id, out CvBlockReveal block))
+                return 0;
+
+            block.MarkFresh(letters, freshSeconds);
+            if (!freshBlocks.Contains(block))
+                freshBlocks.Add(block);
+
+            int revealed = RevealLetters(id, letters);
+            if (revealed == 0)
+                BlockChanged?.Invoke(id);
+            Delivered?.Invoke(id);
+            return revealed;
+        }
+
+        public void Advance(float deltaSeconds)
+        {
+            for (int index = freshBlocks.Count - 1; index >= 0; index--)
+            {
+                CvBlockReveal block = freshBlocks[index];
+                block.FreshSecondsLeft -= deltaSeconds;
+                if (block.HasFreshLetters)
+                    continue;
+
+                freshBlocks.RemoveAt(index);
+                BlockChanged?.Invoke(block.Block.Id);
+            }
         }
 
         public int RevealWord(string id, int wordIndex)

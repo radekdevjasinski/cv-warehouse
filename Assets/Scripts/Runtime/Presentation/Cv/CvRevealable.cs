@@ -9,6 +9,7 @@ namespace CvWarehouse.Presentation.Cv
         [SerializeField] private CvLetterMask[] masks;
         [SerializeField] private CanvasGroup content;
         [SerializeField] private Graphic placeholder;
+        [SerializeField] private Graphic shownOnceStarted;
 
         public CvBlockReveal Reveal { get; private set; }
 
@@ -20,9 +21,17 @@ namespace CvWarehouse.Presentation.Cv
             Refresh();
         }
 
+        public void MarkFreshLettersWith(CvHighlightPool pool)
+        {
+            foreach (CvLetterMask mask in masks)
+                mask.MarkFreshLettersWith(pool);
+        }
+
         public void Refresh()
         {
             placeholder.enabled = Reveal.RevealedCount == 0;
+            if (shownOnceStarted != null)
+                shownOnceStarted.enabled = Reveal.RevealedCount > 0;
             content.blocksRaycasts = Reveal.IsComplete;
             foreach (CvLetterMask mask in masks)
                 mask.Refresh();

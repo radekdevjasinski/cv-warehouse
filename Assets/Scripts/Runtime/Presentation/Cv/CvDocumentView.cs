@@ -11,9 +11,14 @@ namespace CvWarehouse.Presentation.Cv
         [SerializeField] private RectTransform sectionsRoot;
         [SerializeField] private CvSectionView sectionPrefab;
         [SerializeField] private TMP_Text footerText;
+        [SerializeField] private CvAutoScroll autoScroll;
+        [SerializeField] private Color freshColor = new Color32(0xe8, 0xc5, 0x47, 0x80);
 
         private readonly Dictionary<string, CvRevealable> revealables = new Dictionary<string, CvRevealable>();
         private CvRevealState revealState;
+        private CvHighlightPool highlights;
+
+        public int FreshMarkCount => highlights == null ? 0 : highlights.RentedCount;
 
         public void Show(CvDocument document, CvRevealState state)
         {
@@ -22,6 +27,10 @@ namespace CvWarehouse.Presentation.Cv
             foreach (CvSection section in document.Sections)
                 Instantiate(sectionPrefab, sectionsRoot).Show(section, state, revealables);
             footerText.SetText(document.Footer);
+            highlights = new CvHighlightPool(autoScroll.transform, freshColor);
+            foreach (CvRevealable revealable in revealables.Values)
+                revealable.MarkFreshLettersWith(highlights);
+            autoScroll.Follow(state, revealables);
 
             if (isActiveAndEnabled)
                 revealState.BlockChanged += OnBlockChanged;

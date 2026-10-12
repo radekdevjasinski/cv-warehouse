@@ -12,6 +12,7 @@ namespace CvWarehouse.Presentation.Warehouse
         [SerializeField] private CvScreen screen;
         [SerializeField] private CvProgressView progressView;
         [SerializeField] private string cvFileName = "cv_en.json";
+        [SerializeField] private float highlightSeconds = 2f;
 
         private WarehouseScore score;
 
@@ -26,6 +27,12 @@ namespace CvWarehouse.Presentation.Warehouse
             score = demo.Simulation.Score;
             if (isActiveAndEnabled)
                 score.Delivered += ShowDelivery;
+        }
+
+        private void Update()
+        {
+            if (score != null)
+                screen.RevealState.Advance(Time.deltaTime);
         }
 
         private void OnEnable()
@@ -50,7 +57,7 @@ namespace CvWarehouse.Presentation.Warehouse
 
         private void ShowDelivery(CvBlock block, IReadOnlyList<int> letters)
         {
-            screen.RevealState.RevealLetters(block.Id, letters);
+            screen.RevealState.DeliverLetters(block.Id, letters, highlightSeconds);
         }
     }
 }

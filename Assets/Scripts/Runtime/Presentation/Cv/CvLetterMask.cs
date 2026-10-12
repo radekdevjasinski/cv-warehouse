@@ -14,12 +14,18 @@ namespace CvWarehouse.Presentation.Cv
         [SerializeField] private TMP_Text text;
 
         private CvBlockReveal reveal;
+        private CvFreshMarks freshMarks;
         private int firstLetter;
 
         public void Bind(CvBlockReveal blockReveal, int firstLetterInBlock)
         {
             reveal = blockReveal;
             firstLetter = firstLetterInBlock;
+        }
+
+        public void MarkFreshLettersWith(CvHighlightPool pool)
+        {
+            freshMarks = new CvFreshMarks(text, pool);
         }
 
         public void Refresh()
@@ -29,6 +35,7 @@ namespace CvWarehouse.Presentation.Cv
 
             ApplyVisibility(text.textInfo);
             text.UpdateVertexData(TMP_VertexDataUpdateFlags.Colors32);
+            freshMarks?.Show(reveal, firstLetter);
         }
 
         private void OnEnable()
