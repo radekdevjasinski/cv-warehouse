@@ -15,6 +15,9 @@ namespace CvWarehouse.Presentation.Warehouse
         [SerializeField] private WarehouseBoxesView boxesView;
         [SerializeField] private WarehouseBotsView botsView;
         [SerializeField] private WarehouseHudView hudView;
+        [SerializeField] private PointsView pointsView;
+        [SerializeField] private ShiftStatusView shiftStatusView;
+        [SerializeField] private CrewListView crewListView;
         [SerializeField] private BotRouteView routeView;
         [SerializeField] private BotPanelView botPanelView;
         [SerializeField] private BotGroupPanelView botGroupPanelView;
@@ -56,7 +59,7 @@ namespace CvWarehouse.Presentation.Warehouse
 
         private void ShowWarehouse(WarehouseLayout layout)
         {
-            gridView.Show(layout, shapes);
+            gridView.Show(layout, shapeMaterial);
             boxesView.Show(layout, shapes);
             boxHighlightView.Show(BoxSelection, shapes);
             botsView.Show(Simulation, Selection, shapes);
@@ -67,6 +70,9 @@ namespace CvWarehouse.Presentation.Warehouse
         private void ShowControls()
         {
             hudView.Show(Simulation, Shop);
+            pointsView.Show(Shop);
+            shiftStatusView.Show(Simulation);
+            crewListView.Show(Simulation, Selection, BoxSelection);
             botPanelView.Show(Simulation, Shop, Selection);
             botGroupPanelView.Show(Simulation, Selection);
             boxPanelView.Show(BoxSelection);

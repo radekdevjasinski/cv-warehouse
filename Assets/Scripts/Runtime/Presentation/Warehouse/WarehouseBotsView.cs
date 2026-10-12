@@ -6,22 +6,15 @@ namespace CvWarehouse.Presentation.Warehouse
 {
     public sealed class WarehouseBotsView : MonoBehaviour
     {
-        private const int BotSortingOrder = 2;
-        private const int CargoSortingOrder = 3;
-        private const int HighlightSortingOrder = 1;
+        [SerializeField] private WarehouseSettings settings;
+        [SerializeField] private BotSkin skin;
+        [SerializeField] private BotAnimation botAnimation;
+        [SerializeField] private Sprite selectionFrame;
 
-        [SerializeField] private Color botColor = new Color(0.35f, 0.75f, 0.95f);
-        [SerializeField] private Color cargoColor = Color.white;
-        [SerializeField] private Color highlightColor = new Color(1f, 0.85f, 0.2f);
-        [SerializeField] private float botScale = 0.7f;
-        [SerializeField] private float cargoScale = 0.45f;
-        [SerializeField] private float highlightScale = 0.95f;
-
-        private IReadOnlyList<Bot> bots;
+        private WarehouseSimulation simulation;
         private BotSelection selection;
-        private GameObject[] botObjects;
-        private GameObject[] cargoObjects;
-        private GameObject[] highlights;
+        private BotFigure[] figures;
+        private SpriteRenderer[] highlights;
 
         public int VisibleBotCount { get; private set; }
 
@@ -32,32 +25,37 @@ namespace CvWarehouse.Presentation.Warehouse
             return highlights[index].transform.localPosition;
         }
 
-        public void Show(WarehouseSimulation simulation, BotSelection botSelection, SquareShapeFactory shapes)
+        public BotFigure Figure(int index)
         {
-            bots = simulation.Bots;
+            return figures[index];
+        }
+
+        public void Show(WarehouseSimulation shownSimulation, BotSelection botSelection, SquareShapeFactory shapes)
+        {
+            simulation = shownSimulation;
             selection = botSelection;
-            botObjects = new GameObject[simulation.MaxBots];
-            cargoObjects = new GameObject[simulation.MaxBots];
-            highlights = new GameObject[simulation.MaxBots];
-            for (int index = 0; index < botObjects.Length; index++)
+            figures = new BotFigure[simulation.MaxBots];
+            highlights = new SpriteRenderer[simulation.MaxBots];
+            for (int index = 0; index < figures.Length; index++)
             {
-                CreateBot(index, shapes);
+                figures[index] = new BotFigure("Bot " + index, transform, skin, shapes);
                 CreateHighlight(index, shapes);
             }
         }
 
         private void LateUpdate()
         {
-            if (bots == null)
+            if (simulation == null)
                 return;
 
-            VisibleBotCount = Mathf.Min(bots.Count, botObjects.Length);
-            for (int index = 0; index < botObjects.Length; index++)
+            IReadOnlyList<Bot> bots = simulation.Bots;
+            VisibleBotCount = Mathf.Min(bots.Count, figures.Length);
+            for (int index = 0; index < figures.Length; index++)
             {
-                bool isVisible = index < VisibleBotCount;
-                SetActive(botObjects[index], isVisible);
-                if (isVisible)
-                    ShowBot(index, bots[index]);
+                if (index < VisibleBotCount)
+                    figures[index].Show(bots[index], PoseOf(bots[index]), settings.CrewColor(bots[index].CrewSlot));
+                else
+                    figures[index].Hide();
             }
 
             ShowHighlights();
@@ -69,18 +67,18 @@ namespace CvWarehouse.Presentation.Warehouse
                 target.SetActive(isActive);
         }
 
-        private static Vector3 CentreOf(Bot bot)
+        private BotPose PoseOf(Bot bot)
         {
-            return new Vector3(bot.CentreX, bot.CentreY);
+            return new BotPose(
+                botAnimation.IsStepping(bot.IsMoving, simulation.TickCount),
+                botAnimation.IsBlinking(bot.CrewSlot, Time.time));
         }
 
         private void CreateHighlight(int index, SquareShapeFactory shapes)
         {
-            SpriteRenderer highlightRenderer = shapes.CreateSquare("Selection Highlight " + index, transform, HighlightSortingOrder);
-            highlightRenderer.color = highlightColor;
-            highlightRenderer.transform.localScale = new Vector3(highlightScale, highlightScale, 1f);
-            highlights[index] = highlightRenderer.gameObject;
-            highlights[index].SetActive(false);
+            highlights[index] = shapes.CreateSquare("Selection Highlight " + index, transform, DepthSorting.OverEverythingOrder);
+            highlights[index].sprite = selectionFrame;
+            highlights[index].gameObject.SetActive(false);
         }
 
         private void ShowHighlights()
@@ -90,32 +88,10 @@ namespace CvWarehouse.Presentation.Warehouse
             for (int index = 0; index < highlights.Length; index++)
             {
                 bool isVisible = index < VisibleHighlightCount;
-                SetActive(highlights[index], isVisible);
+                SetActive(highlights[index].gameObject, isVisible);
                 if (isVisible)
-                    highlights[index].transform.localPosition = CentreOf(selectedBots[index]);
+                    highlights[index].transform.localPosition = new Vector3(selectedBots[index].CentreX, selectedBots[index].CentreY);
             }
-        }
-
-        private void CreateBot(int index, SquareShapeFactory shapes)
-        {
-            SpriteRenderer botRenderer = shapes.CreateSquare("Bot " + index, transform, BotSortingOrder);
-            botRenderer.color = botColor;
-            botRenderer.transform.localScale = new Vector3(botScale, botScale, 1f);
-
-            SpriteRenderer cargoRenderer = shapes.CreateSquare("Cargo", botRenderer.transform, CargoSortingOrder);
-            cargoRenderer.color = cargoColor;
-            cargoRenderer.transform.localScale = new Vector3(cargoScale, cargoScale, 1f);
-
-            botObjects[index] = botRenderer.gameObject;
-            cargoObjects[index] = cargoRenderer.gameObject;
-            botObjects[index].SetActive(false);
-            cargoObjects[index].SetActive(false);
-        }
-
-        private void ShowBot(int index, Bot bot)
-        {
-            botObjects[index].transform.localPosition = CentreOf(bot);
-            SetActive(cargoObjects[index], bot.CargoPieces > 0);
         }
     }
 }

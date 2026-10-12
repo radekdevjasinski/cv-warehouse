@@ -17,6 +17,11 @@ namespace CvWarehouse.Presentation.Warehouse
 
         public Bot SingleBot => HasSingleBot ? bots[0] : null;
 
+        public bool Contains(Bot bot)
+        {
+            return bots.Contains(bot);
+        }
+
         public void Select(Bot bot)
         {
             bots.Clear();

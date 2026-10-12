@@ -5,12 +5,10 @@ namespace CvWarehouse.Presentation.Warehouse
 {
     public sealed class BoxHighlightView : MonoBehaviour
     {
-        private const int HighlightSortingOrder = 1;
-        private const float BehindBoxes = 0.1f;
-
-        [SerializeField] private Color highlightColor = new Color(1f, 0.85f, 0.2f);
+        [SerializeField] private BoxSkin skin;
 
         private BoxSelection selection;
+        private SpriteRenderer frame;
         private GameObject highlight;
         private Box shownBox;
 
@@ -18,12 +16,13 @@ namespace CvWarehouse.Presentation.Warehouse
 
         public Vector3 Position => highlight.transform.localPosition;
 
+        public Sprite FrameSprite => frame.sprite;
+
         public void Show(BoxSelection boxSelection, SquareShapeFactory shapes)
         {
             selection = boxSelection;
-            SpriteRenderer highlightRenderer = shapes.CreateSquare("Box Highlight", transform, HighlightSortingOrder);
-            highlightRenderer.color = highlightColor;
-            highlight = highlightRenderer.gameObject;
+            frame = shapes.CreateSquare("Box Highlight", transform, DepthSorting.OverEverythingOrder);
+            highlight = frame.gameObject;
             highlight.SetActive(false);
         }
 
@@ -43,12 +42,10 @@ namespace CvWarehouse.Presentation.Warehouse
 
         private void Frame(Box box)
         {
-            Transform highlightTransform = highlight.transform;
-            highlightTransform.localPosition = new Vector3(
+            frame.sprite = skin.LookOf(box.WeightClass).SelectionFrame;
+            highlight.transform.localPosition = new Vector3(
                 box.Origin.X + box.Size.Width * 0.5f,
-                box.Origin.Y + box.Size.Height * 0.5f,
-                BehindBoxes);
-            highlightTransform.localScale = new Vector3(box.Size.Width, box.Size.Height, 1f);
+                box.Origin.Y + box.Size.Height * 0.5f);
         }
     }
 }

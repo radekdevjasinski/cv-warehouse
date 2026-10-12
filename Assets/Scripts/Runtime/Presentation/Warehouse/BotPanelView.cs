@@ -11,7 +11,10 @@ namespace CvWarehouse.Presentation.Warehouse
         private const int UpgradeCount = 2;
 
         [SerializeField] private GameObject window;
+        [SerializeField] private WarehouseSettings settings;
         [SerializeField] private TMP_Text nameText;
+        [SerializeField] private Image swatch;
+        [SerializeField] private BotStatusText statusText;
         [SerializeField] private TMP_Text carryText;
         [SerializeField] private Button upgradeCarryButton;
         [SerializeField] private TMP_Text upgradeCarryLabel;
@@ -145,6 +148,7 @@ namespace CvWarehouse.Presentation.Warehouse
 
             Bot bot = selection.SingleBot;
             RefreshName(bot);
+            statusText.Show(bot);
             RefreshCarry(bot);
             RefreshSpeed(bot);
             RefreshFocus(bot);
@@ -159,7 +163,8 @@ namespace CvWarehouse.Presentation.Warehouse
             shownBot = bot;
             isFocusShown = false;
             ForgetShownUpgrades();
-            nameText.SetText("Bot {0}", bot.Id + 1);
+            nameText.SetText(bot.Name);
+            swatch.color = settings.CrewColor(bot.CrewSlot);
         }
 
         private void RefreshCarry(Bot bot)

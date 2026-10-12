@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using CvWarehouse.Core.Cv;
 
 namespace CvWarehouse.Core.Warehouse
@@ -29,6 +30,8 @@ namespace CvWarehouse.Core.Warehouse
         public int MediumPiecePoints { get; set; } = 2;
 
         public int HeavyPiecePoints { get; set; } = 3;
+
+        public IReadOnlyList<string> CrewNames { get; set; } = Array.Empty<string>();
 
         public int StepTicks(int speedLevel, int stepCost)
         {

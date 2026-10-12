@@ -18,6 +18,10 @@ namespace CvWarehouse.Core.Warehouse
 
         public int Id { get; }
 
+        public string Name { get; internal set; } = string.Empty;
+
+        public int CrewSlot { get; internal set; }
+
         public GridPosition Cell { get; internal set; }
 
         public GridPosition NextCell { get; internal set; }
@@ -46,6 +50,8 @@ namespace CvWarehouse.Core.Warehouse
 
         public int CargoPieces { get; internal set; }
 
+        public int CargoWords { get; internal set; }
+
         public int CarryLevel { get; internal set; } = FirstLevel;
 
         public int SpeedLevel { get; internal set; } = FirstLevel;
@@ -67,6 +73,8 @@ namespace CvWarehouse.Core.Warehouse
         internal int PathIndex { get; set; }
 
         internal List<int> Letters { get; } = new List<int>();
+
+        internal int ClaimedWords { get; set; }
 
         internal int WorkTicksLeft { get; set; }
 

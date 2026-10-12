@@ -5,6 +5,8 @@ namespace CvWarehouse.Core.Cv
 {
     public sealed class CvRevealState
     {
+        private const int WholePercent = 100;
+
         private readonly List<CvBlockReveal> blocks = new List<CvBlockReveal>();
         private readonly Dictionary<string, CvBlockReveal> blocksById = new Dictionary<string, CvBlockReveal>();
 
@@ -28,6 +30,8 @@ namespace CvWarehouse.Core.Cv
         public int RevealedLetterCount { get; private set; }
 
         public bool IsComplete => RevealedLetterCount == TotalLetterCount;
+
+        public int RevealedPercent => TotalLetterCount == 0 ? WholePercent : RevealedLetterCount * WholePercent / TotalLetterCount;
 
         public bool TryGetBlock(string id, out CvBlockReveal block)
         {

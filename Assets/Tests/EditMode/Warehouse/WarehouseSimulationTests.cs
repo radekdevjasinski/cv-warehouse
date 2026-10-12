@@ -448,6 +448,73 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
             Assert.AreEqual(BotFocus.BiggestBox, simulation.Bots[0].Focus);
         }
 
+        [Test]
+        public void TryAddBot_CrewNamesGiven_NamesBotsInRosterOrder()
+        {
+            WarehouseSimulation simulation = NewSmallSimulation(new SimulationSettings { CrewNames = new[] { "PIP", "BLIP" } });
+
+            simulation.TryAddBot();
+            simulation.TryAddBot();
+
+            Assert.AreEqual("PIP", simulation.Bots[0].Name);
+            Assert.AreEqual("BLIP", simulation.Bots[1].Name);
+            Assert.AreEqual(1, simulation.Bots[1].CrewSlot);
+        }
+
+        [Test]
+        public void TryAddBot_AfterABotWasRemoved_GivesItsNameToTheNewBot()
+        {
+            WarehouseSimulation simulation = NewSmallSimulation(new SimulationSettings { CrewNames = new[] { "PIP", "BLIP" } });
+            simulation.TryAddBot();
+            simulation.TryAddBot();
+            simulation.TryRemoveBot(simulation.Bots[0]);
+
+            simulation.TryAddBot();
+
+            Assert.AreEqual("BLIP", simulation.Bots[0].Name);
+            Assert.AreEqual("PIP", simulation.Bots[1].Name);
+            Assert.AreEqual(0, simulation.Bots[1].CrewSlot);
+        }
+
+        [Test]
+        public void TryAddBot_MoreBotsThanCrewNames_NumbersTheRest()
+        {
+            WarehouseSimulation simulation = NewSmallSimulation(new SimulationSettings { CrewNames = new[] { "PIP" } });
+
+            simulation.TryAddBot();
+            simulation.TryAddBot();
+
+            Assert.AreEqual("PIP", simulation.Bots[0].Name);
+            Assert.AreEqual("BOT 2", simulation.Bots[1].Name);
+        }
+
+        [Test]
+        public void Tick_BotCarryingTwoWords_CountsTheWordsOfItsCargoUntilItUnloads()
+        {
+            WarehouseSimulation simulation = NewSmallSimulation(new SimulationSettings());
+            simulation.TryAddBot();
+            Bot bot = simulation.Bots[0];
+            simulation.Upgrade(bot, BotUpgrade.Carry);
+            Assert.AreEqual(0, bot.CargoWords);
+
+            TickUntilState(simulation, bot, BotState.GoingToDrop);
+            Assert.AreEqual(2, bot.CargoWords);
+
+            TickUntilState(simulation, bot, BotState.GoingToBox);
+            Assert.AreEqual(0, bot.CargoWords);
+
+            TickUntilState(simulation, bot, BotState.GoingToDrop);
+            Assert.AreEqual(1, bot.CargoWords);
+        }
+
+        private static void TickUntilState(WarehouseSimulation simulation, Bot bot, BotState state)
+        {
+            for (int tick = 0; tick < MaxTicks && bot.State != state; tick++)
+                simulation.Tick();
+
+            Assert.AreEqual(state, bot.State);
+        }
+
         private static WarehouseSimulation NewSmallSimulation(SimulationSettings settings)
         {
             return NewSimulationWithOneBox(CvTestBlocks.FromText(SmallBoxText), settings);

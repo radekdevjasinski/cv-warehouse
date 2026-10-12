@@ -50,7 +50,9 @@ namespace CvWarehouse.Core.Warehouse
 
             bot.JobBox = null;
             bot.ClaimedPieces = 0;
+            bot.ClaimedWords = 0;
             bot.CargoPieces = 0;
+            bot.CargoWords = 0;
             bot.HasParkingCell = false;
             bot.State = BotState.Idle;
             reservations.ReleaseAll(bot.Id);
@@ -65,6 +67,7 @@ namespace CvWarehouse.Core.Warehouse
             reservations.Release(bot.AccessCell, bot.Id);
             bot.JobBox = null;
             bot.ClaimedPieces = 0;
+            bot.ClaimedWords = 0;
             bot.State = BotState.Idle;
             return TryStartJob(bot);
         }
@@ -153,7 +156,9 @@ namespace CvWarehouse.Core.Warehouse
         {
             bot.JobBox.TakeClaimed(bot.ClaimedPieces);
             bot.CargoPieces = bot.ClaimedPieces;
+            bot.CargoWords = bot.ClaimedWords;
             bot.ClaimedPieces = 0;
+            bot.ClaimedWords = 0;
             if (!bot.JobBox.IsEmpty)
                 return;
 
@@ -173,6 +178,7 @@ namespace CvWarehouse.Core.Warehouse
             bot.Letters.Clear();
             reservations.Release(bot.DropCell, bot.Id);
             bot.CargoPieces = 0;
+            bot.CargoWords = 0;
             bot.JobBox = null;
             bot.State = BotState.Idle;
         }

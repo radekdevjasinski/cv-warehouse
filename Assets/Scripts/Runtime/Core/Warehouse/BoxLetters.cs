@@ -38,20 +38,20 @@ namespace CvWarehouse.Core.Warehouse
             UnclaimedCount += claimed.Count;
         }
 
-        private void Claim(int letter, List<int> claimed)
-        {
-            claimedLetters[letter] = true;
-            UnclaimedCount--;
-            claimed.Add(letter);
-        }
-
-        private int CountOpenWords()
+        public int CountOpenWords()
         {
             int openWords = 0;
             for (int wordIndex = 0; wordIndex < block.Words.Count; wordIndex++)
                 if (IsOpen(block.Words[wordIndex]))
                     openWords++;
             return openWords;
+        }
+
+        private void Claim(int letter, List<int> claimed)
+        {
+            claimedLetters[letter] = true;
+            UnclaimedCount--;
+            claimed.Add(letter);
         }
 
         private bool IsOpen(CvWord word)

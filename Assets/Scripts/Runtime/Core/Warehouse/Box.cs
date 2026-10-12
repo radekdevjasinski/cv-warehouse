@@ -42,6 +42,8 @@ namespace CvWarehouse.Core.Warehouse
 
         public int UnclaimedPieces => letters.UnclaimedCount;
 
+        public int OpenWords => letters.CountOpenWords();
+
         public bool IsEmpty => RemainingPieces == 0;
 
         public int Claim(int words, Random random, List<int> claimed)

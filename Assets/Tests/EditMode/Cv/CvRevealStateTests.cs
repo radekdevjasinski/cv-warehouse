@@ -151,6 +151,36 @@ namespace CvWarehouse.Tests.EditMode.Cv
             CollectionAssert.AreEqual(new[] { CvItemId.Name }, changedBlocks);
         }
 
+        [Test]
+        public void RevealedPercent_NothingRevealed_IsZero()
+        {
+            Assert.AreEqual(0, state.RevealedPercent);
+        }
+
+        [Test]
+        public void RevealedPercent_OneBlockRevealed_IsItsShareOfEveryLetterRoundedDown()
+        {
+            state.RevealBlock(CvItemId.Name);
+
+            Assert.AreEqual(NameLetterCount * 100 / (NameLetterCount + ProfileLetterCount), state.RevealedPercent);
+        }
+
+        [Test]
+        public void RevealedPercent_EverythingRevealed_IsOneHundred()
+        {
+            state.RevealAll();
+
+            Assert.AreEqual(100, state.RevealedPercent);
+        }
+
+        [Test]
+        public void RevealedPercent_CvWithoutLetters_IsOneHundred()
+        {
+            var emptyState = new CvRevealState(new List<CvBlock>());
+
+            Assert.AreEqual(100, emptyState.RevealedPercent);
+        }
+
         private CvBlockReveal GetBlock(string id)
         {
             Assert.IsTrue(state.TryGetBlock(id, out CvBlockReveal block));

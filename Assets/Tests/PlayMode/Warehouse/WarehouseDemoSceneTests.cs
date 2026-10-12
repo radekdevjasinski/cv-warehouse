@@ -22,6 +22,10 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
         private const string PointsTextName = "PointsText";
         private const string BotWindowName = "BotWindow";
         private const string BotNameTextName = "BotNameText";
+        private const string BotStatusTextName = "BotStatusText";
+        private const string ShiftStatusTextName = "ShiftStatusText";
+        private const string CvProgressTextName = "CvProgressText";
+        private const string TopBarName = "TopBar";
         private const string BotCarryTextName = "BotCarryText";
         private const string BotUpgradeCarryButtonName = "BotUpgradeCarryButton";
         private const string BotSpeedTextName = "BotSpeedText";
@@ -47,6 +51,7 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
         private const int MaxTicks = 600000;
         private const int MaxFramesToWait = 300;
         private const float AnchorTolerance = 0.0001f;
+        private const float SpriteMargin = 0.2f;
 
         private WarehouseDemo demo;
 
@@ -112,7 +117,7 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
             yield return null;
 
             Assert.IsFalse(GameObject.Find(BuyBotButtonName).GetComponent<Button>().interactable);
-            Assert.AreEqual("0 points", GameObject.Find(PointsTextName).GetComponent<TMP_Text>().text);
+            Assert.AreEqual("0", GameObject.Find(PointsTextName).GetComponent<TMP_Text>().text);
         }
 
         [UnityTest]
@@ -130,7 +135,7 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
 
             Assert.AreEqual(StartingBots + 1, Object.FindAnyObjectByType<WarehouseBotsView>().VisibleBotCount);
             Assert.AreEqual(pointsBefore - botPrice, demo.Shop.Balance);
-            Assert.AreEqual(demo.Shop.Balance + " points", GameObject.Find(PointsTextName).GetComponent<TMP_Text>().text);
+            Assert.AreEqual(demo.Shop.Balance.ToString(), GameObject.Find(PointsTextName).GetComponent<TMP_Text>().text);
         }
 
         [UnityTest]
@@ -153,7 +158,7 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
             yield return null;
 
             Assert.AreSame(secondBot, demo.Selection.SingleBot);
-            Assert.AreEqual("Bot 2", GameObject.Find(BotNameTextName).GetComponent<TMP_Text>().text);
+            Assert.AreEqual("BLIP", GameObject.Find(BotNameTextName).GetComponent<TMP_Text>().text);
             Assert.AreEqual("Words per haul: 1", GameObject.Find(BotCarryTextName).GetComponent<TMP_Text>().text);
             Assert.AreEqual("Speed: 1", GameObject.Find(BotSpeedTextName).GetComponent<TMP_Text>().text);
             Assert.AreEqual(1, botsView.VisibleHighlightCount);
@@ -306,9 +311,11 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
         }
 
         [UnityTest]
-        public IEnumerator Simulation_RunToTheEnd_HidesEveryBox()
+        public IEnumerator Simulation_RunToTheEnd_LeavesAnEmptiedBoxOnTheFloorWhereEveryBoxStood()
         {
             WarehouseSimulation simulation = demo.Simulation;
+            WarehouseBoxesView boxesView = Object.FindAnyObjectByType<WarehouseBoxesView>();
+            WarehouseBotsView botsView = Object.FindAnyObjectByType<WarehouseBotsView>();
             while (simulation.TryAddBot())
             {
             }
@@ -318,7 +325,54 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
             yield return null;
 
             Assert.IsTrue(simulation.IsComplete);
-            Assert.AreEqual(0, Object.FindAnyObjectByType<WarehouseBoxesView>().VisibleBoxCount);
+            for (int index = 0; index < simulation.Layout.Boxes.Count; index++)
+            {
+                StringAssert.EndsWith("Empty", boxesView.ShownSprite(index).name);
+                Assert.Less(boxesView.SortingOrder(index), botsView.Figure(0).SortingOrder);
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator BoxesView_HeavyBoxPartlyEmptied_ShowsItOpen()
+        {
+            WarehouseBoxesView boxesView = Object.FindAnyObjectByType<WarehouseBoxesView>();
+            int heavyBox = IndexOfFirstBox(candidate => candidate.WeightClass == WeightClass.Heavy);
+            Box box = demo.Simulation.Layout.Boxes[heavyBox];
+            yield return null;
+            Assert.AreEqual("BoxHeavy", boxesView.ShownSprite(heavyBox).name);
+
+            TickUntil(() => box.RemainingPieces < box.TotalPieces);
+            yield return null;
+
+            Assert.IsFalse(box.IsEmpty);
+            Assert.AreEqual("BoxHeavyOpen", boxesView.ShownSprite(heavyBox).name);
+        }
+
+        [UnityTest]
+        public IEnumerator BoxesView_LightBoxPartlyEmptied_StaysClosed()
+        {
+            WarehouseBoxesView boxesView = Object.FindAnyObjectByType<WarehouseBoxesView>();
+            int startedBox = -1;
+
+            TickUntil(() => (startedBox = IndexOfFirstBox(IsPartlyEmptiedLightBox)) >= 0);
+            yield return null;
+
+            Assert.AreEqual("BoxLight", boxesView.ShownSprite(startedBox).name);
+        }
+
+        [UnityTest]
+        public IEnumerator BoxHighlight_HeavyBoxSelected_FramesItsWholeFootprint()
+        {
+            Box heavyBox = FirstBox(candidate => candidate.WeightClass == WeightClass.Heavy);
+            BoxHighlightView highlight = Object.FindAnyObjectByType<BoxHighlightView>();
+
+            TapOn(heavyBox);
+            yield return null;
+
+            Vector3 frameSize = highlight.FrameSprite.bounds.size;
+            Assert.GreaterOrEqual(frameSize.x, heavyBox.Size.Width);
+            Assert.GreaterOrEqual(frameSize.y, heavyBox.Size.Height);
+            Assert.AreEqual(heavyBox.Size.Width, frameSize.x, SpriteMargin);
         }
 
         [UnityTest]
@@ -760,6 +814,324 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
             Assert.IsNotNull(GameObject.Find(BoxWindowName));
         }
 
+        [UnityTest]
+        public IEnumerator CrewList_Booted_ShowsAChipWithTheNameOfEveryBot()
+        {
+            CrewListView crewList = Object.FindAnyObjectByType<CrewListView>();
+            yield return null;
+
+            Assert.AreEqual(StartingBots, crewList.VisibleChipCount);
+            Assert.AreEqual("PIP", crewList.Chip(0).ShownName);
+            Assert.AreEqual("BLIP", crewList.Chip(1).ShownName);
+            Assert.AreEqual("NIB", crewList.Chip(2).ShownName);
+            Assert.IsFalse(crewList.Chip(StartingBots).gameObject.activeSelf);
+        }
+
+        [UnityTest]
+        public IEnumerator CrewList_ChipClicked_SelectsThatBotAndOpensItsWindow()
+        {
+            CrewListView crewList = Object.FindAnyObjectByType<CrewListView>();
+            TapOn(demo.Simulation.Layout.Boxes[0]);
+            yield return null;
+
+            crewList.Chip(1).GetComponent<Button>().onClick.Invoke();
+            yield return null;
+
+            Assert.AreSame(demo.Simulation.Bots[1], demo.Selection.SingleBot);
+            Assert.IsTrue(crewList.Chip(1).IsSelected);
+            Assert.IsFalse(crewList.Chip(0).IsSelected);
+            Assert.IsFalse(demo.BoxSelection.HasBox);
+            Assert.AreEqual("BLIP", GameObject.Find(BotNameTextName).GetComponent<TMP_Text>().text);
+        }
+
+        [UnityTest]
+        public IEnumerator CrewList_SelectedChipClickedAgain_ClearsTheSelection()
+        {
+            CrewListView crewList = Object.FindAnyObjectByType<CrewListView>();
+            crewList.Chip(0).GetComponent<Button>().onClick.Invoke();
+            yield return null;
+
+            crewList.Chip(0).GetComponent<Button>().onClick.Invoke();
+            yield return null;
+
+            Assert.AreEqual(0, demo.Selection.Count);
+            Assert.IsFalse(crewList.Chip(0).IsSelected);
+            Assert.IsNull(GameObject.Find(BotWindowName));
+        }
+
+        [UnityTest]
+        public IEnumerator CrewList_BotBoughtAndBotDeleted_FollowsTheCrew()
+        {
+            CrewListView crewList = Object.FindAnyObjectByType<CrewListView>();
+            demo.Simulation.TryAddBot();
+            yield return null;
+
+            Assert.AreEqual(StartingBots + 1, crewList.VisibleChipCount);
+            Assert.AreEqual("MOX", crewList.Chip(StartingBots).ShownName);
+
+            demo.Simulation.TryRemoveBot(demo.Simulation.Bots[0]);
+            yield return null;
+
+            Assert.AreEqual(StartingBots, crewList.VisibleChipCount);
+            Assert.AreEqual("BLIP", crewList.Chip(0).ShownName);
+        }
+
+        [UnityTest]
+        public IEnumerator BotWindow_SelectedBotAtWork_DescribesWhatItIsDoing()
+        {
+            Bot bot = demo.Simulation.Bots[0];
+            TickUntil(() => bot.State == BotState.GoingToBox);
+            TapOn(bot);
+            yield return null;
+            TMP_Text status = GameObject.Find(BotStatusTextName).GetComponent<TMP_Text>();
+            Assert.AreEqual("Walking to a box", status.text);
+
+            TickUntil(() => bot.State == BotState.Extracting);
+            yield return null;
+            Assert.AreEqual("Picking up", status.text);
+
+            TickUntil(() => bot.State == BotState.GoingToDrop);
+            yield return null;
+            Assert.AreEqual("Hauling 1 word", status.text);
+
+            TickUntil(() => bot.State == BotState.Unloading);
+            yield return null;
+            Assert.AreEqual("Loading truck", status.text);
+        }
+
+        [UnityTest]
+        public IEnumerator BotWindow_SelectedBotHaulingSeveralWords_SaysHowMany()
+        {
+            Bot bot = demo.Simulation.Bots[0];
+            demo.Simulation.Upgrade(bot, BotUpgrade.Carry);
+            TapOn(bot);
+
+            TickUntil(() => bot.State == BotState.GoingToDrop && bot.CargoWords == 2);
+            yield return null;
+
+            Assert.AreEqual("Hauling 2 words", GameObject.Find(BotStatusTextName).GetComponent<TMP_Text>().text);
+        }
+
+        [UnityTest]
+        public IEnumerator CvProgress_Booted_ShowsZeroPercent()
+        {
+            CvProgressView progress = Object.FindAnyObjectByType<CvProgressView>();
+            yield return null;
+
+            Assert.AreEqual(0, progress.ShownPercent);
+            Assert.AreEqual("0%", GameObject.Find(CvProgressTextName).GetComponent<TMP_Text>().text);
+        }
+
+        [UnityTest]
+        public IEnumerator CvProgress_AfterDeliveries_ShowsTheShareOfTheCvOnTheWaybill()
+        {
+            CvRevealState waybill = Object.FindAnyObjectByType<CvScreen>().RevealState;
+            CvProgressView progress = Object.FindAnyObjectByType<CvProgressView>();
+
+            TickUntil(() => waybill.RevealedPercent >= 10);
+            yield return null;
+
+            Assert.AreEqual(waybill.RevealedPercent, progress.ShownPercent);
+            Assert.AreEqual(waybill.RevealedPercent + "%", GameObject.Find(CvProgressTextName).GetComponent<TMP_Text>().text);
+        }
+
+        [UnityTest]
+        public IEnumerator CvProgress_SimulationRunToTheEnd_ShowsOneHundredPercent()
+        {
+            while (demo.Simulation.TryAddBot())
+            {
+            }
+
+            TickUntil(() => demo.Simulation.IsComplete);
+            yield return null;
+
+            Assert.AreEqual("100%", GameObject.Find(CvProgressTextName).GetComponent<TMP_Text>().text);
+            Assert.AreEqual("SHIPPED", GameObject.Find(ShiftStatusTextName).GetComponent<TMP_Text>().text);
+        }
+
+        [UnityTest]
+        public IEnumerator ShiftStatus_PausedAndResumed_FollowsTheSimulation()
+        {
+            TMP_Text status = GameObject.Find(ShiftStatusTextName).GetComponent<TMP_Text>();
+            Button pauseButton = GameObject.Find(PauseButtonName).GetComponent<Button>();
+            yield return null;
+            Assert.AreEqual("ON SHIFT", status.text);
+
+            pauseButton.onClick.Invoke();
+            yield return null;
+            Assert.AreEqual("PAUSED", status.text);
+
+            pauseButton.onClick.Invoke();
+            yield return null;
+            Assert.AreEqual("ON SHIFT", status.text);
+        }
+
+        [UnityTest]
+        public IEnumerator ExpandButton_Clicked_KeepsTheTopBarAndItsPointsUpToDate()
+        {
+            var waybillPanel = (RectTransform)Object.FindAnyObjectByType<CvScreen>().transform.Find(WaybillPanelPath);
+            var topBar = (RectTransform)GameObject.Find(TopBarName).transform;
+
+            GameObject.Find(ExpandButtonName).GetComponent<Button>().onClick.Invoke();
+            TickUntil(() => demo.Shop.Balance > 0);
+            yield return null;
+
+            Assert.IsTrue(topBar.gameObject.activeInHierarchy);
+            Assert.AreEqual(topBar.anchorMin.y, waybillPanel.anchorMax.y, AnchorTolerance);
+            Assert.AreEqual(demo.Shop.Balance.ToString(), GameObject.Find(PointsTextName).GetComponent<TMP_Text>().text);
+        }
+
+        [UnityTest]
+        public IEnumerator Scene_Booted_KeepsTheWarehouseViewBetweenTheTopBarAndTheDock()
+        {
+            yield return null;
+            Rect warehouseView = Object.FindAnyObjectByType<WarehouseCamera>().GetComponent<Camera>().rect;
+            var topBar = (RectTransform)GameObject.Find(TopBarName).transform;
+
+            Assert.Greater(warehouseView.yMin, 0f);
+            Assert.AreEqual(topBar.anchorMin.y, warehouseView.yMax, AnchorTolerance);
+        }
+
+        [UnityTest]
+        public IEnumerator BotsView_Booted_TintsEveryBotWithItsCrewColourAndKeepsTheFaceUntinted()
+        {
+            WarehouseBotsView botsView = Object.FindAnyObjectByType<WarehouseBotsView>();
+            yield return null;
+
+            var pip = new Color32(0x7b, 0xd3, 0x89, 0xff);
+            var blip = new Color32(0xa5, 0x93, 0xe0, 0xff);
+            Assert.AreEqual(pip, (Color32)botsView.Figure(0).BodyColor);
+            Assert.AreEqual(blip, (Color32)botsView.Figure(1).BodyColor);
+            Assert.AreEqual("BotBodyStand", botsView.Figure(0).BodySprite.name);
+            StringAssert.StartsWith("BotFaceStand", botsView.Figure(0).FaceSprite.name);
+            Assert.IsFalse(botsView.Figure(StartingBots).IsVisible);
+        }
+
+        [UnityTest]
+        public IEnumerator BotsView_BotHauling_ShowsAsManySheetsAsWordsItCarries()
+        {
+            WarehouseBotsView botsView = Object.FindAnyObjectByType<WarehouseBotsView>();
+            Bot bot = demo.Simulation.Bots[0];
+            yield return null;
+            Assert.IsFalse(botsView.Figure(0).IsCarrying);
+
+            TickUntil(() => bot.State == BotState.GoingToDrop);
+            yield return null;
+            Assert.IsTrue(botsView.Figure(0).IsCarrying);
+            Assert.AreEqual("Cargo1", botsView.Figure(0).CargoSprite.name);
+
+            demo.Simulation.Upgrade(bot, BotUpgrade.Carry);
+            TickUntil(() => bot.State == BotState.GoingToDrop && bot.CargoWords == 2);
+            yield return null;
+            Assert.AreEqual("Cargo2", botsView.Figure(0).CargoSprite.name);
+        }
+
+        [UnityTest]
+        public IEnumerator BotsView_BotAmongBoxes_IsDrawnBehindTheBoxesBelowItAndInFrontOfTheOnesAbove()
+        {
+            WarehouseBotsView botsView = Object.FindAnyObjectByType<WarehouseBotsView>();
+            WarehouseBoxesView boxesView = Object.FindAnyObjectByType<WarehouseBoxesView>();
+            Bot bot = demo.Simulation.Bots[0];
+            TickUntil(() => bot.State == BotState.Extracting);
+            yield return null;
+
+            for (int index = 0; index < demo.Simulation.Layout.Boxes.Count; index++)
+            {
+                Box box = demo.Simulation.Layout.Boxes[index];
+                bool isBotBehind = botsView.Figure(0).SortingOrder < boxesView.SortingOrder(index);
+                if (bot.Cell.Y >= box.Origin.Y + box.Size.Height)
+                    Assert.IsTrue(isBotBehind, "Box " + index + " is below the bot");
+                else if (bot.Cell.Y < box.Origin.Y)
+                    Assert.IsFalse(isBotBehind, "Box " + index + " is above the bot");
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator BoxesView_Booted_DrawsEveryBoxAsBigAsItsFootprint()
+        {
+            WarehouseBoxesView boxesView = Object.FindAnyObjectByType<WarehouseBoxesView>();
+            yield return null;
+
+            for (int index = 0; index < demo.Simulation.Layout.Boxes.Count; index++)
+            {
+                Box box = demo.Simulation.Layout.Boxes[index];
+                Vector3 size = boxesView.ShownSprite(index).bounds.size;
+                Assert.AreEqual(box.Size.Width, size.x, SpriteMargin, box.WeightClass + " box width");
+                Assert.AreEqual(box.Size.Height, size.y, SpriteMargin, box.WeightClass + " box height");
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator GridView_Booted_PaintsATileOnEveryCellAndFloorUnderEveryBox()
+        {
+            WarehouseGridView gridView = Object.FindAnyObjectByType<WarehouseGridView>();
+            WarehouseGrid grid = demo.Simulation.Layout.Grid;
+            yield return null;
+
+            for (int cellIndex = 0; cellIndex < grid.CellCount; cellIndex++)
+                Assert.IsNotNull(gridView.SpriteAt(grid.PositionOf(cellIndex)));
+
+            foreach (Box box in demo.Simulation.Layout.Boxes)
+                StringAssert.StartsWith("TileFloor", gridView.SpriteAt(box.Origin).name);
+            foreach (GridPosition parkingCell in demo.Simulation.Layout.ParkingCells)
+                StringAssert.StartsWith("TileFloor", gridView.SpriteAt(parkingCell).name);
+        }
+
+        [UnityTest]
+        public IEnumerator GridView_BoxEmptied_KeepsFloorWhereItStood()
+        {
+            WarehouseGridView gridView = Object.FindAnyObjectByType<WarehouseGridView>();
+            Box nameBox = FirstBox(candidate => candidate.Block.Role == CvBlockRole.Name);
+
+            TickUntil(() => nameBox.IsEmpty);
+            yield return null;
+
+            StringAssert.StartsWith("TileFloor", gridView.SpriteAt(nameBox.Origin).name);
+        }
+
+        [UnityTest]
+        public IEnumerator Scanlines_Booted_CoverTheWarehouseViewWithOneLinePerPeriodAndLetClicksThrough()
+        {
+            ScanlinesView scanlines = Object.FindAnyObjectByType<ScanlinesView>();
+            yield return null;
+            var area = (RectTransform)scanlines.transform;
+            var warehouseArea = (RectTransform)area.parent;
+
+            Assert.AreEqual(warehouseArea.rect.width, area.rect.width, PositionTolerance);
+            Assert.AreEqual(warehouseArea.rect.height, area.rect.height, PositionTolerance);
+            Assert.AreEqual(scanlines.ScreenPixelHeight / scanlines.LinePeriodPixels, scanlines.ShownRepeats, PositionTolerance);
+            Assert.Greater(scanlines.ShownRepeats, 1f);
+            Assert.IsFalse(scanlines.GetComponent<RawImage>().raycastTarget);
+        }
+
+        [UnityTest]
+        public IEnumerator Vignette_Booted_CoversTheWarehouseViewUnderItsFrameAndLetsClicksThrough()
+        {
+            VignetteView vignette = Object.FindAnyObjectByType<VignetteView>();
+            yield return null;
+            var area = (RectTransform)vignette.transform;
+            var warehouseArea = (RectTransform)area.parent;
+            RawImage image = vignette.GetComponent<RawImage>();
+
+            Assert.AreEqual(warehouseArea.rect.width, area.rect.width, PositionTolerance);
+            Assert.AreEqual(warehouseArea.rect.height, area.rect.height, PositionTolerance);
+            Assert.IsTrue(image.enabled);
+            Assert.IsNotNull(image.texture);
+            Assert.IsFalse(image.raycastTarget);
+            Assert.Less(area.GetSiblingIndex(), GameObject.Find("ViewFrame").transform.GetSiblingIndex());
+        }
+
+        [UnityTest]
+        public IEnumerator Scanlines_WaybillExpanded_AreHiddenWithTheWarehouse()
+        {
+            ScanlinesView scanlines = Object.FindAnyObjectByType<ScanlinesView>();
+
+            GameObject.Find(ExpandButtonName).GetComponent<Button>().onClick.Invoke();
+            yield return null;
+
+            Assert.IsFalse(scanlines.gameObject.activeInHierarchy);
+        }
+
         private static SelectionArea AreaAround(System.Collections.Generic.IReadOnlyList<Bot> bots)
         {
             float minX = float.MaxValue;
@@ -796,6 +1168,20 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
 
             Assert.Fail("The warehouse has no such box.");
             return null;
+        }
+
+        private static bool IsPartlyEmptiedLightBox(Box box)
+        {
+            return box.WeightClass == WeightClass.Light && !box.IsEmpty && box.RemainingPieces < box.TotalPieces;
+        }
+
+        private int IndexOfFirstBox(System.Predicate<Box> isWanted)
+        {
+            for (int index = 0; index < demo.Simulation.Layout.Boxes.Count; index++)
+                if (isWanted(demo.Simulation.Layout.Boxes[index]))
+                    return index;
+
+            return -1;
         }
 
         private void TickUntil(System.Func<bool> isReached)

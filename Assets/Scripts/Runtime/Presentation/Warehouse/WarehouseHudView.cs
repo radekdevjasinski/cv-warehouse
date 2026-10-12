@@ -9,7 +9,6 @@ namespace CvWarehouse.Presentation.Warehouse
     {
         private const int NothingShown = -1;
 
-        [SerializeField] private TMP_Text pointsText;
         [SerializeField] private TMP_Text botsText;
         [SerializeField] private TMP_Text deliveredText;
         [SerializeField] private Button buyBotButton;
@@ -17,7 +16,6 @@ namespace CvWarehouse.Presentation.Warehouse
 
         private WarehouseSimulation simulation;
         private BotShop shop;
-        private int shownPoints = NothingShown;
         private int shownBots = NothingShown;
         private int shownDelivered = NothingShown;
         private int shownBotPrice = NothingShown;
@@ -59,22 +57,16 @@ namespace CvWarehouse.Presentation.Warehouse
 
         private void RefreshCounters()
         {
-            if (shownPoints != shop.Balance)
-            {
-                shownPoints = shop.Balance;
-                pointsText.SetText("{0} points", shownPoints);
-            }
-
             if (shownBots != simulation.Bots.Count)
             {
                 shownBots = simulation.Bots.Count;
-                botsText.SetText("Bots {0}/{1}", shownBots, simulation.MaxBots);
+                botsText.SetText("{0}/{1}", shownBots, simulation.MaxBots);
             }
 
             if (shownDelivered != simulation.Score.DeliveredPieces)
             {
                 shownDelivered = simulation.Score.DeliveredPieces;
-                deliveredText.SetText("Delivered {0}/{1}", shownDelivered, simulation.Layout.TotalPieces);
+                deliveredText.SetText("{0}/{1}", shownDelivered, simulation.Layout.TotalPieces);
             }
         }
 

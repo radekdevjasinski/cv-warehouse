@@ -10,6 +10,7 @@ namespace CvWarehouse.Presentation.Warehouse
     {
         [SerializeField] private WarehouseDemo demo;
         [SerializeField] private CvScreen screen;
+        [SerializeField] private CvProgressView progressView;
         [SerializeField] private string cvFileName = "cv_en.json";
 
         private WarehouseScore score;
@@ -20,6 +21,7 @@ namespace CvWarehouse.Presentation.Warehouse
             if (this == null || screen.RevealState == null)
                 return;
 
+            progressView.Show(screen.RevealState);
             demo.Begin(BlocksOf(screen.RevealState));
             score = demo.Simulation.Score;
             if (isActiveAndEnabled)

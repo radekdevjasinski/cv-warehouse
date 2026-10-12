@@ -27,7 +27,25 @@ namespace CvWarehouse.Presentation.Warehouse
         [SerializeField] private int speedUpgradePricePermille = 10;
         [SerializeField] private int upgradePriceGrowthPercent = 150;
 
+        [Header("Crew, in the order bots join")]
+        [SerializeField] private CrewMember[] crew =
+        {
+            new CrewMember("PIP", new Color32(0x7b, 0xd3, 0x89, 0xff)),
+            new CrewMember("BLIP", new Color32(0xa5, 0x93, 0xe0, 0xff)),
+            new CrewMember("NIB", new Color32(0x6c, 0xb6, 0xe0, 0xff)),
+            new CrewMember("MOX", new Color32(0xe5, 0x8f, 0xb5, 0xff)),
+            new CrewMember("ZEE", new Color32(0xc8, 0xdd, 0x6a, 0xff)),
+            new CrewMember("TUK", new Color32(0x6f, 0xe0, 0xd0, 0xff)),
+            new CrewMember("FIG", new Color32(0xe0, 0xd2, 0x6c, 0xff)),
+            new CrewMember("LUM", new Color32(0xe0, 0x70, 0x70, 0xff))
+        };
+
         public int StartingBots => startingBots;
+
+        public Color CrewColor(int crewSlot)
+        {
+            return crew.Length == 0 ? Color.white : crew[crewSlot % crew.Length].Color;
+        }
 
         public ShopSettings CreateShopSettings()
         {
@@ -57,8 +75,17 @@ namespace CvWarehouse.Presentation.Warehouse
                 UnloadTicks = unloadTicks,
                 LightPiecePoints = lightPiecePoints,
                 MediumPiecePoints = mediumPiecePoints,
-                HeavyPiecePoints = heavyPiecePoints
+                HeavyPiecePoints = heavyPiecePoints,
+                CrewNames = CrewNames()
             };
+        }
+
+        private string[] CrewNames()
+        {
+            var names = new string[crew.Length];
+            for (int index = 0; index < crew.Length; index++)
+                names[index] = crew[index].Name;
+            return names;
         }
     }
 }

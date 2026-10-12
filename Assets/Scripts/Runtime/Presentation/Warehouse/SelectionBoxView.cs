@@ -5,7 +5,7 @@ namespace CvWarehouse.Presentation.Warehouse
 {
     public sealed class SelectionBoxView : MonoBehaviour
     {
-        private const int BoxSortingOrder = 4;
+        private const int BoxSortingOrder = 30000;
 
         [SerializeField] private Color boxColor = new Color(1f, 0.85f, 0.2f, 0.25f);
 

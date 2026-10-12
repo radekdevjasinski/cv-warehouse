@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using CvWarehouse.Core.Cv;
 using CvWarehouse.Core.Warehouse;
 using UnityEngine;
 
@@ -7,20 +6,25 @@ namespace CvWarehouse.Presentation.Warehouse
 {
     public sealed class WarehouseBoxesView : MonoBehaviour
     {
-        private const int SortingOrder = 1;
+        private const int BoxLayer = 0;
         private const int NothingShown = -1;
+        private const float BottomEdgeAboveOrigin = 1f / DepthSorting.PixelsPerUnit;
 
-        [SerializeField] private Color lightColor = new Color(0.95f, 0.80f, 0.35f);
-        [SerializeField] private Color mediumColor = new Color(0.90f, 0.55f, 0.25f);
-        [SerializeField] private Color heavyColor = new Color(0.80f, 0.30f, 0.25f);
-        [SerializeField] private float gap = 0.12f;
-        [SerializeField] private float emptiestAlpha = 0.35f;
+        [SerializeField] private BoxSkin skin;
 
         private IReadOnlyList<Box> boxes;
         private SpriteRenderer[] boxRenderers;
         private int[] shownPieces;
 
-        public int VisibleBoxCount { get; private set; }
+        public Sprite ShownSprite(int index)
+        {
+            return boxRenderers[index].sprite;
+        }
+
+        public int SortingOrder(int index)
+        {
+            return boxRenderers[index].sortingOrder;
+        }
 
         public void Show(WarehouseLayout layout, SquareShapeFactory shapes)
         {
@@ -44,11 +48,8 @@ namespace CvWarehouse.Presentation.Warehouse
 
         private SpriteRenderer CreateBox(Box box, SquareShapeFactory shapes)
         {
-            SpriteRenderer boxRenderer = shapes.CreateSquare("Box " + box.Id, transform, SortingOrder);
-            Transform boxTransform = boxRenderer.transform;
-            boxTransform.localPosition = new Vector3(box.Origin.X + box.Size.Width * 0.5f, box.Origin.Y + box.Size.Height * 0.5f);
-            boxTransform.localScale = new Vector3(box.Size.Width - gap, box.Size.Height - gap, 1f);
-            boxRenderer.enabled = false;
+            SpriteRenderer boxRenderer = shapes.CreateSquare("Box " + box.Id, transform, DepthSorting.OnTheFloorOrder);
+            boxRenderer.transform.localPosition = new Vector3(box.Origin.X + box.Size.Width * 0.5f, box.Origin.Y + box.Size.Height * 0.5f);
             return boxRenderer;
         }
 
@@ -67,26 +68,10 @@ namespace CvWarehouse.Presentation.Warehouse
 
         private void RefreshBox(SpriteRenderer boxRenderer, Box box)
         {
-            if (boxRenderer.enabled == box.IsEmpty)
-                VisibleBoxCount += box.IsEmpty ? -1 : 1;
-
-            boxRenderer.enabled = !box.IsEmpty;
-            Color color = ColorOf(box.WeightClass);
-            color.a = Mathf.Lerp(emptiestAlpha, 1f, (float)box.RemainingPieces / box.TotalPieces);
-            boxRenderer.color = color;
-        }
-
-        private Color ColorOf(WeightClass weightClass)
-        {
-            switch (weightClass)
-            {
-                case WeightClass.Heavy:
-                    return heavyColor;
-                case WeightClass.Medium:
-                    return mediumColor;
-                default:
-                    return lightColor;
-            }
+            boxRenderer.sprite = skin.LookOf(box.WeightClass).SpriteOf(box);
+            boxRenderer.sortingOrder = box.IsEmpty
+                ? DepthSorting.OnTheFloorOrder
+                : DepthSorting.OrderAt(box.Origin.Y + BottomEdgeAboveOrigin, BoxLayer);
         }
     }
 }

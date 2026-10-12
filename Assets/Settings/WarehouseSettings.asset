@@ -15,12 +15,35 @@ MonoBehaviour:
   ticksPerSecond: 60
   maxTicksPerFrame: 5
   ticksPerCell: 8
-  extractTicks: 30
+  speedStepPercent: 25
+  lightExtractTicks: 20
+  mediumExtractTicks: 30
+  heavyExtractTicks: 45
   unloadTicks: 20
-  repathWaitTicks: 15
-  sidestepWaitTicks: 60
-  carryPieces: 1
   lightPiecePoints: 1
   mediumPiecePoints: 2
   heavyPiecePoints: 3
   startingBots: 3
+  firstBotPricePermille: 15
+  botPriceGrowthPercent: 125
+  maxUpgradeLevel: 5
+  carryUpgradePricePermille: 10
+  speedUpgradePricePermille: 10
+  upgradePriceGrowthPercent: 150
+  crew:
+  - name: PIP
+    color: {r: 0.48235294, g: 0.827451, b: 0.5372549, a: 1}
+  - name: BLIP
+    color: {r: 0.64705884, g: 0.5764706, b: 0.8784314, a: 1}
+  - name: NIB
+    color: {r: 0.42352942, g: 0.7137255, b: 0.8784314, a: 1}
+  - name: MOX
+    color: {r: 0.8980392, g: 0.56078434, b: 0.70980394, a: 1}
+  - name: ZEE
+    color: {r: 0.78431374, g: 0.8666667, b: 0.41568628, a: 1}
+  - name: TUK
+    color: {r: 0.43529412, g: 0.8784314, b: 0.8156863, a: 1}
+  - name: FIG
+    color: {r: 0.8784314, g: 0.8235294, b: 0.42352942, a: 1}
+  - name: LUM
+    color: {r: 0.8784314, g: 0.4392157, b: 0.4392157, a: 1}

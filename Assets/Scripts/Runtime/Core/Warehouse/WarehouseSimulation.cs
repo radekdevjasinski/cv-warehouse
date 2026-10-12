@@ -10,6 +10,7 @@ namespace CvWarehouse.Core.Warehouse
         private readonly ReservationTable reservations;
         private readonly BotMover mover;
         private readonly BotBrain brain;
+        private readonly CrewRoster roster;
         private float accumulatedSeconds;
         private int nextBotId;
 
@@ -21,6 +22,7 @@ namespace CvWarehouse.Core.Warehouse
             reservations = new ReservationTable(layout.Grid);
             mover = new BotMover(layout.Grid, settings);
             brain = new BotBrain(layout, settings, reservations, Score, random);
+            roster = new CrewRoster(settings.CrewNames);
         }
 
         public WarehouseLayout Layout { get; }
@@ -100,8 +102,11 @@ namespace CvWarehouse.Core.Warehouse
             if (bots.Count >= MaxBots || !TryFindFreeParkingCell(out GridPosition parkingCell))
                 return false;
 
+            int crewSlot = roster.FirstFreeSlot(bots);
             var bot = new Bot(nextBotId++, parkingCell)
             {
+                CrewSlot = crewSlot,
+                Name = roster.NameOf(crewSlot),
                 ParkingCell = parkingCell,
                 HasParkingCell = true,
                 State = BotState.Parked

@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df24c540bc4b2f647859e96690fc8674, type: 3}
+  m_Name: BoxSkin
+  m_EditorClassIdentifier: CvWarehouse.Runtime::CvWarehouse.Presentation.Warehouse.BoxSkin
+  light:
+    closed: {fileID: 21300000, guid: 4de29ee1a61c40840beb77f57ef6e4a6, type: 3}
+    open: {fileID: 0}
+    empty: {fileID: 21300000, guid: b65387744577b2d43ba8cb24c8e880e1, type: 3}
+    selectionFrame: {fileID: 21300000, guid: 3581ae10786fa144ab269d5654658ba5, type: 3}
+  medium:
+    closed: {fileID: 21300000, guid: b5c4f362eef72cd43941b373b17869b0, type: 3}
+    open: {fileID: 21300000, guid: 668100d049448b84ea265f310ec37169, type: 3}
+    empty: {fileID: 21300000, guid: a1f10fe36a75aad46a427cb8a50806af, type: 3}
+    selectionFrame: {fileID: 21300000, guid: 333b3e5167b1669419d779339243480d, type: 3}
+  heavy:
+    closed: {fileID: 21300000, guid: 0a44bedac9ac0554aa553e8ee5e31c39, type: 3}
+    open: {fileID: 21300000, guid: 64765dbf10e0002478af1547ffeabaea, type: 3}
+    empty: {fileID: 21300000, guid: 67ad78286e28495448c17cac5a07ce5c, type: 3}
+    selectionFrame: {fileID: 21300000, guid: 443b7a440d7e4c044a84af7b6f5c5ebc, type: 3}

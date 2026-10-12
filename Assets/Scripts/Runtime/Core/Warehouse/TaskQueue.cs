@@ -48,6 +48,7 @@ namespace CvWarehouse.Core.Warehouse
 
                 bot.JobBox = box;
                 bot.AccessCell = accessCell;
+                bot.ClaimedWords = Math.Min(bot.CarryLevel, box.OpenWords);
                 bot.ClaimedPieces = box.Claim(bot.CarryLevel, random, bot.Letters);
                 return true;
             }
