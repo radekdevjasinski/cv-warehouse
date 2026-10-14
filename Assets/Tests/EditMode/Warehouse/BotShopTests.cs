@@ -215,6 +215,73 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
             Assert.AreEqual(2, tinyShop.UpgradePrice(bot, BotUpgrade.Carry));
         }
 
+        [Test]
+        public void GroupUpgradePrice_BotsAtDifferentLevels_IsTheSumOfTheirOwnPrices()
+        {
+            FillTheCrew();
+            simulation.Upgrade(FirstBot, BotUpgrade.Carry);
+
+            Assert.AreEqual(3, shop.CountUpgradeable(simulation.Bots, BotUpgrade.Carry));
+            Assert.AreEqual(CarryPrices[1] + CarryPrices[0] + CarryPrices[0], shop.UpgradePrice(simulation.Bots, BotUpgrade.Carry));
+        }
+
+        [Test]
+        public void GroupUpgradePrice_BotAtTheLastLevel_IsLeftOut()
+        {
+            FillTheCrew();
+            while (shop.HasUpgrade(FirstBot, BotUpgrade.Speed))
+                simulation.Upgrade(FirstBot, BotUpgrade.Speed);
+
+            Assert.AreEqual(2, shop.CountUpgradeable(simulation.Bots, BotUpgrade.Speed));
+            Assert.AreEqual(SpeedPrices[0] * 2, shop.UpgradePrice(simulation.Bots, BotUpgrade.Speed));
+        }
+
+        [Test]
+        public void TryUpgradeGroup_EnoughPoints_LiftsEveryBotOneLevelAndTakesTheSum()
+        {
+            FillTheCrew();
+            Earn(simulation.Score.MaxPoints);
+            int pointsBefore = shop.Balance;
+            int price = shop.UpgradePrice(simulation.Bots, BotUpgrade.Carry);
+
+            Assert.IsTrue(shop.TryUpgrade(simulation.Bots, BotUpgrade.Carry));
+
+            foreach (Bot bot in simulation.Bots)
+                Assert.AreEqual(2, bot.CarryLevel);
+            Assert.AreEqual(pointsBefore - price, shop.Balance);
+        }
+
+        [Test]
+        public void TryUpgradeGroup_PointsForSomeBotsButNotAll_UpgradesNobody()
+        {
+            FillTheCrew();
+            Earn(simulation.Score.MaxPoints);
+            while (shop.CanUpgrade(simulation.Bots, BotUpgrade.Carry))
+                shop.TryUpgrade(simulation.Bots, BotUpgrade.Carry);
+            int pointsBefore = shop.Balance;
+            int levelBefore = FirstBot.CarryLevel;
+            Assert.IsTrue(shop.CanUpgrade(FirstBot, BotUpgrade.Carry), "One bot alone should still be affordable.");
+
+            Assert.IsFalse(shop.TryUpgrade(simulation.Bots, BotUpgrade.Carry));
+
+            foreach (Bot bot in simulation.Bots)
+                Assert.AreEqual(levelBefore, bot.CarryLevel);
+            Assert.AreEqual(pointsBefore, shop.Balance);
+        }
+
+        [Test]
+        public void TryUpgradeGroup_EveryBotAtTheLastLevel_DoesNothing()
+        {
+            FillTheCrew();
+            foreach (Bot bot in simulation.Bots)
+                while (shop.HasUpgrade(bot, BotUpgrade.Speed))
+                    simulation.Upgrade(bot, BotUpgrade.Speed);
+
+            Assert.AreEqual(0, shop.CountUpgradeable(simulation.Bots, BotUpgrade.Speed));
+            Assert.IsFalse(shop.CanUpgrade(simulation.Bots, BotUpgrade.Speed));
+            Assert.IsFalse(shop.TryUpgrade(simulation.Bots, BotUpgrade.Speed));
+        }
+
         private static WarehouseSimulation NewSimulation(int heavyPieces)
         {
             WarehouseLayout layout = new WarehouseLayoutBuilder(GridSide, GridSide)
@@ -241,6 +308,15 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
                 SpeedUpgradePricePermille = 20,
                 UpgradePriceGrowthPercent = 150
             });
+        }
+
+        private void FillTheCrew()
+        {
+            while (simulation.TryAddBot())
+            {
+            }
+
+            Assert.AreEqual(3, simulation.Bots.Count);
         }
 
         private void Earn(int points)

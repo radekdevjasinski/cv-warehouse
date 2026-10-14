@@ -57,19 +57,6 @@ namespace CvWarehouse.Presentation.Warehouse
                 button.interactable = isInteractable;
         }
 
-        private static string NameOf(BotFocus focus)
-        {
-            switch (focus)
-            {
-                case BotFocus.BiggestBox:
-                    return "Biggest box";
-                case BotFocus.SmallestBox:
-                    return "Smallest box";
-                default:
-                    return "Closest box";
-            }
-        }
-
         private void OnEnable()
         {
             upgradeCarryButton.onClick.AddListener(UpgradeCarry);
@@ -213,7 +200,7 @@ namespace CvWarehouse.Presentation.Warehouse
 
             isFocusShown = true;
             shownFocus = bot.Focus;
-            focusText.SetText(NameOf(bot.Focus));
+            focusText.SetText(BotFocusNames.NameOf(bot.Focus));
         }
     }
 }

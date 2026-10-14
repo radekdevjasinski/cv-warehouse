@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace CvWarehouse.Core.Warehouse
 {
@@ -52,6 +53,29 @@ namespace CvWarehouse.Core.Warehouse
             return Grow(ShareOfAllPoints(firstPricePermille), boughtLevels, settings.UpgradePriceGrowthPercent);
         }
 
+        public int CountUpgradeable(IReadOnlyList<Bot> bots, BotUpgrade upgrade)
+        {
+            int upgradeable = 0;
+            for (int index = 0; index < bots.Count; index++)
+                if (HasUpgrade(bots[index], upgrade))
+                    upgradeable++;
+            return upgradeable;
+        }
+
+        public int UpgradePrice(IReadOnlyList<Bot> bots, BotUpgrade upgrade)
+        {
+            int price = 0;
+            for (int index = 0; index < bots.Count; index++)
+                if (HasUpgrade(bots[index], upgrade))
+                    price += UpgradePrice(bots[index], upgrade);
+            return price;
+        }
+
+        public bool CanUpgrade(IReadOnlyList<Bot> bots, BotUpgrade upgrade)
+        {
+            return CountUpgradeable(bots, upgrade) > 0 && Balance >= UpgradePrice(bots, upgrade);
+        }
+
         public bool TryBuyBot()
         {
             int price = BotPrice;
@@ -69,6 +93,16 @@ namespace CvWarehouse.Core.Warehouse
 
             spentPoints += UpgradePrice(bot, upgrade);
             simulation.Upgrade(bot, upgrade);
+            return true;
+        }
+
+        public bool TryUpgrade(IReadOnlyList<Bot> bots, BotUpgrade upgrade)
+        {
+            if (!CanUpgrade(bots, upgrade))
+                return false;
+
+            for (int index = 0; index < bots.Count; index++)
+                TryUpgrade(bots[index], upgrade);
             return true;
         }
 

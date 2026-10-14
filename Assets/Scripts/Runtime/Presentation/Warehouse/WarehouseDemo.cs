@@ -63,7 +63,7 @@ namespace CvWarehouse.Presentation.Warehouse
             boxesView.Show(layout, shapes);
             boxHighlightView.Show(BoxSelection, shapes);
             botsView.Show(Simulation, Selection, shapes);
-            routeView.Show(Selection, shapeMaterial);
+            routeView.Show(Selection, shapeMaterial, Simulation.MaxBots);
             selectionBoxView.Show(shapes);
         }
 
@@ -74,7 +74,7 @@ namespace CvWarehouse.Presentation.Warehouse
             shiftStatusView.Show(Simulation);
             crewListView.Show(Simulation, Selection, BoxSelection);
             botPanelView.Show(Simulation, Shop, Selection);
-            botGroupPanelView.Show(Simulation, Selection);
+            botGroupPanelView.Show(Simulation, Shop, Selection);
             boxPanelView.Show(BoxSelection);
             botSelector.Connect(Simulation, Selection, BoxSelection);
             pauseControl.Show(Simulation);

@@ -38,6 +38,14 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
         private const string BotGroupWindowName = "BotGroupWindow";
         private const string BotGroupTextName = "BotGroupText";
         private const string DeleteBotsButtonName = "DeleteBotsButton";
+        private const string GroupCarryTextName = "GroupCarryText";
+        private const string GroupSpeedTextName = "GroupSpeedText";
+        private const string GroupUpgradeCarryButtonName = "GroupUpgradeCarryButton";
+        private const string GroupUpgradeSpeedButtonName = "GroupUpgradeSpeedButton";
+        private const string GroupFocusNameTextName = "GroupFocusNameText";
+        private const string GroupNextFocusButtonName = "GroupNextFocusButton";
+        private const string GroupPreviousFocusButtonName = "GroupPreviousFocusButton";
+        private const string CloseBotGroupWindowButtonName = "CloseBotGroupWindowButton";
         private const string BoxWindowName = "BoxWindow";
         private const string BoxWeightTextName = "BoxWeightText";
         private const string BoxCategoryTextName = "BoxCategoryText";
@@ -46,6 +54,7 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
         private const string PausedBadgeName = "PausedBadge";
         private const float PositionTolerance = 0.001f;
         private const int StartingBots = 3;
+        private const int LastLevel = 5;
         private const string WaybillPanelPath = "CvCanvas/Panel";
         private const string ExpandButtonName = "ExpandButton";
         private const string AutoButtonName = "AutoButton";
@@ -583,7 +592,7 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
             Assert.AreEqual("Multiple bots selected", GameObject.Find(BotGroupTextName).GetComponent<TMP_Text>().text);
             Assert.IsNotNull(GameObject.Find(BotGroupWindowName));
             Assert.IsNull(GameObject.Find(BotWindowName));
-            Assert.AreEqual(0, Object.FindAnyObjectByType<BotRouteView>().VisiblePointCount);
+            Assert.AreEqual(StartingBots, Object.FindAnyObjectByType<BotRouteView>().VisibleRouteCount);
         }
 
         [UnityTest]
@@ -1287,6 +1296,208 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
             waybill.DeliverLetters(contactChip.Revealable.Reveal.Block.Id, new[] { 0 }, HighlightSeconds);
 
             Assert.IsTrue(contactChip.IsIconVisible);
+        }
+
+        [UnityTest]
+        public IEnumerator RouteView_OneOrSeveralBotsSelected_DrawsEachRouteInItsCrewColourAndThinnerForAGroup()
+        {
+            BotRouteView routeView = Object.FindAnyObjectByType<BotRouteView>();
+            demo.Simulation.Tick();
+            TapOn(demo.Simulation.Bots[0]);
+            yield return null;
+            float singleWidth = routeView.Route(0).widthMultiplier;
+            Color pipRoute = routeView.Route(0).startColor;
+            Assert.AreEqual(1, routeView.VisibleRouteCount);
+            Assert.Less(pipRoute.a, 1f);
+            pipRoute.a = 1f;
+            Assert.AreEqual(new Color32(0x7b, 0xd3, 0x89, 0xff), (Color32)pipRoute);
+
+            SelectEveryBot();
+            yield return null;
+
+            Assert.AreEqual(StartingBots, routeView.VisibleRouteCount);
+            var blip = new Color32(0xa5, 0x93, 0xe0, 0xff);
+            Color blipRoute = routeView.Route(1).startColor;
+            Assert.Less(blipRoute.a, 1f);
+            blipRoute.a = 1f;
+            Assert.AreEqual(blip, (Color32)blipRoute);
+            Assert.Less(routeView.Route(1).widthMultiplier, singleWidth);
+            Vector3 secondRouteStart = routeView.Route(1).GetPosition(0);
+            Assert.AreEqual(demo.Simulation.Bots[1].CentreX, secondRouteStart.x, PositionTolerance);
+            Assert.AreEqual(demo.Simulation.Bots[1].CentreY, secondRouteStart.y, PositionTolerance);
+        }
+
+        [UnityTest]
+        public IEnumerator RouteView_SelectionCleared_HidesEveryRoute()
+        {
+            BotRouteView routeView = Object.FindAnyObjectByType<BotRouteView>();
+            demo.Simulation.Tick();
+            SelectEveryBot();
+            yield return null;
+
+            demo.Selection.Clear();
+            yield return null;
+
+            Assert.AreEqual(0, routeView.VisibleRouteCount);
+            for (int index = 0; index < StartingBots; index++)
+                Assert.AreEqual(0, routeView.Route(index).positionCount);
+        }
+
+        [UnityTest]
+        public IEnumerator GroupWindow_BotsAtTheSameLevels_ShowsThoseLevelsAndThePriceForAllOfThem()
+        {
+            SelectEveryBot();
+            yield return null;
+            Button upgradeCarryButton = GameObject.Find(GroupUpgradeCarryButtonName).GetComponent<Button>();
+            int carryPrice = demo.Shop.UpgradePrice(demo.Simulation.Bots, BotUpgrade.Carry);
+            int speedPrice = demo.Shop.UpgradePrice(demo.Simulation.Bots, BotUpgrade.Speed);
+
+            Assert.AreEqual("Words per haul: 1", GameObject.Find(GroupCarryTextName).GetComponent<TMP_Text>().text);
+            Assert.AreEqual("Speed: 1", GameObject.Find(GroupSpeedTextName).GetComponent<TMP_Text>().text);
+            Assert.AreEqual("Words x3 (" + carryPrice + ")", upgradeCarryButton.GetComponentInChildren<TMP_Text>().text);
+            Assert.AreEqual(
+                "Speed x3 (" + speedPrice + ")",
+                GameObject.Find(GroupUpgradeSpeedButtonName).GetComponentInChildren<TMP_Text>().text);
+            Assert.AreEqual(demo.Shop.UpgradePrice(demo.Simulation.Bots[0], BotUpgrade.Carry) * StartingBots, carryPrice);
+            Assert.IsFalse(upgradeCarryButton.interactable);
+        }
+
+        [UnityTest]
+        public IEnumerator GroupUpgradeCarryButton_ClickedWithEnoughPoints_UpgradesEverySelectedBotForTheSum()
+        {
+            SelectEveryBot();
+            yield return null;
+            Button upgradeCarryButton = GameObject.Find(GroupUpgradeCarryButtonName).GetComponent<Button>();
+            TickUntil(() => demo.Shop.CanUpgrade(demo.Simulation.Bots, BotUpgrade.Carry));
+            int price = demo.Shop.UpgradePrice(demo.Simulation.Bots, BotUpgrade.Carry);
+            int pointsBefore = demo.Shop.Balance;
+            yield return null;
+            Assert.IsTrue(upgradeCarryButton.interactable);
+
+            upgradeCarryButton.onClick.Invoke();
+            yield return null;
+
+            foreach (Bot bot in demo.Simulation.Bots)
+            {
+                Assert.AreEqual(2, bot.CarryLevel);
+                Assert.AreEqual(1, bot.SpeedLevel);
+            }
+
+            Assert.AreEqual(pointsBefore - price, demo.Shop.Balance);
+            Assert.AreEqual("Words per haul: 2", GameObject.Find(GroupCarryTextName).GetComponent<TMP_Text>().text);
+        }
+
+        [UnityTest]
+        public IEnumerator GroupWindow_BotsAtDifferentLevels_ShowsTheRangeAndCountsOnlyBotsThatCanStillGoUp()
+        {
+            Bot firstBot = demo.Simulation.Bots[0];
+            while (demo.Shop.HasUpgrade(firstBot, BotUpgrade.Speed))
+                demo.Simulation.Upgrade(firstBot, BotUpgrade.Speed);
+            SelectEveryBot();
+            yield return null;
+
+            Assert.AreEqual("Speed: 1-5", GameObject.Find(GroupSpeedTextName).GetComponent<TMP_Text>().text);
+            StringAssert.StartsWith(
+                "Speed x2 (",
+                GameObject.Find(GroupUpgradeSpeedButtonName).GetComponentInChildren<TMP_Text>().text);
+        }
+
+        [UnityTest]
+        public IEnumerator GroupWindow_EveryBotAtTheLastLevel_HidesThatUpgradeButton()
+        {
+            foreach (Bot bot in demo.Simulation.Bots)
+                while (demo.Shop.HasUpgrade(bot, BotUpgrade.Carry))
+                    demo.Simulation.Upgrade(bot, BotUpgrade.Carry);
+            SelectEveryBot();
+            yield return null;
+
+            Assert.IsNull(GameObject.Find(GroupUpgradeCarryButtonName));
+            Assert.IsNotNull(GameObject.Find(GroupUpgradeSpeedButtonName));
+            Assert.AreEqual("Words per haul: 5", GameObject.Find(GroupCarryTextName).GetComponent<TMP_Text>().text);
+        }
+
+        [UnityTest]
+        public IEnumerator GroupFocus_BotsOnDifferentFocuses_SaysDifferentUntilAnArrowGivesThemAllTheSame()
+        {
+            demo.Simulation.SetFocus(demo.Simulation.Bots[0], BotFocus.BiggestBox);
+            SelectEveryBot();
+            yield return null;
+            TMP_Text focusName = GameObject.Find(GroupFocusNameTextName).GetComponent<TMP_Text>();
+            Button nextButton = GameObject.Find(GroupNextFocusButtonName).GetComponent<Button>();
+            Assert.AreEqual("Different", focusName.text);
+
+            nextButton.onClick.Invoke();
+            yield return null;
+
+            foreach (Bot bot in demo.Simulation.Bots)
+                Assert.AreEqual(BotFocus.ClosestBox, bot.Focus);
+            Assert.AreEqual("Closest box", focusName.text);
+
+            nextButton.onClick.Invoke();
+            yield return null;
+
+            foreach (Bot bot in demo.Simulation.Bots)
+                Assert.AreEqual(BotFocus.BiggestBox, bot.Focus);
+            Assert.AreEqual("Biggest box", focusName.text);
+        }
+
+        [UnityTest]
+        public IEnumerator GroupFocus_PreviousClickedOnASharedFocus_StepsEveryBotBack()
+        {
+            SelectEveryBot();
+            yield return null;
+            Assert.AreEqual("Closest box", GameObject.Find(GroupFocusNameTextName).GetComponent<TMP_Text>().text);
+
+            GameObject.Find(GroupPreviousFocusButtonName).GetComponent<Button>().onClick.Invoke();
+            yield return null;
+
+            foreach (Bot bot in demo.Simulation.Bots)
+                Assert.AreEqual(BotFocus.SmallestBox, bot.Focus);
+            Assert.AreEqual("Smallest box", GameObject.Find(GroupFocusNameTextName).GetComponent<TMP_Text>().text);
+        }
+
+        [UnityTest]
+        public IEnumerator CloseBotGroupWindowButton_Clicked_ClearsTheSelection()
+        {
+            SelectEveryBot();
+            yield return null;
+
+            GameObject.Find(CloseBotGroupWindowButtonName).GetComponent<Button>().onClick.Invoke();
+            yield return null;
+
+            Assert.AreEqual(0, demo.Selection.Count);
+            Assert.IsNull(GameObject.Find(BotGroupWindowName));
+        }
+
+        [UnityTest]
+        public IEnumerator GroupWindow_FullCrewOneLevelBelowTheLast_ShowsBothUpgradeLabelsAtFullSize()
+        {
+            while (demo.Simulation.TryAddBot())
+            {
+            }
+
+            foreach (Bot bot in demo.Simulation.Bots)
+            {
+                while (bot.CarryLevel < LastLevel - 1)
+                    demo.Simulation.Upgrade(bot, BotUpgrade.Carry);
+                while (bot.SpeedLevel < LastLevel - 1)
+                    demo.Simulation.Upgrade(bot, BotUpgrade.Speed);
+            }
+
+            SelectEveryBot();
+            yield return null;
+            yield return null;
+
+            foreach (string buttonName in new[] { GroupUpgradeCarryButtonName, GroupUpgradeSpeedButtonName })
+            {
+                TMP_Text label = GameObject.Find(buttonName).GetComponentInChildren<TMP_Text>();
+                Assert.AreEqual(label.fontSizeMax, label.fontSize, PositionTolerance, label.text + " had to shrink");
+            }
+        }
+
+        private void SelectEveryBot()
+        {
+            demo.Selection.SelectAll(demo.Simulation.Bots);
         }
 
         private static void DeliverToTheLastBlock(CvRevealState waybill)

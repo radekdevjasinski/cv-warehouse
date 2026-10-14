@@ -2,6 +2,9 @@ namespace CvWarehouse.Core.Warehouse
 {
     public static class BotFocusCycle
     {
+        public const BotFocus First = BotFocus.ClosestBox;
+        public const BotFocus Last = BotFocus.SmallestBox;
+
         private const int FocusCount = 3;
 
         public static BotFocus Next(BotFocus focus)
