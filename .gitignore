@@ -108,3 +108,10 @@ InitTestScene*.unity*
 
 # CV source documents
 cv*.pdf
+
+# Burst output left at the project root by WebGL builds
+/[Dd]ata/
+
+# Performance Testing files the test runner drops into Resources during a run
+/[Aa]ssets/[Rr]esources/PerformanceTestRun*.json*
+/[Aa]ssets/[Rr]esources.meta
