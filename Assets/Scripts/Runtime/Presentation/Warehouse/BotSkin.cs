@@ -16,6 +16,14 @@ namespace CvWarehouse.Presentation.Warehouse
         [Header("Cargo, from one sheet of paper up")]
         [SerializeField] private Sprite[] cargoStacks;
 
+        [Header("Extraction progress bar")]
+        [SerializeField] private Color progressFrameColor = new Color32(0x1a, 0x1c, 0x2c, 0xff);
+        [SerializeField] private Color progressFillColor = new Color32(0xff, 0xcd, 0x75, 0xff);
+
+        public Color ProgressFrameColor => progressFrameColor;
+
+        public Color ProgressFillColor => progressFillColor;
+
         public Sprite Body(BotPose pose)
         {
             return pose.IsStepping ? bodyStep : bodyStand;

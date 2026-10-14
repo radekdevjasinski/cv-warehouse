@@ -18,6 +18,7 @@ namespace CvWarehouse.Presentation.Warehouse
         private readonly SpriteRenderer body;
         private readonly SpriteRenderer face;
         private readonly SpriteRenderer cargo;
+        private readonly BotProgressBar progressBar;
 
         public BotFigure(string name, Transform parent, BotSkin skin, SquareShapeFactory shapes)
         {
@@ -25,6 +26,7 @@ namespace CvWarehouse.Presentation.Warehouse
             body = shapes.CreateSquare(name, parent, BodyLayer);
             face = shapes.CreateSquare("Face", body.transform, FaceLayer);
             cargo = shapes.CreateSquare("Cargo", body.transform, CargoLayer);
+            progressBar = new BotProgressBar(body.transform, skin, shapes);
             root = body.gameObject;
             root.SetActive(false);
         }
@@ -43,6 +45,8 @@ namespace CvWarehouse.Presentation.Warehouse
 
         public int SortingOrder => body.sortingOrder;
 
+        public BotProgressBar ProgressBar => progressBar;
+
         public void Hide()
         {
             if (root.activeSelf)
@@ -59,6 +63,7 @@ namespace CvWarehouse.Presentation.Warehouse
             body.color = color;
             face.sprite = skin.Face(pose);
             ShowCargo(bot, pose);
+            progressBar.Show(bot.ExtractProgress);
             Sort(bot.CentreY - FeetBelowCentre);
         }
 

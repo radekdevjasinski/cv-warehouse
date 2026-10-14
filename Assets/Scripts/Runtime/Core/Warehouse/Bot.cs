@@ -64,6 +64,8 @@ namespace CvWarehouse.Core.Warehouse
 
         public float CentreY => Cell.Y + (NextCell.Y - Cell.Y) * MoveFraction + HalfCell;
 
+        public float ExtractProgress => State == BotState.Extracting && WorkDuration > 0 ? 1f - (float)WorkTicksLeft / WorkDuration : 0f;
+
         public bool IsAtDestination => !IsMoving && Cell == Destination;
 
         public int RouteLength => Path.Count - PathIndex;
@@ -77,6 +79,8 @@ namespace CvWarehouse.Core.Warehouse
         internal int ClaimedWords { get; set; }
 
         internal int WorkTicksLeft { get; set; }
+
+        internal int WorkDuration { get; set; }
 
         internal bool HasPath => PathIndex < Path.Count;
 

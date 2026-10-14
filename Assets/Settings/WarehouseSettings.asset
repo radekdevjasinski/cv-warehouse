@@ -14,15 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: CvWarehouse.Runtime::CvWarehouse.Presentation.Warehouse.WarehouseSettings
   ticksPerSecond: 60
   maxTicksPerFrame: 5
-  ticksPerCell: 8
+  ticksPerCell: 16
   speedStepPercent: 25
-  lightExtractTicks: 20
-  mediumExtractTicks: 30
-  heavyExtractTicks: 45
+  normalExtractTicks: 30
+  importantExtractTicks: 60
+  keyExtractTicks: 120
   unloadTicks: 20
-  lightPiecePoints: 1
-  mediumPiecePoints: 2
-  heavyPiecePoints: 3
+  normalPiecePoints: 1
+  importantPiecePoints: 2
+  keyPiecePoints: 3
   startingBots: 3
   firstBotPricePermille: 15
   botPriceGrowthPercent: 125

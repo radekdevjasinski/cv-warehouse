@@ -162,6 +162,27 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         }
 
         [Test]
+        public void ExtractProgress_WhileTakingTextOut_GrowsFromZeroToOneAndResetsWhenDone()
+        {
+            var settings = new SimulationSettings { NormalExtractTicks = 10 };
+            WarehouseSimulation simulation = NewSimulationWithOneBox(CvTestBlocks.WithLetters(SmallBoxPieces), settings, TestBoxKinds.Of(Importance.Normal));
+            simulation.TryAddBot();
+            Bot bot = simulation.Bots[0];
+            Assert.AreEqual(0f, bot.ExtractProgress);
+            for (int tick = 0; tick < MaxTicks && bot.State != BotState.Extracting; tick++)
+                simulation.Tick();
+
+            Assert.AreEqual(0f, bot.ExtractProgress);
+            for (int tick = 0; tick < 5; tick++)
+                simulation.Tick();
+            Assert.AreEqual(0.5f, bot.ExtractProgress, 0.001f);
+
+            for (int tick = 0; tick < MaxTicks && bot.State == BotState.Extracting; tick++)
+                simulation.Tick();
+            Assert.AreEqual(0f, bot.ExtractProgress);
+        }
+
+        [Test]
         public void TryRemoveBot_BotCarryingText_CountsItsLettersAsDelivered()
         {
             WarehouseSimulation simulation = NewSmallSimulation(new SimulationSettings());

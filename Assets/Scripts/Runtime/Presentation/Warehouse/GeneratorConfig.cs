@@ -15,8 +15,8 @@ namespace CvWarehouse.Presentation.Warehouse
         [SerializeField] private int minStorageHeight = 12;
         [SerializeField] private int truckWidth = 10;
         [SerializeField] private int dropCells = 6;
-        [SerializeField] private int parkingPerSide = 6;
-        [SerializeField] private int rampDepth = 4;
+        [SerializeField] private int parkingPerSide = 4;
+        [SerializeField] private int rampDepth = 3;
 
         [Header("Boxes that open the CV")]
         [SerializeField, FormerlySerializedAs("nameWeight")] private Importance nameImportance = Importance.Key;

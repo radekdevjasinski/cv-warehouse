@@ -13,15 +13,15 @@ namespace CvWarehouse.Core.Warehouse
 
         public int MaxTicksPerAdvance { get; set; } = 5;
 
-        public int TicksPerCell { get; set; } = 8;
+        public int TicksPerCell { get; set; } = 16;
 
         public int SpeedStepPercent { get; set; } = 25;
 
-        public int NormalExtractTicks { get; set; } = 20;
+        public int NormalExtractTicks { get; set; } = 30;
 
-        public int ImportantExtractTicks { get; set; } = 30;
+        public int ImportantExtractTicks { get; set; } = 60;
 
-        public int KeyExtractTicks { get; set; } = 45;
+        public int KeyExtractTicks { get; set; } = 120;
 
         public int UnloadTicks { get; set; } = 20;
 

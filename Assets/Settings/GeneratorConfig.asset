@@ -18,8 +18,8 @@ MonoBehaviour:
   minStorageHeight: 12
   truckWidth: 10
   dropCells: 6
-  parkingPerSide: 6
-  rampDepth: 4
+  parkingPerSide: 4
+  rampDepth: 3
   nameImportance: 2
   jobTitleImportance: 1
   contactImportance: 0

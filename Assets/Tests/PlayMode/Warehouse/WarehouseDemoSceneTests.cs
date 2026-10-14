@@ -1129,6 +1129,24 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
         }
 
         [UnityTest]
+        public IEnumerator BotsView_BotTakingTextOut_ShowsAProgressBarThatFillsInWholePixels()
+        {
+            WarehouseBotsView botsView = Object.FindAnyObjectByType<WarehouseBotsView>();
+            Bot bot = demo.Simulation.Bots[0];
+            yield return null;
+            Assert.IsFalse(botsView.Figure(0).ProgressBar.IsVisible);
+
+            TickUntil(() => bot.State == BotState.Extracting && bot.ExtractProgress >= 0.5f);
+            yield return null;
+            Assert.IsTrue(botsView.Figure(0).ProgressBar.IsVisible);
+            Assert.AreEqual(Mathf.FloorToInt(bot.ExtractProgress * 10), botsView.Figure(0).ProgressBar.FilledPixels);
+
+            TickUntil(() => bot.State == BotState.GoingToDrop);
+            yield return null;
+            Assert.IsFalse(botsView.Figure(0).ProgressBar.IsVisible);
+        }
+
+        [UnityTest]
         public IEnumerator BotsView_BotAmongBoxes_IsDrawnBehindTheBoxesBelowItAndInFrontOfTheOnesAbove()
         {
             WarehouseBotsView botsView = Object.FindAnyObjectByType<WarehouseBotsView>();

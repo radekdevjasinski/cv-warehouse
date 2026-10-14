@@ -86,6 +86,7 @@ namespace CvWarehouse.Core.Warehouse
         {
             bot.State = workState;
             bot.WorkTicksLeft = workTicks;
+            bot.WorkDuration = workTicks;
         }
 
         private bool TryStartJob(Bot bot)

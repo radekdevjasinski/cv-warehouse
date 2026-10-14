@@ -9,11 +9,11 @@ namespace CvWarehouse.Presentation.Warehouse
     {
         [SerializeField] private int ticksPerSecond = 60;
         [SerializeField] private int maxTicksPerFrame = 5;
-        [SerializeField] private int ticksPerCell = 8;
+        [SerializeField] private int ticksPerCell = 16;
         [SerializeField] private int speedStepPercent = 25;
-        [SerializeField, FormerlySerializedAs("lightExtractTicks")] private int normalExtractTicks = 20;
-        [SerializeField, FormerlySerializedAs("mediumExtractTicks")] private int importantExtractTicks = 30;
-        [SerializeField, FormerlySerializedAs("heavyExtractTicks")] private int keyExtractTicks = 45;
+        [SerializeField, FormerlySerializedAs("lightExtractTicks")] private int normalExtractTicks = 30;
+        [SerializeField, FormerlySerializedAs("mediumExtractTicks")] private int importantExtractTicks = 60;
+        [SerializeField, FormerlySerializedAs("heavyExtractTicks")] private int keyExtractTicks = 120;
         [SerializeField] private int unloadTicks = 20;
         [SerializeField, FormerlySerializedAs("lightPiecePoints")] private int normalPiecePoints = 1;
         [SerializeField, FormerlySerializedAs("mediumPiecePoints")] private int importantPiecePoints = 2;

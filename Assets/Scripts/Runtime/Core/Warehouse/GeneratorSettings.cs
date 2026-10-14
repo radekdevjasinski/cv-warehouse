@@ -16,9 +16,9 @@ namespace CvWarehouse.Core.Warehouse
 
         public int DropCells { get; set; } = 6;
 
-        public int ParkingPerSide { get; set; } = 6;
+        public int ParkingPerSide { get; set; } = 4;
 
-        public int RampDepth { get; set; } = 4;
+        public int RampDepth { get; set; } = 3;
 
         public Importance NameImportance { get; set; } = Importance.Key;
 

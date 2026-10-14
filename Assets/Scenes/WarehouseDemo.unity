@@ -10929,6 +10929,8 @@ MonoBehaviour:
     - {fileID: 21300000, guid: a6c86847c5eb11149a7ae23697465b35, type: 3}
     - {fileID: 21300000, guid: fbca28cc8f27beb47b56ff4aae09d007, type: 3}
     - {fileID: 21300000, guid: 8ed3d956a084c3a4b928579fa1400ac6, type: 3}
+    progressFrameColor: {r: 0.101960786, g: 0.10980392, b: 0.17254902, a: 1}
+    progressFillColor: {r: 1, g: 0.8039216, b: 0.45882353, a: 1}
   botAnimation:
     ticksPerStepFrame: 8
     secondsBetweenBlinks: 3.2
