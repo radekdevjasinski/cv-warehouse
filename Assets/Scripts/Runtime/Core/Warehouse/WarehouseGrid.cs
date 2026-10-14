@@ -22,6 +22,8 @@ namespace CvWarehouse.Core.Warehouse
 
         public int CellCount => cellTypes.Length;
 
+        public int Version { get; private set; }
+
         public bool Contains(GridPosition position)
         {
             return position.X >= 0 && position.X < Width && position.Y >= 0 && position.Y < Height;
@@ -45,6 +47,14 @@ namespace CvWarehouse.Core.Warehouse
         public void SetCellType(GridPosition position, CellType cellType)
         {
             cellTypes[IndexOf(position)] = cellType;
+            Version++;
+        }
+
+        public WarehouseGrid Clone()
+        {
+            var copy = new WarehouseGrid(Width, Height);
+            Array.Copy(cellTypes, copy.cellTypes, cellTypes.Length);
+            return copy;
         }
 
         public bool IsWalkable(GridPosition position)

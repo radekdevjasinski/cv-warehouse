@@ -8,6 +8,8 @@ namespace CvWarehouse.Presentation.Warehouse
 {
     public sealed class WarehouseWaybill : MonoBehaviour
     {
+        private const string WarehouseNotBuiltMessage = "The warehouse could not be built for this CV file.";
+
         [SerializeField] private WarehouseDemo demo;
         [SerializeField] private CvScreen screen;
         [SerializeField] private CvProgressView progressView;
@@ -22,8 +24,13 @@ namespace CvWarehouse.Presentation.Warehouse
             if (this == null || screen.RevealState == null)
                 return;
 
+            if (!demo.TryBegin(BlocksOf(screen.RevealState)))
+            {
+                screen.ShowError(WarehouseNotBuiltMessage);
+                return;
+            }
+
             progressView.Show(screen.RevealState);
-            demo.Begin(BlocksOf(screen.RevealState));
             score = demo.Simulation.Score;
             if (isActiveAndEnabled)
                 score.Delivered += ShowDelivery;

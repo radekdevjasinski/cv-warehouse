@@ -6,6 +6,8 @@ namespace CvWarehouse.Presentation.Cv
 {
     public sealed class HttpCvTextSource : ICvTextSource
     {
+        private const int TimeoutSeconds = 15;
+
         private readonly string fileName;
 
         public HttpCvTextSource(string fileName)
@@ -16,6 +18,7 @@ namespace CvWarehouse.Presentation.Cv
         public async Awaitable<CvTextResponse> LoadAsync()
         {
             using UnityWebRequest request = UnityWebRequest.Get(BuildUrl());
+            request.timeout = TimeoutSeconds;
             await request.SendWebRequest();
 
             return request.result == UnityWebRequest.Result.Success

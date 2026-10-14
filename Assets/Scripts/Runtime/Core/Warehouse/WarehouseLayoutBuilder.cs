@@ -27,6 +27,11 @@ namespace CvWarehouse.Core.Warehouse
             return true;
         }
 
+        public bool CanEmptyEveryBox()
+        {
+            return new BoxReachability(grid, boxes, dropCells).CanEmptyEveryBox();
+        }
+
         public WarehouseLayoutBuilder Block(GridPosition origin, GridSize size)
         {
             for (int y = origin.Y; y < origin.Y + size.Height; y++)

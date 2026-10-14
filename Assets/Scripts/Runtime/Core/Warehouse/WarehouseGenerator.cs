@@ -31,17 +31,23 @@ namespace CvWarehouse.Core.Warehouse
 
         private int RampY => WallY - 1;
 
-        public WarehouseLayout Generate(IReadOnlyList<CvBlock> blocks)
+        public bool TryGenerate(IReadOnlyList<CvBlock> blocks, out WarehouseLayout layout)
         {
             int boxCells = sizer.CountBoxCells(blocks);
             for (int growthSteps = 0; growthSteps <= MaxGrowthSteps; growthSteps++)
-                if (TryGenerate(blocks, sizer.StorageSizeFor(boxCells, growthSteps)))
-                    return builder.Build();
+            {
+                if (!TryPlaceEverything(blocks, sizer.StorageSizeFor(boxCells, growthSteps)))
+                    continue;
 
-            throw new InvalidOperationException("The warehouse could not fit its boxes.");
+                layout = builder.Build();
+                return true;
+            }
+
+            layout = null;
+            return false;
         }
 
-        private bool TryGenerate(IReadOnlyList<CvBlock> blocks, GridSize storageSize)
+        private bool TryPlaceEverything(IReadOnlyList<CvBlock> blocks, GridSize storageSize)
         {
             storage = storageSize;
             builder = new WarehouseLayoutBuilder(storage.Width, WallY + WallHeight);
@@ -52,7 +58,8 @@ namespace CvWarehouse.Core.Warehouse
             return TryPlaceOpeningBoxes(blocks)
                 && TryPlaceEntryBoxes(blocks, BoxSizeClass.Large)
                 && TryPlaceEntryBoxes(blocks, BoxSizeClass.Medium)
-                && TryPlaceEntryBoxes(blocks, BoxSizeClass.Small);
+                && TryPlaceEntryBoxes(blocks, BoxSizeClass.Small)
+                && builder.CanEmptyEveryBox();
         }
 
         private void AddTruckWall()

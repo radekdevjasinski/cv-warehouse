@@ -75,11 +75,6 @@ namespace CvWarehouse.Presentation.Warehouse
         {
             pointAction.performed -= RememberPointerDevice;
             moveAction.Disable();
-            pointAction.Disable();
-            pressAction.Disable();
-            rightPressAction.Disable();
-            middlePressAction.Disable();
-            scrollAction.Disable();
         }
 
         private void Update()

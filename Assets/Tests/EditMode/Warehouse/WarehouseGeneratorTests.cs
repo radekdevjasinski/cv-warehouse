@@ -198,6 +198,18 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         }
 
         [Test]
+        public void TryGenerate_BoxesCanNeverFit_ReturnsFalseWithoutALayout()
+        {
+            List<CvBlock> blocks = CvTestBlocks.BuildCv(1, 1, 1);
+            var settings = new GeneratorSettings { FillPercent = 1000000, MinWidth = 1, MinStorageHeight = 1 };
+
+            bool isGenerated = new WarehouseGenerator(settings, new Random(Seed)).TryGenerate(blocks, out WarehouseLayout layout);
+
+            Assert.IsFalse(isGenerated);
+            Assert.IsNull(layout);
+        }
+
+        [Test]
         public void Generate_TinyCv_StillHasRoomForTheRamp()
         {
             List<CvBlock> blocks = CvTestBlocks.Build(CvTestBlocks.NameAndProfileCv);
@@ -239,7 +251,8 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
 
         private static WarehouseLayout Generate(IReadOnlyList<CvBlock> blocks, GeneratorSettings settings, int seed)
         {
-            return new WarehouseGenerator(settings, new Random(seed)).Generate(blocks);
+            Assert.IsTrue(new WarehouseGenerator(settings, new Random(seed)).TryGenerate(blocks, out WarehouseLayout layout), "No warehouse with seed " + seed);
+            return layout;
         }
 
         private static Box BoxOf(WarehouseLayout layout, CvBlock block)

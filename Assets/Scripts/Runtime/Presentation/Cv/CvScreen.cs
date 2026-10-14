@@ -21,18 +21,23 @@ namespace CvWarehouse.Presentation.Cv
 
             if (!response.IsSuccess)
             {
-                errorView.Show(response.Error);
+                ShowError(response.Error);
                 return;
             }
 
             ShowParsed(parser.Parse(response.Text));
         }
 
+        public void ShowError(string message)
+        {
+            errorView.Show(message);
+        }
+
         private void ShowParsed(CvParseResult result)
         {
             if (!result.IsValid)
             {
-                errorView.Show(result.Error);
+                ShowError(result.Error);
                 return;
             }
 

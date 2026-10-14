@@ -41,10 +41,12 @@ namespace CvWarehouse.Presentation.Warehouse
 
         public int Seed => seed;
 
-        public void Begin(IReadOnlyList<CvBlock> blocks)
+        public bool TryBegin(IReadOnlyList<CvBlock> blocks)
         {
             var random = new System.Random(seed);
-            WarehouseLayout layout = new WarehouseGenerator(generatorConfig.CreateGeneratorSettings(), random).Generate(blocks);
+            if (!new WarehouseGenerator(generatorConfig.CreateGeneratorSettings(), random).TryGenerate(blocks, out WarehouseLayout layout))
+                return false;
+
             Simulation = new WarehouseSimulation(layout, settings.CreateSimulationSettings(), random);
             for (int bot = 0; bot < settings.StartingBots; bot++)
                 Simulation.TryAddBot();
@@ -56,6 +58,7 @@ namespace CvWarehouse.Presentation.Warehouse
             warehouseCamera.Frame(layout);
             ShowWarehouse(layout);
             ShowControls();
+            return true;
         }
 
         private void ShowWarehouse(WarehouseLayout layout)

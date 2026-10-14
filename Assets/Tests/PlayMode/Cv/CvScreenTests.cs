@@ -190,6 +190,18 @@ namespace CvWarehouse.Tests.PlayMode.Cv
             Assert.AreEqual("Could not load the CV file.", errorView.Message);
         }
 
+        [UnityTest]
+        public IEnumerator ShowError_AfterAValidCv_ShowsTheMessage()
+        {
+            yield return Show(CvTextResponse.Success(ValidCv));
+
+            screen.ShowError("The warehouse could not be built.");
+
+            CvErrorView errorView = screen.GetComponentInChildren<CvErrorView>();
+            Assert.IsTrue(errorView.IsVisible);
+            Assert.AreEqual("The warehouse could not be built.", errorView.Message);
+        }
+
         [Test]
         public void ScrollView_OwnBackground_CatchesThePointerForScrolling()
         {

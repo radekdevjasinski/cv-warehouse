@@ -6,15 +6,20 @@ namespace CvWarehouse.Core.Warehouse
     public sealed class ReservationTable
     {
         private const int NoOwner = -1;
+        private const int NotMeasured = -1;
 
         private readonly WarehouseGrid grid;
         private readonly int[] ownerAtCell;
+        private readonly List<GridPosition> walkStart = new List<GridPosition> { default };
+        private readonly DistanceField walkDistances;
+        private int measuredGridVersion = NotMeasured;
 
         public ReservationTable(WarehouseGrid grid)
         {
             this.grid = grid;
             ownerAtCell = new int[grid.CellCount];
             Array.Fill(ownerAtCell, NoOwner);
+            walkDistances = new DistanceField(grid, walkStart);
         }
 
         public bool IsReserved(GridPosition position)
@@ -33,11 +38,16 @@ namespace CvWarehouse.Core.Warehouse
 
         public bool TryReserveNearest(IReadOnlyList<GridPosition> candidates, Bot bot, out GridPosition reserved)
         {
+            reserved = default;
+            if (!HasFreeCandidate(candidates))
+                return false;
+
+            MeasureWalksFrom(bot.IsMoving ? bot.NextCell : bot.Cell);
             int nearest = -1;
-            int nearestDistance = int.MaxValue;
+            int nearestDistance = DistanceField.Unreachable;
             for (int candidate = 0; candidate < candidates.Count; candidate++)
             {
-                int distance = GridDirections.OctileDistance(bot.Cell, candidates[candidate]);
+                int distance = walkDistances.GetDistance(candidates[candidate]);
                 if (distance >= nearestDistance || IsReserved(candidates[candidate]))
                     continue;
 
@@ -45,8 +55,11 @@ namespace CvWarehouse.Core.Warehouse
                 nearestDistance = distance;
             }
 
-            reserved = nearest < 0 ? default : candidates[nearest];
-            return nearest >= 0 && TryReserve(reserved, bot.Id);
+            if (nearest < 0)
+                return false;
+
+            reserved = candidates[nearest];
+            return TryReserve(reserved, bot.Id);
         }
 
         public void Release(GridPosition position, int botId)
@@ -61,6 +74,24 @@ namespace CvWarehouse.Core.Warehouse
             for (int cellIndex = 0; cellIndex < ownerAtCell.Length; cellIndex++)
                 if (ownerAtCell[cellIndex] == botId)
                     ownerAtCell[cellIndex] = NoOwner;
+        }
+
+        private bool HasFreeCandidate(IReadOnlyList<GridPosition> candidates)
+        {
+            for (int candidate = 0; candidate < candidates.Count; candidate++)
+                if (!IsReserved(candidates[candidate]))
+                    return true;
+            return false;
+        }
+
+        private void MeasureWalksFrom(GridPosition start)
+        {
+            if (walkStart[0] == start && measuredGridVersion == grid.Version)
+                return;
+
+            walkStart[0] = start;
+            walkDistances.Recompute();
+            measuredGridVersion = grid.Version;
         }
     }
 }

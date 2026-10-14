@@ -595,7 +595,7 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
                 BigClusterRadius = 4
             };
             var random = new Random(Seed);
-            WarehouseLayout layout = new WarehouseGenerator(generatorSettings, random).Generate(CvTestBlocks.BuildCv(5, 14, 45));
+            Assert.IsTrue(new WarehouseGenerator(generatorSettings, random).TryGenerate(CvTestBlocks.BuildCv(5, 14, 45), out WarehouseLayout layout));
             var simulation = new WarehouseSimulation(layout, new SimulationSettings(), random);
             while (simulation.Bots.Count < botCount && simulation.TryAddBot())
             {
