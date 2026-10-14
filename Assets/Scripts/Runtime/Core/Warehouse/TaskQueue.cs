@@ -8,10 +8,12 @@ namespace CvWarehouse.Core.Warehouse
         private static readonly Comparison<Box> NearestTruckFirst = CompareByTruckDistance;
         private static readonly Comparison<Box> BiggestFirst = CompareBiggestFirst;
         private static readonly Comparison<Box> SmallestFirst = CompareSmallestFirst;
+        private static readonly Comparison<Box> MostImportantFirst = CompareMostImportantFirst;
 
         private readonly List<Box> closestBoxes = new List<Box>();
         private readonly List<Box> biggestBoxes = new List<Box>();
         private readonly List<Box> smallestBoxes = new List<Box>();
+        private readonly List<Box> importantBoxes = new List<Box>();
         private readonly ReservationTable reservations;
         private readonly Random random;
 
@@ -22,6 +24,7 @@ namespace CvWarehouse.Core.Warehouse
             closestBoxes.AddRange(layout.Boxes);
             biggestBoxes.AddRange(layout.Boxes);
             smallestBoxes.AddRange(layout.Boxes);
+            importantBoxes.AddRange(layout.Boxes);
             Refresh();
         }
 
@@ -30,9 +33,11 @@ namespace CvWarehouse.Core.Warehouse
             RemoveEmptyBoxes(closestBoxes);
             RemoveEmptyBoxes(biggestBoxes);
             RemoveEmptyBoxes(smallestBoxes);
+            RemoveEmptyBoxes(importantBoxes);
             closestBoxes.Sort(NearestTruckFirst);
             biggestBoxes.Sort(BiggestFirst);
             smallestBoxes.Sort(SmallestFirst);
+            importantBoxes.Sort(MostImportantFirst);
         }
 
         public bool TryAssign(Bot bot)
@@ -71,14 +76,20 @@ namespace CvWarehouse.Core.Warehouse
 
         private static int CompareBiggestFirst(Box left, Box right)
         {
-            int bySize = ((int)right.WeightClass).CompareTo((int)left.WeightClass);
+            int bySize = ((int)right.SizeClass).CompareTo((int)left.SizeClass);
             return bySize != 0 ? bySize : CompareByTruckDistance(left, right);
         }
 
         private static int CompareSmallestFirst(Box left, Box right)
         {
-            int bySize = ((int)left.WeightClass).CompareTo((int)right.WeightClass);
+            int bySize = ((int)left.SizeClass).CompareTo((int)right.SizeClass);
             return bySize != 0 ? bySize : CompareByTruckDistance(left, right);
+        }
+
+        private static int CompareMostImportantFirst(Box left, Box right)
+        {
+            int byImportance = ((int)right.Importance).CompareTo((int)left.Importance);
+            return byImportance != 0 ? byImportance : CompareByTruckDistance(left, right);
         }
 
         private List<Box> BoxesFor(BotFocus focus)
@@ -89,6 +100,8 @@ namespace CvWarehouse.Core.Warehouse
                     return biggestBoxes;
                 case BotFocus.SmallestBox:
                     return smallestBoxes;
+                case BotFocus.MostImportant:
+                    return importantBoxes;
                 default:
                     return closestBoxes;
             }

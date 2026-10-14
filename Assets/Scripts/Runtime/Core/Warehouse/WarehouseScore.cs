@@ -25,7 +25,7 @@ namespace CvWarehouse.Core.Warehouse
 
         public int PointsIn(Box box)
         {
-            return box.TotalPieces * settings.PointsPerPiece(box.WeightClass);
+            return box.TotalPieces * settings.PointsPerPiece(box.Importance);
         }
 
         public void Deliver(Box box, IReadOnlyList<int> letters)
@@ -34,7 +34,7 @@ namespace CvWarehouse.Core.Warehouse
                 return;
 
             DeliveredPieces += letters.Count;
-            Points += letters.Count * settings.PointsPerPiece(box.WeightClass);
+            Points += letters.Count * settings.PointsPerPiece(box.Importance);
             Delivered?.Invoke(box.Block, letters);
         }
     }

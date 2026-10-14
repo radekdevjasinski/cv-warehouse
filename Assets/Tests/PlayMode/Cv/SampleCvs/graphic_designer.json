@@ -28,7 +28,7 @@
           "subtitle": "identity, wayfinding",
           "link": "https://olasikora.example.com/work/city-museum",
           "description": "New logo family, signage for four buildings and a 96-page guideline.",
-          "weight": "heavy",
+          "importance": "key",
           "category": "client"
         },
         {
@@ -36,14 +36,14 @@
           "subtitle": "editorial design",
           "link": "https://olasikora.example.com/work/szum",
           "description": "Art direction of a quarterly magazine, 12 issues.",
-          "weight": "medium",
+          "importance": "important",
           "category": "client"
         },
         {
           "title": "Mgła",
           "subtitle": "typeface",
           "description": "A soft grotesque in six weights with full Polish diacritics.",
-          "weight": "heavy",
+          "importance": "key",
           "category": "craft"
         }
       ]
@@ -68,8 +68,8 @@
       "type": "list",
       "style": "rows",
       "entries": [
-        { "title": "Polish Graphic Design Awards — shortlist, identity", "meta": "2024", "weight": "medium", "category": "client" },
-        { "title": "Most Beautiful Books of the Year — distinction", "meta": "2022", "weight": "medium", "category": "craft" }
+        { "title": "Polish Graphic Design Awards — shortlist, identity", "meta": "2024", "importance": "important", "category": "client" },
+        { "title": "Most Beautiful Books of the Year — distinction", "meta": "2022", "importance": "important", "category": "craft" }
       ]
     },
     {

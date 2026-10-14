@@ -25,14 +25,14 @@
             "Drafted remote-work policies for eleven companies after the 2023 Labour Code amendment.",
             "Supervise two trainee attorneys."
           ],
-          "weight": "heavy"
+          "importance": "key"
         },
         {
           "title": "Associate",
           "subtitle": "Grabowski Legal",
           "meta": "2015 – 2020",
           "description": "Employment litigation and day-to-day HR advisory for manufacturing and retail clients.",
-          "weight": "medium"
+          "importance": "important"
         }
       ]
     },
@@ -45,14 +45,14 @@
           "title": "Monitoring employees after the whistleblower act: where legitimate interest ends",
           "subtitle": "Labour Law Monthly",
           "meta": "No. 4/2025",
-          "weight": "medium"
+          "importance": "important"
         },
         {
           "title": "Remote work in practice",
           "subtitle": "co-author, 2nd edition",
           "meta": "2024",
           "link": "https://example.com/books/remote-work-in-practice-second-edition",
-          "weight": "heavy"
+          "importance": "key"
         }
       ]
     },

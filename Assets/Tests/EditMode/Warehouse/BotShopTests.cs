@@ -9,7 +9,7 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
     {
         private const int GridSide = 8;
         private const int Seed = 12345;
-        private const int HeavyPieces = 100;
+        private const int KeyBoxLetters = 100;
         private const int MaxTicks = 400000;
         private const int FirstBotPrice = 6;
         private const int SecondBotPrice = 9;
@@ -27,7 +27,7 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         [SetUp]
         public void SetUp()
         {
-            simulation = NewSimulation(HeavyPieces);
+            simulation = NewSimulation(KeyBoxLetters);
             shop = NewShop(simulation);
         }
 
@@ -184,7 +184,7 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         [Test]
         public void BotPrice_WarehouseWithTwiceThePoints_IsTwiceAsHigh()
         {
-            WarehouseSimulation biggerSimulation = NewSimulation(HeavyPieces * 2);
+            WarehouseSimulation biggerSimulation = NewSimulation(KeyBoxLetters * 2);
             BotShop biggerShop = NewShop(biggerSimulation);
 
             Assert.AreEqual(FirstBotPrice * 2, biggerShop.BotPrice);
@@ -282,14 +282,14 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
             Assert.IsFalse(shop.TryUpgrade(simulation.Bots, BotUpgrade.Speed));
         }
 
-        private static WarehouseSimulation NewSimulation(int heavyPieces)
+        private static WarehouseSimulation NewSimulation(int letters)
         {
             WarehouseLayout layout = new WarehouseLayoutBuilder(GridSide, GridSide)
                 .AddDropCell(new GridPosition(0, 7))
                 .AddParkingCell(new GridPosition(5, 7))
                 .AddParkingCell(new GridPosition(6, 7))
                 .AddParkingCell(new GridPosition(7, 7))
-                .AddBox(new GridPosition(3, 2), WeightClass.Heavy, CvTestBlocks.WithLetters(heavyPieces))
+                .AddBox(new GridPosition(3, 2), new BoxKind(BoxSizeClass.Large, Importance.Key), CvTestBlocks.WithLetters(letters))
                 .Build();
             var newSimulation = new WarehouseSimulation(layout, new SimulationSettings(), new System.Random(Seed));
             newSimulation.TryAddBot();

@@ -47,7 +47,8 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
         private const string GroupPreviousFocusButtonName = "GroupPreviousFocusButton";
         private const string CloseBotGroupWindowButtonName = "CloseBotGroupWindowButton";
         private const string BoxWindowName = "BoxWindow";
-        private const string BoxWeightTextName = "BoxWeightText";
+        private const string BoxSizeTextName = "BoxSizeText";
+        private const string BoxImportanceTextName = "BoxImportanceText";
         private const string BoxCategoryTextName = "BoxCategoryText";
         private const string CloseBoxWindowButtonName = "CloseBoxWindowButton";
         private const string PauseButtonName = "PauseButton";
@@ -347,37 +348,48 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
         }
 
         [UnityTest]
-        public IEnumerator BoxesView_HeavyBoxPartlyEmptied_ShowsItOpen()
+        public IEnumerator BoxesView_LargeBoxPartlyEmptied_ShowsItOpen()
         {
             WarehouseBoxesView boxesView = Object.FindAnyObjectByType<WarehouseBoxesView>();
-            int heavyBox = IndexOfFirstBox(candidate => candidate.WeightClass == WeightClass.Heavy);
-            Box box = demo.Simulation.Layout.Boxes[heavyBox];
+            int largeBox = IndexOfFirstBox(candidate => candidate.SizeClass == BoxSizeClass.Large);
+            Box box = demo.Simulation.Layout.Boxes[largeBox];
             yield return null;
-            Assert.AreEqual("BoxHeavy", boxesView.ShownSprite(heavyBox).name);
+            Assert.AreEqual(SpriteNameOf(box), boxesView.ShownSprite(largeBox).name);
 
             TickUntil(() => box.RemainingPieces < box.TotalPieces);
             yield return null;
 
             Assert.IsFalse(box.IsEmpty);
-            Assert.AreEqual("BoxHeavyOpen", boxesView.ShownSprite(heavyBox).name);
+            Assert.AreEqual(SpriteNameOf(box) + "Open", boxesView.ShownSprite(largeBox).name);
         }
 
         [UnityTest]
-        public IEnumerator BoxesView_LightBoxPartlyEmptied_StaysClosed()
+        public IEnumerator BoxesView_SmallBoxPartlyEmptied_ShowsItOpen()
         {
             WarehouseBoxesView boxesView = Object.FindAnyObjectByType<WarehouseBoxesView>();
             int startedBox = -1;
 
-            TickUntil(() => (startedBox = IndexOfFirstBox(IsPartlyEmptiedLightBox)) >= 0);
+            TickUntil(() => (startedBox = IndexOfFirstBox(IsPartlyEmptiedSmallBox)) >= 0);
             yield return null;
 
-            Assert.AreEqual("BoxLight", boxesView.ShownSprite(startedBox).name);
+            Box box = demo.Simulation.Layout.Boxes[startedBox];
+            Assert.AreEqual(SpriteNameOf(box) + "Open", boxesView.ShownSprite(startedBox).name);
         }
 
         [UnityTest]
-        public IEnumerator BoxHighlight_HeavyBoxSelected_FramesItsWholeFootprint()
+        public IEnumerator BoxesView_Booted_DrawsEveryBoxInTheMaterialOfItsImportance()
         {
-            Box heavyBox = FirstBox(candidate => candidate.WeightClass == WeightClass.Heavy);
+            WarehouseBoxesView boxesView = Object.FindAnyObjectByType<WarehouseBoxesView>();
+            yield return null;
+
+            for (int index = 0; index < demo.Simulation.Layout.Boxes.Count; index++)
+                Assert.AreEqual(SpriteNameOf(demo.Simulation.Layout.Boxes[index]), boxesView.ShownSprite(index).name);
+        }
+
+        [UnityTest]
+        public IEnumerator BoxHighlight_LargeBoxSelected_FramesItsWholeFootprint()
+        {
+            Box heavyBox = FirstBox(candidate => candidate.SizeClass == BoxSizeClass.Large);
             BoxHighlightView highlight = Object.FindAnyObjectByType<BoxHighlightView>();
 
             TapOn(heavyBox);
@@ -505,7 +517,7 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
             GameObject.Find(NextFocusButtonName).GetComponent<Button>().onClick.Invoke();
             yield return null;
 
-            Assert.AreEqual(BotFocus.BiggestBox, firstBot.Focus);
+            Assert.AreEqual(BotFocus.MostImportant, firstBot.Focus);
         }
 
         [UnityTest]
@@ -521,8 +533,14 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
             nextButton.onClick.Invoke();
             yield return null;
 
-            Assert.AreEqual(BotFocus.BiggestBox, firstBot.Focus);
+            Assert.AreEqual(BotFocus.MostImportant, firstBot.Focus);
             Assert.AreEqual(BotFocus.ClosestBox, demo.Simulation.Bots[1].Focus);
+            Assert.AreEqual("Most important", focusName.text);
+
+            nextButton.onClick.Invoke();
+            yield return null;
+
+            Assert.AreEqual(BotFocus.BiggestBox, firstBot.Focus);
             Assert.AreEqual("Biggest box", focusName.text);
 
             nextButton.onClick.Invoke();
@@ -565,7 +583,7 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
             yield return null;
 
             Assert.AreEqual(BotState.GoingToBox, bot.State);
-            Assert.AreEqual(WeightClass.Heavy, bot.JobBox.WeightClass);
+            Assert.AreEqual(Importance.Key, bot.JobBox.Importance);
             Assert.AreEqual(bot.AccessCell, bot.Destination);
             Vector3 routeEnd = route.GetPosition(route.positionCount - 1);
             Assert.AreEqual(bot.AccessCell.X + 0.5f, routeEnd.x, PositionTolerance);
@@ -689,7 +707,7 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
         }
 
         [UnityTest]
-        public IEnumerator BotSelector_TapOnABox_OpensItsWindowWithWeightAndCategoryAndHighlightsIt()
+        public IEnumerator BotSelector_TapOnABox_OpensItsWindowWithSizeImportanceAndCategoryAndHighlightsIt()
         {
             Box box = FirstBox(candidate => candidate.Block.CategoryName.Length > 0);
             BoxHighlightView highlight = Object.FindAnyObjectByType<BoxHighlightView>();
@@ -699,8 +717,11 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
 
             Assert.AreSame(box, demo.BoxSelection.SelectedBox);
             Assert.AreEqual(
-                "Weight: " + box.WeightClass.ToString().ToLowerInvariant(),
-                GameObject.Find(BoxWeightTextName).GetComponent<TMP_Text>().text);
+                "Size: " + box.SizeClass.ToString().ToLowerInvariant() + " (" + box.Block.Words.Count + " words)",
+                GameObject.Find(BoxSizeTextName).GetComponent<TMP_Text>().text);
+            Assert.AreEqual(
+                "Importance: " + box.Importance.ToString().ToLowerInvariant(),
+                GameObject.Find(BoxImportanceTextName).GetComponent<TMP_Text>().text);
             Assert.AreEqual("Category: " + box.Block.CategoryName, GameObject.Find(BoxCategoryTextName).GetComponent<TMP_Text>().text);
             Assert.IsTrue(highlight.IsVisible);
             Assert.AreEqual(box.Origin.X + box.Size.Width * 0.5f, highlight.Position.x, PositionTolerance);
@@ -715,23 +736,23 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
             TapOn(nameBox);
             yield return null;
 
-            Assert.AreEqual("Weight: heavy", GameObject.Find(BoxWeightTextName).GetComponent<TMP_Text>().text);
+            Assert.AreEqual("Importance: key", GameObject.Find(BoxImportanceTextName).GetComponent<TMP_Text>().text);
             Assert.AreEqual("Category: none", GameObject.Find(BoxCategoryTextName).GetComponent<TMP_Text>().text);
         }
 
         [UnityTest]
         public IEnumerator BotSelector_TapOnAnotherBox_ShowsThatBoxInstead()
         {
-            Box lightBox = FirstBox(candidate => candidate.WeightClass == WeightClass.Light);
-            Box heavyBox = FirstBox(candidate => candidate.WeightClass == WeightClass.Heavy);
-            TapOn(lightBox);
+            Box smallBox = FirstBox(candidate => candidate.SizeClass == BoxSizeClass.Small);
+            Box largeBox = FirstBox(candidate => candidate.SizeClass == BoxSizeClass.Large);
+            TapOn(smallBox);
             yield return null;
 
-            TapOn(heavyBox);
+            TapOn(largeBox);
             yield return null;
 
-            Assert.AreSame(heavyBox, demo.BoxSelection.SelectedBox);
-            Assert.AreEqual("Weight: heavy", GameObject.Find(BoxWeightTextName).GetComponent<TMP_Text>().text);
+            Assert.AreSame(largeBox, demo.BoxSelection.SelectedBox);
+            StringAssert.StartsWith("Size: large", GameObject.Find(BoxSizeTextName).GetComponent<TMP_Text>().text);
         }
 
         [UnityTest]
@@ -1070,8 +1091,8 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
             {
                 Box box = demo.Simulation.Layout.Boxes[index];
                 Vector3 size = boxesView.ShownSprite(index).bounds.size;
-                Assert.AreEqual(box.Size.Width, size.x, SpriteMargin, box.WeightClass + " box width");
-                Assert.AreEqual(box.Size.Height, size.y, SpriteMargin, box.WeightClass + " box height");
+                Assert.AreEqual(box.Size.Width, size.x, SpriteMargin, box.SizeClass + " box width");
+                Assert.AreEqual(box.Size.Height, size.y, SpriteMargin, box.SizeClass + " box height");
             }
         }
 
@@ -1437,8 +1458,8 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
             yield return null;
 
             foreach (Bot bot in demo.Simulation.Bots)
-                Assert.AreEqual(BotFocus.BiggestBox, bot.Focus);
-            Assert.AreEqual("Biggest box", focusName.text);
+                Assert.AreEqual(BotFocus.MostImportant, bot.Focus);
+            Assert.AreEqual("Most important", focusName.text);
         }
 
         [UnityTest]
@@ -1544,9 +1565,27 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
             return null;
         }
 
-        private static bool IsPartlyEmptiedLightBox(Box box)
+        private static bool IsPartlyEmptiedSmallBox(Box box)
         {
-            return box.WeightClass == WeightClass.Light && !box.IsEmpty && box.RemainingPieces < box.TotalPieces;
+            return box.SizeClass == BoxSizeClass.Small && !box.IsEmpty && box.RemainingPieces < box.TotalPieces;
+        }
+
+        private static string SpriteNameOf(Box box)
+        {
+            return "Box" + box.SizeClass + MaterialNameOf(box.Importance);
+        }
+
+        private static string MaterialNameOf(Importance importance)
+        {
+            switch (importance)
+            {
+                case Importance.Key:
+                    return "Steel";
+                case Importance.Important:
+                    return "Crate";
+                default:
+                    return "Cardboard";
+            }
         }
 
         private int IndexOfFirstBox(System.Predicate<Box> isWanted)

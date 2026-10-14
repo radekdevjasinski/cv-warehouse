@@ -17,8 +17,8 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         [SetUp]
         public void SetUp()
         {
-            heavyBox = new Box(0, new GridPosition(3, 2), WeightClass.Heavy, CvTestBlocks.WithLetters(Letters));
-            lightBox = new Box(1, new GridPosition(5, 2), WeightClass.Light, CvTestBlocks.WithLetters(Letters));
+            heavyBox = new Box(0, new GridPosition(3, 2), TestBoxKinds.Large, CvTestBlocks.WithLetters(Letters));
+            lightBox = new Box(1, new GridPosition(5, 2), TestBoxKinds.Small, CvTestBlocks.WithLetters(Letters));
             boxes = new List<Box> { heavyBox, lightBox };
         }
 

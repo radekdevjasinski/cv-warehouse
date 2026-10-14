@@ -1,6 +1,7 @@
 using CvWarehouse.Core.Cv;
 using CvWarehouse.Core.Warehouse;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace CvWarehouse.Presentation.Warehouse
 {
@@ -18,17 +19,21 @@ namespace CvWarehouse.Presentation.Warehouse
         [SerializeField] private int rampDepth = 4;
 
         [Header("Boxes that open the CV")]
-        [SerializeField] private WeightClass nameWeight = WeightClass.Heavy;
-        [SerializeField] private WeightClass jobTitleWeight = WeightClass.Medium;
-        [SerializeField] private WeightClass contactWeight = WeightClass.Light;
+        [SerializeField, FormerlySerializedAs("nameWeight")] private Importance nameImportance = Importance.Key;
+        [SerializeField, FormerlySerializedAs("jobTitleWeight")] private Importance jobTitleImportance = Importance.Important;
+        [SerializeField, FormerlySerializedAs("contactWeight")] private Importance contactImportance = Importance.Normal;
         [SerializeField] private int openingRadius = 4;
+
+        [Header("Box size, by the words of its block")]
+        [SerializeField] private int smallBoxMaxWords = 8;
+        [SerializeField] private int mediumBoxMaxWords = 20;
 
         [Header("Clusters")]
         [SerializeField] private int bigClusterRadius = 6;
         [SerializeField] private int mediumClusterRadius = 3;
-        [SerializeField, Range(0, 100)] private int mediumNearHeavyPercent = 60;
-        [SerializeField, Range(0, 100)] private int lightNearHeavyPercent = 35;
-        [SerializeField, Range(0, 100)] private int lightNearMediumPercent = 45;
+        [SerializeField, Range(0, 100), FormerlySerializedAs("mediumNearHeavyPercent")] private int mediumNearLargePercent = 60;
+        [SerializeField, Range(0, 100), FormerlySerializedAs("lightNearHeavyPercent")] private int smallNearLargePercent = 35;
+        [SerializeField, Range(0, 100), FormerlySerializedAs("lightNearMediumPercent")] private int smallNearMediumPercent = 45;
 
         public GeneratorSettings CreateGeneratorSettings()
         {
@@ -42,15 +47,17 @@ namespace CvWarehouse.Presentation.Warehouse
                 DropCells = dropCells,
                 ParkingPerSide = parkingPerSide,
                 RampDepth = rampDepth,
-                NameWeight = nameWeight,
-                JobTitleWeight = jobTitleWeight,
-                ContactWeight = contactWeight,
+                NameImportance = nameImportance,
+                JobTitleImportance = jobTitleImportance,
+                ContactImportance = contactImportance,
+                SmallBoxMaxWords = smallBoxMaxWords,
+                MediumBoxMaxWords = mediumBoxMaxWords,
                 OpeningRadius = openingRadius,
                 BigClusterRadius = bigClusterRadius,
                 MediumClusterRadius = mediumClusterRadius,
-                MediumNearHeavyPercent = mediumNearHeavyPercent,
-                LightNearHeavyPercent = lightNearHeavyPercent,
-                LightNearMediumPercent = lightNearMediumPercent
+                MediumNearLargePercent = mediumNearLargePercent,
+                SmallNearLargePercent = smallNearLargePercent,
+                SmallNearMediumPercent = smallNearMediumPercent
             };
         }
     }

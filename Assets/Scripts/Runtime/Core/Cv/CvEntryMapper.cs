@@ -53,7 +53,7 @@ namespace CvWarehouse.Core.Cv
                 Description = CvText.Clean(source.description),
                 Bullets = CleanBullets(source.bullets),
                 Link = CvText.Clean(source.link),
-                Weight = ReadWeight(source.weight, id),
+                Importance = ReadImportance(source.importance, id),
                 Category = ReadCategory(source.category, id),
                 Effect = CvText.Clean(source.effect)
             };
@@ -82,15 +82,15 @@ namespace CvWarehouse.Core.Cv
             return cleanBullets;
         }
 
-        private WeightClass ReadWeight(string weight, string id)
+        private Importance ReadImportance(string importance, string id)
         {
-            string keyword = CvText.Clean(weight);
-            if (CvKeyword.TryParse(keyword, out WeightClass weightClass))
-                return weightClass;
+            string keyword = CvText.Clean(importance);
+            if (CvKeyword.TryParse(keyword, out Importance value))
+                return value;
 
             if (keyword.Length > 0)
-                warnings.Add("Entry '" + id + "' has unknown weight '" + keyword + "'.");
-            return WeightClass.Medium;
+                warnings.Add("Entry '" + id + "' has unknown importance '" + keyword + "'.");
+            return Importance.Normal;
         }
 
         private string ReadCategory(string category, string id)

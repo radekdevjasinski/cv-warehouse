@@ -81,12 +81,12 @@ namespace CvWarehouse.Tests.EditMode.Cv
         }
 
         [Test]
-        public void Build_Entry_CarriesItsWeightAndCategory()
+        public void Build_Entry_CarriesItsImportanceAndCategory()
         {
             CvBlock block = CvTestBlocks.Build(
-                "{\"categories\":[{\"id\":\"technical\",\"name\":\"Technical\"}],\"sections\":[{\"entries\":[{\"title\":\"Game\",\"weight\":\"heavy\",\"category\":\"technical\"}]}]}")[0];
+                "{\"categories\":[{\"id\":\"technical\",\"name\":\"Technical\"}],\"sections\":[{\"entries\":[{\"title\":\"Game\",\"importance\":\"key\",\"category\":\"technical\"}]}]}")[0];
 
-            Assert.AreEqual(WeightClass.Heavy, block.Weight);
+            Assert.AreEqual(Importance.Key, block.Importance);
             Assert.AreEqual("technical", block.Category);
             Assert.AreEqual("Technical", block.CategoryName);
         }

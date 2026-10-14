@@ -10,9 +10,6 @@ namespace CvWarehouse.Presentation.Warehouse
         [SerializeField] private Sprite closed;
         [SerializeField] private Sprite open;
         [SerializeField] private Sprite empty;
-        [SerializeField] private Sprite selectionFrame;
-
-        public Sprite SelectionFrame => selectionFrame;
 
         public Sprite SpriteOf(Box box)
         {

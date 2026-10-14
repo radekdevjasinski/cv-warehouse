@@ -20,7 +20,7 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
                 .AddParkingCell(new GridPosition(5, 7))
                 .AddParkingCell(new GridPosition(6, 7))
                 .AddParkingCell(new GridPosition(7, 7))
-                .AddBox(new GridPosition(3, 2), WeightClass.Heavy, CvTestBlocks.WithLetters(30))
+                .AddBox(new GridPosition(3, 2), TestBoxKinds.Large, CvTestBlocks.WithLetters(30))
                 .Build();
             simulation = new WarehouseSimulation(layout, new SimulationSettings(), new System.Random(Seed));
             while (simulation.TryAddBot())
@@ -67,7 +67,7 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
                 simulation.SetFocus(bot, BotFocus.BiggestBox);
 
             Assert.AreEqual(BotFocus.SmallestBox, BotGroup.NextFocus(simulation.Bots));
-            Assert.AreEqual(BotFocus.ClosestBox, BotGroup.PreviousFocus(simulation.Bots));
+            Assert.AreEqual(BotFocus.MostImportant, BotGroup.PreviousFocus(simulation.Bots));
         }
 
         [Test]

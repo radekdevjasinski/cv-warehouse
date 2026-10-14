@@ -32,7 +32,7 @@ namespace CvWarehouse.Core.Cv
         private CvBlock CutEntry(CvEntry entry, CvListStyle style, IReadOnlyList<CvCategory> categories)
         {
             CvBlock block = CutEntryText(entry, style);
-            block.Weight = entry.Weight;
+            block.Importance = entry.Importance;
             block.Category = entry.Category ?? string.Empty;
             block.CategoryName = NameOf(block.Category, categories);
             return block;

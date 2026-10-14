@@ -5,7 +5,7 @@ namespace CvWarehouse.Core.Warehouse
         public const BotFocus First = BotFocus.ClosestBox;
         public const BotFocus Last = BotFocus.SmallestBox;
 
-        private const int FocusCount = 3;
+        private const int FocusCount = 4;
 
         public static BotFocus Next(BotFocus focus)
         {

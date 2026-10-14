@@ -9,13 +9,14 @@ namespace CvWarehouse.Core.Warehouse
         private readonly List<GridPosition> accessCells = new List<GridPosition>();
         private readonly BoxLetters letters;
 
-        public Box(int id, GridPosition origin, WeightClass weightClass, CvBlock block)
+        public Box(int id, GridPosition origin, BoxKind kind, CvBlock block)
         {
             Id = id;
             Origin = origin;
-            WeightClass = weightClass;
+            SizeClass = kind.SizeClass;
+            Importance = kind.Importance;
             Block = block;
-            Size = BoxFootprints.For(weightClass);
+            Size = BoxFootprints.For(kind.SizeClass);
             letters = new BoxLetters(block);
             TotalPieces = block.LetterCount;
             RemainingPieces = block.LetterCount;
@@ -28,7 +29,9 @@ namespace CvWarehouse.Core.Warehouse
 
         public GridSize Size { get; }
 
-        public WeightClass WeightClass { get; }
+        public BoxSizeClass SizeClass { get; }
+
+        public Importance Importance { get; }
 
         public CvBlock Block { get; }
 

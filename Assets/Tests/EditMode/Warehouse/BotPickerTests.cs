@@ -24,7 +24,7 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
                 .AddDropCell(new GridPosition(0, 7))
                 .AddParkingCell(new GridPosition(5, 7))
                 .AddParkingCell(new GridPosition(6, 7))
-                .AddBox(new GridPosition(3, 2), WeightClass.Heavy, CvTestBlocks.WithLetters(10))
+                .AddBox(new GridPosition(3, 2), TestBoxKinds.Large, CvTestBlocks.WithLetters(10))
                 .Build();
             simulation = new WarehouseSimulation(layout, new SimulationSettings(), new System.Random(Seed));
             simulation.TryAddBot();

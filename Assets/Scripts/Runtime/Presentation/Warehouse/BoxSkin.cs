@@ -1,4 +1,5 @@
 using CvWarehouse.Core.Cv;
+using CvWarehouse.Core.Warehouse;
 using UnityEngine;
 
 namespace CvWarehouse.Presentation.Warehouse
@@ -6,20 +7,44 @@ namespace CvWarehouse.Presentation.Warehouse
     [CreateAssetMenu(menuName = "CV Warehouse/Box Skin", fileName = "BoxSkin")]
     public sealed class BoxSkin : ScriptableObject
     {
-        [SerializeField] private BoxLook light;
-        [SerializeField] private BoxLook medium;
-        [SerializeField] private BoxLook heavy;
+        [Header("Material, by importance")]
+        [SerializeField] private BoxMaterialLooks cardboard;
+        [SerializeField] private BoxMaterialLooks crate;
+        [SerializeField] private BoxMaterialLooks steel;
 
-        public BoxLook LookOf(WeightClass weightClass)
+        [Header("Selection frame, by size")]
+        [SerializeField] private Sprite smallFrame;
+        [SerializeField] private Sprite mediumFrame;
+        [SerializeField] private Sprite largeFrame;
+
+        public BoxLook LookOf(Box box)
         {
-            switch (weightClass)
+            return MaterialOf(box.Importance).LookOf(box.SizeClass);
+        }
+
+        public Sprite FrameOf(BoxSizeClass sizeClass)
+        {
+            switch (sizeClass)
             {
-                case WeightClass.Heavy:
-                    return heavy;
-                case WeightClass.Medium:
-                    return medium;
+                case BoxSizeClass.Large:
+                    return largeFrame;
+                case BoxSizeClass.Medium:
+                    return mediumFrame;
                 default:
-                    return light;
+                    return smallFrame;
+            }
+        }
+
+        private BoxMaterialLooks MaterialOf(Importance importance)
+        {
+            switch (importance)
+            {
+                case Importance.Key:
+                    return steel;
+                case Importance.Important:
+                    return crate;
+                default:
+                    return cardboard;
             }
         }
     }

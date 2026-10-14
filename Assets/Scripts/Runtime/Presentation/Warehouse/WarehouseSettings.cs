@@ -1,5 +1,6 @@
 using CvWarehouse.Core.Warehouse;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace CvWarehouse.Presentation.Warehouse
 {
@@ -10,13 +11,13 @@ namespace CvWarehouse.Presentation.Warehouse
         [SerializeField] private int maxTicksPerFrame = 5;
         [SerializeField] private int ticksPerCell = 8;
         [SerializeField] private int speedStepPercent = 25;
-        [SerializeField] private int lightExtractTicks = 20;
-        [SerializeField] private int mediumExtractTicks = 30;
-        [SerializeField] private int heavyExtractTicks = 45;
+        [SerializeField, FormerlySerializedAs("lightExtractTicks")] private int normalExtractTicks = 20;
+        [SerializeField, FormerlySerializedAs("mediumExtractTicks")] private int importantExtractTicks = 30;
+        [SerializeField, FormerlySerializedAs("heavyExtractTicks")] private int keyExtractTicks = 45;
         [SerializeField] private int unloadTicks = 20;
-        [SerializeField] private int lightPiecePoints = 1;
-        [SerializeField] private int mediumPiecePoints = 2;
-        [SerializeField] private int heavyPiecePoints = 3;
+        [SerializeField, FormerlySerializedAs("lightPiecePoints")] private int normalPiecePoints = 1;
+        [SerializeField, FormerlySerializedAs("mediumPiecePoints")] private int importantPiecePoints = 2;
+        [SerializeField, FormerlySerializedAs("heavyPiecePoints")] private int keyPiecePoints = 3;
         [SerializeField] private int startingBots = 3;
 
         [Header("Shop prices, in thousandths of all the points in the warehouse")]
@@ -69,13 +70,13 @@ namespace CvWarehouse.Presentation.Warehouse
                 MaxTicksPerAdvance = maxTicksPerFrame,
                 TicksPerCell = ticksPerCell,
                 SpeedStepPercent = speedStepPercent,
-                LightExtractTicks = lightExtractTicks,
-                MediumExtractTicks = mediumExtractTicks,
-                HeavyExtractTicks = heavyExtractTicks,
+                NormalExtractTicks = normalExtractTicks,
+                ImportantExtractTicks = importantExtractTicks,
+                KeyExtractTicks = keyExtractTicks,
                 UnloadTicks = unloadTicks,
-                LightPiecePoints = lightPiecePoints,
-                MediumPiecePoints = mediumPiecePoints,
-                HeavyPiecePoints = heavyPiecePoints,
+                NormalPiecePoints = normalPiecePoints,
+                ImportantPiecePoints = importantPiecePoints,
+                KeyPiecePoints = keyPiecePoints,
                 CrewNames = CrewNames()
             };
         }

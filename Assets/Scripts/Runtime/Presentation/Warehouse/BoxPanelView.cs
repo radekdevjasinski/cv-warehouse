@@ -2,6 +2,7 @@ using CvWarehouse.Core.Cv;
 using CvWarehouse.Core.Warehouse;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace CvWarehouse.Presentation.Warehouse
@@ -12,7 +13,8 @@ namespace CvWarehouse.Presentation.Warehouse
         private const string NoCategory = "Category: none";
 
         [SerializeField] private GameObject window;
-        [SerializeField] private TMP_Text weightText;
+        [SerializeField, FormerlySerializedAs("weightText")] private TMP_Text sizeText;
+        [SerializeField] private TMP_Text importanceText;
         [SerializeField] private TMP_Text categoryText;
         [SerializeField] private Button closeButton;
 
@@ -25,16 +27,29 @@ namespace CvWarehouse.Presentation.Warehouse
             Refresh();
         }
 
-        private static string LabelOf(WeightClass weightClass)
+        private static string SizeFormatOf(BoxSizeClass sizeClass)
         {
-            switch (weightClass)
+            switch (sizeClass)
             {
-                case WeightClass.Heavy:
-                    return "Weight: heavy";
-                case WeightClass.Medium:
-                    return "Weight: medium";
+                case BoxSizeClass.Large:
+                    return "Size: large ({0} words)";
+                case BoxSizeClass.Medium:
+                    return "Size: medium ({0} words)";
                 default:
-                    return "Weight: light";
+                    return "Size: small ({0} words)";
+            }
+        }
+
+        private static string ImportanceLabelOf(Importance importance)
+        {
+            switch (importance)
+            {
+                case Importance.Key:
+                    return "Importance: key";
+                case Importance.Important:
+                    return "Importance: important";
+                default:
+                    return "Importance: normal";
             }
         }
 
@@ -68,7 +83,8 @@ namespace CvWarehouse.Presentation.Warehouse
 
             shownBox = selection.SelectedBox;
             string categoryName = shownBox.Block.CategoryName;
-            weightText.SetText(LabelOf(shownBox.WeightClass));
+            sizeText.SetText(SizeFormatOf(shownBox.SizeClass), shownBox.Block.Words.Count);
+            importanceText.SetText(ImportanceLabelOf(shownBox.Importance));
             categoryText.SetText(string.IsNullOrEmpty(categoryName) ? NoCategory : CategoryPrefix + categoryName);
         }
     }

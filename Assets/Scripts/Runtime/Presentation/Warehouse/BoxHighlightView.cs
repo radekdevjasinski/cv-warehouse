@@ -42,7 +42,7 @@ namespace CvWarehouse.Presentation.Warehouse
 
         private void Frame(Box box)
         {
-            frame.sprite = skin.LookOf(box.WeightClass).SelectionFrame;
+            frame.sprite = skin.FrameOf(box.SizeClass);
             highlight.transform.localPosition = new Vector3(
                 box.Origin.X + box.Size.Width * 0.5f,
                 box.Origin.Y + box.Size.Height * 0.5f);

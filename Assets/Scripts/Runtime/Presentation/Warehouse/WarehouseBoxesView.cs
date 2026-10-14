@@ -68,7 +68,7 @@ namespace CvWarehouse.Presentation.Warehouse
 
         private void RefreshBox(SpriteRenderer boxRenderer, Box box)
         {
-            boxRenderer.sprite = skin.LookOf(box.WeightClass).SpriteOf(box);
+            boxRenderer.sprite = skin.LookOf(box).SpriteOf(box);
             boxRenderer.sortingOrder = box.IsEmpty
                 ? DepthSorting.OnTheFloorOrder
                 : DepthSorting.OrderAt(box.Origin.Y + BottomEdgeAboveOrigin, BoxLayer);

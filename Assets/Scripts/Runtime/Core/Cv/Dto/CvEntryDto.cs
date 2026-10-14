@@ -11,7 +11,7 @@ namespace CvWarehouse.Core.Cv.Dto
         public string description;
         public string[] bullets;
         public string link;
-        public string weight;
+        public string importance;
         public string category;
         public string effect;
     }

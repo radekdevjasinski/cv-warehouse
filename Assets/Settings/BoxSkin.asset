@@ -12,18 +12,45 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: df24c540bc4b2f647859e96690fc8674, type: 3}
   m_Name: BoxSkin
   m_EditorClassIdentifier: CvWarehouse.Runtime::CvWarehouse.Presentation.Warehouse.BoxSkin
-  light:
-    closed: {fileID: 21300000, guid: 4de29ee1a61c40840beb77f57ef6e4a6, type: 3}
-    open: {fileID: 0}
-    empty: {fileID: 21300000, guid: b65387744577b2d43ba8cb24c8e880e1, type: 3}
-    selectionFrame: {fileID: 21300000, guid: 3581ae10786fa144ab269d5654658ba5, type: 3}
-  medium:
-    closed: {fileID: 21300000, guid: b5c4f362eef72cd43941b373b17869b0, type: 3}
-    open: {fileID: 21300000, guid: 668100d049448b84ea265f310ec37169, type: 3}
-    empty: {fileID: 21300000, guid: a1f10fe36a75aad46a427cb8a50806af, type: 3}
-    selectionFrame: {fileID: 21300000, guid: 333b3e5167b1669419d779339243480d, type: 3}
-  heavy:
-    closed: {fileID: 21300000, guid: 0a44bedac9ac0554aa553e8ee5e31c39, type: 3}
-    open: {fileID: 21300000, guid: 64765dbf10e0002478af1547ffeabaea, type: 3}
-    empty: {fileID: 21300000, guid: 67ad78286e28495448c17cac5a07ce5c, type: 3}
-    selectionFrame: {fileID: 21300000, guid: 443b7a440d7e4c044a84af7b6f5c5ebc, type: 3}
+  cardboard:
+    small:
+      closed: {fileID: 21300000, guid: 4de29ee1a61c40840beb77f57ef6e4a6, type: 3}
+      open: {fileID: 21300000, guid: 3f49cacd4b105df4fab4cafe735d8a72, type: 3}
+      empty: {fileID: 21300000, guid: b65387744577b2d43ba8cb24c8e880e1, type: 3}
+    medium:
+      closed: {fileID: 21300000, guid: b5c4f362eef72cd43941b373b17869b0, type: 3}
+      open: {fileID: 21300000, guid: 668100d049448b84ea265f310ec37169, type: 3}
+      empty: {fileID: 21300000, guid: a1f10fe36a75aad46a427cb8a50806af, type: 3}
+    large:
+      closed: {fileID: 21300000, guid: 9f960a4bbea733d48a77929585beb202, type: 3}
+      open: {fileID: 21300000, guid: cb62014d29631f048a2a17e46817f5b1, type: 3}
+      empty: {fileID: 21300000, guid: 1c1ea399f6db1e84c829940f272c04f1, type: 3}
+  crate:
+    small:
+      closed: {fileID: 21300000, guid: 172b93e45da750b4b84039e0439e0542, type: 3}
+      open: {fileID: 21300000, guid: 27e0560fc6fd54641bb98e59a6302b94, type: 3}
+      empty: {fileID: 21300000, guid: 86487e8ba35060e4d95696525f691567, type: 3}
+    medium:
+      closed: {fileID: 21300000, guid: e11d8b33721ea0a44a5a35197798fcd0, type: 3}
+      open: {fileID: 21300000, guid: c1813380c0a1ad9498435b6196fc723d, type: 3}
+      empty: {fileID: 21300000, guid: 939051905c651814d926e49b59bdd488, type: 3}
+    large:
+      closed: {fileID: 21300000, guid: 0a44bedac9ac0554aa553e8ee5e31c39, type: 3}
+      open: {fileID: 21300000, guid: 64765dbf10e0002478af1547ffeabaea, type: 3}
+      empty: {fileID: 21300000, guid: 67ad78286e28495448c17cac5a07ce5c, type: 3}
+  steel:
+    small:
+      closed: {fileID: 21300000, guid: 18077e23f7debfc489466179df045819, type: 3}
+      open: {fileID: 21300000, guid: 292d1fddff61a6c49bbaa2a1289458ca, type: 3}
+      empty: {fileID: 21300000, guid: a5886cd55723b474fbcc0c2174c51b34, type: 3}
+    medium:
+      closed: {fileID: 21300000, guid: ae4cecbef4c46f5499c8ea08cf8f5be5, type: 3}
+      open: {fileID: 21300000, guid: ca0be770f7b87c84695048303790c0da, type: 3}
+      empty: {fileID: 21300000, guid: 134b61a62f0d76a46aba35785f5a8588, type: 3}
+    large:
+      closed: {fileID: 21300000, guid: 21a51ae20a60a104fb76036932ab25bd, type: 3}
+      open: {fileID: 21300000, guid: 75e6fb3c7ea6aa9479ea8b00ea9fedb7, type: 3}
+      empty: {fileID: 21300000, guid: 9adf8117fd211ce45bc93e91ec31645a, type: 3}
+  smallFrame: {fileID: 21300000, guid: 3581ae10786fa144ab269d5654658ba5, type: 3}
+  mediumFrame: {fileID: 21300000, guid: 333b3e5167b1669419d779339243480d, type: 3}
+  largeFrame: {fileID: 21300000, guid: 443b7a440d7e4c044a84af7b6f5c5ebc, type: 3}

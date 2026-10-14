@@ -106,7 +106,7 @@ namespace CvWarehouse.Tests.EditMode.Cv
             Assert.AreEqual(string.Empty, entry.Link);
             Assert.AreEqual(string.Empty, entry.Category);
             Assert.AreEqual(string.Empty, entry.Effect);
-            Assert.AreEqual(WeightClass.Medium, entry.Weight);
+            Assert.AreEqual(Importance.Normal, entry.Importance);
             Assert.IsEmpty(entry.Bullets);
         }
 
@@ -115,12 +115,12 @@ namespace CvWarehouse.Tests.EditMode.Cv
         {
             CvParseResult result = parser.Parse(
                 "{\"name\":\"Ada\",\"sections\":[{\"title\":\"S\",\"type\":\"table\",\"style\":\"fancy\","
-                + "\"entries\":[{\"title\":\"One\",\"weight\":\"huge\",\"category\":\"missing\"}]}]}");
+                + "\"entries\":[{\"title\":\"One\",\"importance\":\"huge\",\"category\":\"missing\"}]}]}");
 
             CvSection section = result.Document.Sections[0];
             Assert.AreEqual(CvSectionType.List, section.Type);
             Assert.AreEqual(CvListStyle.Rows, section.Style);
-            Assert.AreEqual(WeightClass.Medium, section.Entries[0].Weight);
+            Assert.AreEqual(Importance.Normal, section.Entries[0].Importance);
             Assert.AreEqual(string.Empty, section.Entries[0].Category);
             Assert.AreEqual(4, result.Warnings.Count);
         }
@@ -130,10 +130,10 @@ namespace CvWarehouse.Tests.EditMode.Cv
         {
             CvSection section = ParseValid(
                 "{\"sections\":[{\"type\":\"LIST\",\"style\":\"keyvalue\","
-                + "\"entries\":[{\"title\":\"One\",\"weight\":\"Heavy\"}]}]}").Sections[0];
+                + "\"entries\":[{\"title\":\"One\",\"importance\":\"Key\"}]}]}").Sections[0];
 
             Assert.AreEqual(CvListStyle.KeyValue, section.Style);
-            Assert.AreEqual(WeightClass.Heavy, section.Entries[0].Weight);
+            Assert.AreEqual(Importance.Key, section.Entries[0].Importance);
         }
 
         [Test]

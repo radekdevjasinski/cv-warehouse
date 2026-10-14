@@ -17,7 +17,7 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         private const int WallHeight = 2;
         private const int OpeningBlocks = 4;
 
-        private static readonly int[] EntriesPerWeight = { 1, 4, 12, 40 };
+        private static readonly int[] EntriesPerSize = { 1, 4, 12, 40 };
 
         [Test]
         public void Generate_Cv_PlacesOneBoxPerBlockHoldingItsLetters()
@@ -38,32 +38,54 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         }
 
         [Test]
-        public void Generate_Cv_GivesEveryBoxTheWeightOfItsBlock()
+        public void Generate_Cv_GivesEveryEntryBoxTheImportanceOfItsBlock()
         {
             List<CvBlock> blocks = CvTestBlocks.BuildCv(3, 5, 7);
             var settings = new GeneratorSettings();
 
             WarehouseLayout layout = Generate(blocks, settings, Seed);
 
-            Assert.AreEqual(WeightClass.Heavy, BoxOf(layout, blocks[0]).WeightClass);
-            Assert.AreEqual(WeightClass.Medium, BoxOf(layout, blocks[1]).WeightClass);
-            Assert.AreEqual(WeightClass.Light, BoxOf(layout, blocks[2]).WeightClass);
             for (int index = OpeningBlocks; index < blocks.Count; index++)
-                Assert.AreEqual(blocks[index].Weight, BoxOf(layout, blocks[index]).WeightClass);
+                Assert.AreEqual(blocks[index].Importance, BoxOf(layout, blocks[index]).Importance);
             Assert.AreEqual(settings.ParkingPerSide * 2, layout.ParkingCells.Count);
             Assert.AreEqual(settings.DropCells, layout.DropCells.Count);
         }
 
         [Test]
-        public void Generate_HeaderWeightsChanged_SizesTheOpeningBoxesToMatch()
+        public void Generate_Cv_SizesEveryBoxByTheWordsOfItsBlock()
         {
             List<CvBlock> blocks = CvTestBlocks.BuildCv(1, 1, 1);
-            var settings = new GeneratorSettings { NameWeight = WeightClass.Light, ContactWeight = WeightClass.Heavy };
+
+            WarehouseLayout layout = Generate(blocks, new GeneratorSettings(), Seed);
+
+            Assert.AreEqual(BoxSizeClass.Small, BoxOf(layout, blocks[0]).SizeClass);
+            Assert.AreEqual(BoxSizeClass.Large, BoxOf(layout, blocks[OpeningBlocks]).SizeClass);
+            Assert.AreEqual(BoxSizeClass.Medium, BoxOf(layout, blocks[OpeningBlocks + 1]).SizeClass);
+            Assert.AreEqual(BoxSizeClass.Small, BoxOf(layout, blocks[OpeningBlocks + 2]).SizeClass);
+        }
+
+        [Test]
+        public void Generate_DefaultSettings_MakesTheNameKeyTheJobTitleImportantAndContactsNormal()
+        {
+            List<CvBlock> blocks = CvTestBlocks.BuildCv(1, 1, 1);
+
+            WarehouseLayout layout = Generate(blocks, new GeneratorSettings(), Seed);
+
+            Assert.AreEqual(Importance.Key, BoxOf(layout, blocks[0]).Importance);
+            Assert.AreEqual(Importance.Important, BoxOf(layout, blocks[1]).Importance);
+            Assert.AreEqual(Importance.Normal, BoxOf(layout, blocks[2]).Importance);
+        }
+
+        [Test]
+        public void Generate_HeaderImportanceChanged_GivesTheOpeningBoxesThatImportance()
+        {
+            List<CvBlock> blocks = CvTestBlocks.BuildCv(1, 1, 1);
+            var settings = new GeneratorSettings { NameImportance = Importance.Normal, ContactImportance = Importance.Key };
 
             WarehouseLayout layout = Generate(blocks, settings, Seed);
 
-            Assert.AreEqual(WeightClass.Light, BoxOf(layout, blocks[0]).WeightClass);
-            Assert.AreEqual(WeightClass.Heavy, BoxOf(layout, blocks[2]).WeightClass);
+            Assert.AreEqual(Importance.Normal, BoxOf(layout, blocks[0]).Importance);
+            Assert.AreEqual(Importance.Key, BoxOf(layout, blocks[2]).Importance);
         }
 
         [Test]
@@ -131,7 +153,7 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         public void Generate_ManySeedsAndCvSizes_KeepsBoxesOffTheRampAndApart()
         {
             var settings = new GeneratorSettings();
-            foreach (int entries in EntriesPerWeight)
+            foreach (int entries in EntriesPerSize)
             {
                 List<CvBlock> blocks = CvTestBlocks.BuildCv(entries, entries, entries);
                 for (int seed = 0; seed < SeedsToCheck; seed++)
@@ -151,7 +173,7 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         [Test]
         public void Generate_ManySeedsAndCvSizes_EveryBoxOpensUpOnceItsNeighboursAreEmptied()
         {
-            foreach (int entries in EntriesPerWeight)
+            foreach (int entries in EntriesPerSize)
             {
                 List<CvBlock> blocks = CvTestBlocks.BuildCv(entries, entries, entries);
                 for (int seed = 0; seed < SeedsToCheck; seed++)

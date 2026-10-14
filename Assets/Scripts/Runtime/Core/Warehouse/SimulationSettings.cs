@@ -17,19 +17,19 @@ namespace CvWarehouse.Core.Warehouse
 
         public int SpeedStepPercent { get; set; } = 25;
 
-        public int LightExtractTicks { get; set; } = 20;
+        public int NormalExtractTicks { get; set; } = 20;
 
-        public int MediumExtractTicks { get; set; } = 30;
+        public int ImportantExtractTicks { get; set; } = 30;
 
-        public int HeavyExtractTicks { get; set; } = 45;
+        public int KeyExtractTicks { get; set; } = 45;
 
         public int UnloadTicks { get; set; } = 20;
 
-        public int LightPiecePoints { get; set; } = 1;
+        public int NormalPiecePoints { get; set; } = 1;
 
-        public int MediumPiecePoints { get; set; } = 2;
+        public int ImportantPiecePoints { get; set; } = 2;
 
-        public int HeavyPiecePoints { get; set; } = 3;
+        public int KeyPiecePoints { get; set; } = 3;
 
         public IReadOnlyList<string> CrewNames { get; set; } = Array.Empty<string>();
 
@@ -39,29 +39,29 @@ namespace CvWarehouse.Core.Warehouse
             return Math.Max(ShortestStepTicks, TicksPerCell * stepCost * Percent / (GridDirections.StraightCost * speedPercent));
         }
 
-        public int ExtractTicks(WeightClass weightClass)
+        public int ExtractTicks(Importance importance)
         {
-            switch (weightClass)
+            switch (importance)
             {
-                case WeightClass.Heavy:
-                    return HeavyExtractTicks;
-                case WeightClass.Medium:
-                    return MediumExtractTicks;
+                case Importance.Key:
+                    return KeyExtractTicks;
+                case Importance.Important:
+                    return ImportantExtractTicks;
                 default:
-                    return LightExtractTicks;
+                    return NormalExtractTicks;
             }
         }
 
-        public int PointsPerPiece(WeightClass weightClass)
+        public int PointsPerPiece(Importance importance)
         {
-            switch (weightClass)
+            switch (importance)
             {
-                case WeightClass.Heavy:
-                    return HeavyPiecePoints;
-                case WeightClass.Medium:
-                    return MediumPiecePoints;
+                case Importance.Key:
+                    return KeyPiecePoints;
+                case Importance.Important:
+                    return ImportantPiecePoints;
                 default:
-                    return LightPiecePoints;
+                    return NormalPiecePoints;
             }
         }
     }

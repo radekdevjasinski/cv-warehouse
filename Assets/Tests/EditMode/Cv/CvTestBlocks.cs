@@ -11,7 +11,11 @@ namespace CvWarehouse.Tests.EditMode.Cv
         public const string NameAndProfileCv =
             "{\"name\":\"Ada Lovelace\",\"sections\":[{\"title\":\"Profile\",\"text\":\"Hello big world\"}]}";
 
-        private static readonly string[] EntryTexts = { "Unity", "Shipped two games", "Led a team of five people", "C#" };
+        public const int SmallEntryWords = 4;
+        public const int MediumEntryWords = 14;
+        public const int LargeEntryWords = 30;
+
+        private static readonly string[] Importances = { "normal", "important", "key" };
 
         public static List<CvBlock> Build(string json)
         {
@@ -30,24 +34,32 @@ namespace CvWarehouse.Tests.EditMode.Cv
             return FromText(new string('a', letterCount));
         }
 
-        public static List<CvBlock> BuildCv(int heavyEntries, int mediumEntries, int lightEntries)
+        public static List<CvBlock> BuildCv(int largeEntries, int mediumEntries, int smallEntries)
         {
             var json = new StringBuilder("{\"name\":\"Ada Lovelace\",\"title\":\"Programmer\",");
             json.Append("\"contacts\":[{\"kind\":\"email\",\"text\":\"ada@example.com\"},{\"kind\":\"phone\",\"text\":\"123 456 789\"}],");
             json.Append("\"sections\":[{\"title\":\"Work\",\"entries\":[");
-            AppendEntries(json, "heavy", heavyEntries);
-            AppendEntries(json, "medium", mediumEntries);
-            AppendEntries(json, "light", lightEntries);
+            AppendEntries(json, LargeEntryWords, largeEntries);
+            AppendEntries(json, MediumEntryWords, mediumEntries);
+            AppendEntries(json, SmallEntryWords, smallEntries);
             json.Length--;
             json.Append("]}]}");
             return Build(json.ToString());
         }
 
-        private static void AppendEntries(StringBuilder json, string weight, int count)
+        public static string Words(int count)
+        {
+            var text = new StringBuilder("word");
+            for (int word = 1; word < count; word++)
+                text.Append(" word");
+            return text.ToString();
+        }
+
+        private static void AppendEntries(StringBuilder json, int words, int count)
         {
             for (int entry = 0; entry < count; entry++)
-                json.Append("{\"title\":\"").Append(EntryTexts[entry % EntryTexts.Length])
-                    .Append("\",\"weight\":\"").Append(weight).Append("\"},");
+                json.Append("{\"title\":\"").Append(Words(words))
+                    .Append("\",\"importance\":\"").Append(Importances[entry % Importances.Length]).Append("\"},");
         }
     }
 }

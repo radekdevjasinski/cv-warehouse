@@ -10,6 +10,8 @@ namespace CvWarehouse.Presentation.Warehouse
         {
             switch (focus)
             {
+                case BotFocus.MostImportant:
+                    return "Most important";
                 case BotFocus.BiggestBox:
                     return "Biggest box";
                 case BotFocus.SmallestBox:

@@ -15,12 +15,12 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         private static readonly GridPosition DropCell = new GridPosition(0, 5);
         private static readonly GridPosition BoxOrigin = new GridPosition(2, 2);
 
-        [TestCase(WeightClass.Light, 4)]
-        [TestCase(WeightClass.Medium, 6)]
-        [TestCase(WeightClass.Heavy, 8)]
-        public void Build_BoxOnOpenFloor_HasAccessCellsOnAllFourSides(WeightClass weightClass, int expectedAccessCells)
+        [TestCase(BoxSizeClass.Small, 4)]
+        [TestCase(BoxSizeClass.Medium, 6)]
+        [TestCase(BoxSizeClass.Large, 8)]
+        public void Build_BoxOnOpenFloor_HasAccessCellsOnAllFourSides(BoxSizeClass sizeClass, int expectedAccessCells)
         {
-            WarehouseLayout layout = NewBuilder().AddBox(BoxOrigin, weightClass, CvTestBlocks.WithLetters(Pieces)).Build();
+            WarehouseLayout layout = NewBuilder().AddBox(BoxOrigin, TestBoxKinds.Of(sizeClass), CvTestBlocks.WithLetters(Pieces)).Build();
 
             Assert.AreEqual(expectedAccessCells, layout.Boxes[0].AccessCells.Count);
         }
@@ -28,7 +28,7 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         [Test]
         public void Build_BoxInCorner_HasOnlyAccessCellsInsideTheGrid()
         {
-            WarehouseLayout layout = NewBuilder().AddBox(new GridPosition(0, 0), WeightClass.Light, CvTestBlocks.WithLetters(Pieces)).Build();
+            WarehouseLayout layout = NewBuilder().AddBox(new GridPosition(0, 0), TestBoxKinds.Small, CvTestBlocks.WithLetters(Pieces)).Build();
 
             Assert.AreEqual(2, layout.Boxes[0].AccessCells.Count);
         }
@@ -38,7 +38,7 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         {
             WarehouseLayout layout = NewBuilder()
                 .Block(new GridPosition(0, 3), new GridSize(GridSide, 1))
-                .AddBox(new GridPosition(2, 1), WeightClass.Light, CvTestBlocks.WithLetters(Pieces))
+                .AddBox(new GridPosition(2, 1), TestBoxKinds.Small, CvTestBlocks.WithLetters(Pieces))
                 .Build();
 
             Assert.IsEmpty(layout.Boxes[0].AccessCells);
@@ -49,9 +49,9 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         {
             var freedCell = new GridPosition(1, 0);
             WarehouseLayout layout = NewBuilder()
-                .AddBox(new GridPosition(0, 0), WeightClass.Light, CvTestBlocks.WithLetters(Pieces))
-                .AddBox(freedCell, WeightClass.Light, CvTestBlocks.WithLetters(Pieces))
-                .AddBox(new GridPosition(0, 1), WeightClass.Light, CvTestBlocks.WithLetters(Pieces))
+                .AddBox(new GridPosition(0, 0), TestBoxKinds.Small, CvTestBlocks.WithLetters(Pieces))
+                .AddBox(freedCell, TestBoxKinds.Small, CvTestBlocks.WithLetters(Pieces))
+                .AddBox(new GridPosition(0, 1), TestBoxKinds.Small, CvTestBlocks.WithLetters(Pieces))
                 .Build();
             Box buried = layout.Boxes[0];
             Box neighbour = layout.Boxes[1];
@@ -68,7 +68,7 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         [Test]
         public void RemoveEmptyBox_BoxStillHoldingPieces_Throws()
         {
-            WarehouseLayout layout = NewBuilder().AddBox(BoxOrigin, WeightClass.Light, CvTestBlocks.WithLetters(Pieces)).Build();
+            WarehouseLayout layout = NewBuilder().AddBox(BoxOrigin, TestBoxKinds.Small, CvTestBlocks.WithLetters(Pieces)).Build();
 
             Assert.Throws<InvalidOperationException>(() => layout.RemoveEmptyBox(layout.Boxes[0]));
         }
@@ -77,8 +77,8 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         public void Build_Boxes_BlockTheirFootprintAndSumTheirPieces()
         {
             WarehouseLayout layout = NewBuilder()
-                .AddBox(BoxOrigin, WeightClass.Heavy, CvTestBlocks.WithLetters(Pieces))
-                .AddBox(new GridPosition(5, 0), WeightClass.Light, CvTestBlocks.WithLetters(Pieces))
+                .AddBox(BoxOrigin, TestBoxKinds.Large, CvTestBlocks.WithLetters(Pieces))
+                .AddBox(new GridPosition(5, 0), TestBoxKinds.Small, CvTestBlocks.WithLetters(Pieces))
                 .Build();
 
             Assert.IsFalse(layout.Grid.IsWalkable(new GridPosition(3, 3)));
@@ -88,15 +88,15 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         [Test]
         public void AddBox_OverlappingAnotherBox_Throws()
         {
-            WarehouseLayoutBuilder builder = NewBuilder().AddBox(BoxOrigin, WeightClass.Heavy, CvTestBlocks.WithLetters(Pieces));
+            WarehouseLayoutBuilder builder = NewBuilder().AddBox(BoxOrigin, TestBoxKinds.Large, CvTestBlocks.WithLetters(Pieces));
 
-            Assert.Throws<ArgumentException>(() => builder.AddBox(new GridPosition(3, 3), WeightClass.Light, CvTestBlocks.WithLetters(Pieces)));
+            Assert.Throws<ArgumentException>(() => builder.AddBox(new GridPosition(3, 3), TestBoxKinds.Small, CvTestBlocks.WithLetters(Pieces)));
         }
 
         [Test]
         public void AddBox_OutsideTheGrid_Throws()
         {
-            Assert.Throws<ArgumentException>(() => NewBuilder().AddBox(new GridPosition(5, 5), WeightClass.Heavy, CvTestBlocks.WithLetters(Pieces)));
+            Assert.Throws<ArgumentException>(() => NewBuilder().AddBox(new GridPosition(5, 5), TestBoxKinds.Large, CvTestBlocks.WithLetters(Pieces)));
         }
 
         [Test]

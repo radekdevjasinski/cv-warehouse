@@ -28,7 +28,20 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
 
             Assert.IsTrue(simulation.IsComplete);
             Assert.IsTrue(simulation.Layout.Boxes[0].IsEmpty);
-            Assert.AreEqual(SmallBoxPieces * 2, simulation.Score.Points);
+            Assert.AreEqual(SmallBoxPieces, simulation.Score.Points);
+        }
+
+        [TestCase(Importance.Normal, 1)]
+        [TestCase(Importance.Important, 2)]
+        [TestCase(Importance.Key, 3)]
+        public void Tick_BoxDelivered_ScoresEveryLetterByItsImportance(Importance importance, int pointsPerLetter)
+        {
+            WarehouseSimulation simulation = NewSimulationWithOneBox(CvTestBlocks.WithLetters(SmallBoxPieces), new SimulationSettings(), TestBoxKinds.Of(importance));
+            simulation.TryAddBot();
+
+            RunUntilComplete(simulation);
+
+            Assert.AreEqual(SmallBoxPieces * pointsPerLetter, simulation.Score.Points);
         }
 
         [Test]
@@ -126,13 +139,13 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
             Assert.AreEqual(1, settings.StepTicks(5, GridDirections.StraightCost));
         }
 
-        [TestCase(WeightClass.Light, 20)]
-        [TestCase(WeightClass.Medium, 30)]
-        [TestCase(WeightClass.Heavy, 45)]
-        public void Tick_BotAtABox_SpendsLongerTakingTextOutOfABiggerBox(WeightClass weightClass, int expectedExtractTicks)
+        [TestCase(Importance.Normal, 20)]
+        [TestCase(Importance.Important, 30)]
+        [TestCase(Importance.Key, 45)]
+        public void Tick_BotAtABox_SpendsLongerTakingTextOutOfAMoreImportantBox(Importance importance, int expectedExtractTicks)
         {
-            var settings = new SimulationSettings { LightExtractTicks = 20, MediumExtractTicks = 30, HeavyExtractTicks = 45 };
-            WarehouseSimulation simulation = NewSimulationWithOneBox(CvTestBlocks.WithLetters(SmallBoxPieces), settings, weightClass);
+            var settings = new SimulationSettings { NormalExtractTicks = 20, ImportantExtractTicks = 30, KeyExtractTicks = 45 };
+            WarehouseSimulation simulation = NewSimulationWithOneBox(CvTestBlocks.WithLetters(SmallBoxPieces), settings, TestBoxKinds.Of(importance));
             simulation.TryAddBot();
             Bot bot = simulation.Bots[0];
             for (int tick = 0; tick < MaxTicks && bot.State != BotState.Extracting; tick++)
@@ -533,13 +546,18 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
             return simulation.TickCount;
         }
 
-        private static WarehouseSimulation NewSimulationWithOneBox(CvBlock block, SimulationSettings settings, WeightClass weightClass = WeightClass.Medium)
+        private static WarehouseSimulation NewSimulationWithOneBox(CvBlock block, SimulationSettings settings)
+        {
+            return NewSimulationWithOneBox(block, settings, TestBoxKinds.Medium);
+        }
+
+        private static WarehouseSimulation NewSimulationWithOneBox(CvBlock block, SimulationSettings settings, BoxKind kind)
         {
             WarehouseLayout layout = new WarehouseLayoutBuilder(SmallGridSide, SmallGridSide)
                 .AddDropCell(new GridPosition(0, 5))
                 .AddParkingCell(new GridPosition(5, 5))
                 .AddParkingCell(new GridPosition(4, 5))
-                .AddBox(new GridPosition(2, 2), weightClass, block)
+                .AddBox(new GridPosition(2, 2), kind, block)
                 .Build();
             return new WarehouseSimulation(layout, settings, new Random(Seed));
         }
@@ -576,7 +594,7 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
             var settings = new SimulationSettings();
             int points = 0;
             foreach (Box box in layout.Boxes)
-                points += box.TotalPieces * settings.PointsPerPiece(box.WeightClass);
+                points += box.TotalPieces * settings.PointsPerPiece(box.Importance);
             return points;
         }
 

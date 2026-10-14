@@ -22,7 +22,7 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         [SetUp]
         public void SetUp()
         {
-            box = new Box(0, new GridPosition(0, 0), WeightClass.Medium, CvTestBlocks.FromText(Text));
+            box = new Box(0, new GridPosition(0, 0), TestBoxKinds.Medium, CvTestBlocks.FromText(Text));
             random = new Random(Seed);
             claimed = new List<int>();
         }
@@ -104,7 +104,7 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         [Test]
         public void Claim_SameSeed_PicksTheSameWords()
         {
-            var otherBox = new Box(0, new GridPosition(0, 0), WeightClass.Medium, CvTestBlocks.FromText(Text));
+            var otherBox = new Box(0, new GridPosition(0, 0), TestBoxKinds.Medium, CvTestBlocks.FromText(Text));
             var otherRandom = new Random(Seed);
             var otherClaimed = new List<int>();
 

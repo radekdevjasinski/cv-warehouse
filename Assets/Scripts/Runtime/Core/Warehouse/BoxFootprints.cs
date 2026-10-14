@@ -1,16 +1,14 @@
-using CvWarehouse.Core.Cv;
-
 namespace CvWarehouse.Core.Warehouse
 {
     public static class BoxFootprints
     {
-        public static GridSize For(WeightClass weightClass)
+        public static GridSize For(BoxSizeClass sizeClass)
         {
-            switch (weightClass)
+            switch (sizeClass)
             {
-                case WeightClass.Heavy:
+                case BoxSizeClass.Large:
                     return new GridSize(2, 2);
-                case WeightClass.Medium:
+                case BoxSizeClass.Medium:
                     return new GridSize(2, 1);
                 default:
                     return new GridSize(1, 1);

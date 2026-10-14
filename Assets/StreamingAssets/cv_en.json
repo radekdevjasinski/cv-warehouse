@@ -28,7 +28,7 @@
           "meta": "radekdev.itch.io/machine-learning-fps",
           "link": "https://radekdev.itch.io/machine-learning-fps",
           "description": "Master’s thesis. 1v1 arena shooter with bots trained by PPO self-play.",
-          "weight": "heavy",
+          "importance": "key",
           "category": "technical"
         },
         {
@@ -37,7 +37,7 @@
           "meta": "radekdev.itch.io/defuse-or-lose",
           "link": "https://radekdev.itch.io/defuse-or-lose",
           "description": "Co-op bomb defusal with 8 levels of randomized puzzles and hazards. Team of two.",
-          "weight": "medium",
+          "importance": "important",
           "category": "technical"
         },
         {
@@ -46,7 +46,7 @@
           "meta": "radekdev.itch.io/cars-vs-chickens",
           "link": "https://radekdev.itch.io/cars-vs-chickens",
           "description": "Reverse tower defence built in 10 days for WitchJam 2026. Team of three.",
-          "weight": "medium",
+          "importance": "important",
           "category": "technical"
         },
         {
@@ -55,7 +55,7 @@
           "meta": "radekdev.itch.io/dungeons-whisper",
           "link": "https://radekdev.itch.io/dungeons-whisper",
           "description": "Procedurally generated dungeons, items, bosses. Led a 16-person team.",
-          "weight": "heavy",
+          "importance": "key",
           "category": "soft"
         },
         {
@@ -64,7 +64,7 @@
           "meta": "radekdev.itch.io/the-reaver-king",
           "link": "https://radekdev.itch.io/the-reaver-king",
           "description": "Engineering thesis. Shoot ’em up with a computer player trained by PPO.",
-          "weight": "heavy",
+          "importance": "key",
           "category": "technical"
         },
         {
@@ -73,7 +73,7 @@
           "meta": "radekdev.itch.io/zombie-killer",
           "link": "https://radekdev.itch.io/zombie-killer",
           "description": "PS2-style FPS demo with ragdoll physics, own low-poly models and animations.",
-          "weight": "medium",
+          "importance": "important",
           "category": "technical"
         }
       ]
@@ -88,7 +88,7 @@
           "subtitle": "Kielce University of Technology & Fool’s Theory",
           "meta": "May 2026",
           "description": "Game jam, theme <i>“On the other side”</i>. Built Cars vs Chickens, an arcade lane defence game with low-poly graphics.",
-          "weight": "heavy",
+          "importance": "key",
           "category": "soft"
         },
         {
@@ -96,7 +96,7 @@
           "subtitle": "Kielce University of Technology & 11 bit studios",
           "meta": "Mar 2025",
           "description": "Week-long game jam, theme <i>“The clock is ticking”</i>. Built Defuse or Lose, a 2D co-op puzzle game played against a timer.",
-          "weight": "medium",
+          "importance": "important",
           "category": "soft"
         }
       ]
@@ -106,14 +106,14 @@
       "type": "list",
       "style": "keyValue",
       "entries": [
-        { "title": "Languages", "description": "C#, C++, Java, Python", "weight": "light", "category": "technical" },
+        { "title": "Languages", "description": "C#, C++, Java, Python", "importance": "normal", "category": "technical" },
         {
           "title": "Game development",
           "description": "Unity (URP, Input System, ML-Agents, Test Framework), procedural generation, game AI, PhysX, OpenGL",
-          "weight": "medium",
+          "importance": "important",
           "category": "technical"
         },
-        { "title": "Tools", "description": "Blender, Aseprite, Adobe Photoshop, Git", "weight": "light", "category": "technical" }
+        { "title": "Tools", "description": "Blender, Aseprite, Adobe Photoshop, Git", "importance": "normal", "category": "technical" }
       ]
     },
     {
@@ -128,7 +128,7 @@
             "Develop full-stack mobile app features in Flutter and Java (Spring Boot).",
             "Build responsive UIs and integrate them with REST APIs and databases."
           ],
-          "weight": "heavy",
+          "importance": "key",
           "category": "technical"
         }
       ]
@@ -142,21 +142,21 @@
           "title": "Master’s degree, Computer Science",
           "subtitle": "Kielce University of Technology",
           "meta": "2025 – 2026",
-          "weight": "heavy",
+          "importance": "key",
           "category": "technical"
         },
         {
           "title": "Engineer’s degree (B.Eng.), Computer Science",
           "subtitle": "Kielce University of Technology",
           "meta": "2021 – 2025",
-          "weight": "medium",
+          "importance": "important",
           "category": "technical"
         },
         {
           "title": "IT Technician",
           "subtitle": "ZSE Kielce Technical Secondary School",
           "meta": "2017 – 2021",
-          "weight": "light",
+          "importance": "normal",
           "category": "technical"
         }
       ]
@@ -166,9 +166,9 @@
       "type": "list",
       "style": "inline",
       "entries": [
-        { "title": "Polish (native)", "weight": "light", "category": "soft" },
-        { "title": "English (B2)", "weight": "light", "category": "soft" },
-        { "title": "Driving licence (cat. B)", "weight": "light", "category": "soft" }
+        { "title": "Polish (native)", "importance": "normal", "category": "soft" },
+        { "title": "English (B2)", "importance": "normal", "category": "soft" },
+        { "title": "Driving licence (cat. B)", "importance": "normal", "category": "soft" }
       ]
     },
     {
@@ -176,9 +176,9 @@
       "type": "list",
       "style": "keyValue",
       "entries": [
-        { "title": "Video games", "description": "favourites: Elden Ring, The Witcher 3, Fallout 4, RimWorld", "weight": "light", "category": "soft" },
-        { "title": "Running and gym", "description": "training for a marathon", "weight": "light", "category": "soft" },
-        { "title": "Movies and shows", "description": "Blade Runner 2049, The Prestige, Interstellar, Breaking Bad", "weight": "light", "category": "soft" }
+        { "title": "Video games", "description": "favourites: Elden Ring, The Witcher 3, Fallout 4, RimWorld", "importance": "normal", "category": "soft" },
+        { "title": "Running and gym", "description": "training for a marathon", "importance": "normal", "category": "soft" },
+        { "title": "Movies and shows", "description": "Blade Runner 2049, The Prestige, Interstellar, Breaking Bad", "importance": "normal", "category": "soft" }
       ]
     }
   ],

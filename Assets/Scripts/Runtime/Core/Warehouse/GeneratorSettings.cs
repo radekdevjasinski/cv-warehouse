@@ -20,11 +20,15 @@ namespace CvWarehouse.Core.Warehouse
 
         public int RampDepth { get; set; } = 4;
 
-        public WeightClass NameWeight { get; set; } = WeightClass.Heavy;
+        public Importance NameImportance { get; set; } = Importance.Key;
 
-        public WeightClass JobTitleWeight { get; set; } = WeightClass.Medium;
+        public Importance JobTitleImportance { get; set; } = Importance.Important;
 
-        public WeightClass ContactWeight { get; set; } = WeightClass.Light;
+        public Importance ContactImportance { get; set; } = Importance.Normal;
+
+        public int SmallBoxMaxWords { get; set; } = 8;
+
+        public int MediumBoxMaxWords { get; set; } = 20;
 
         public int OpeningRadius { get; set; } = 4;
 
@@ -32,24 +36,38 @@ namespace CvWarehouse.Core.Warehouse
 
         public int MediumClusterRadius { get; set; } = 3;
 
-        public int MediumNearHeavyPercent { get; set; } = 60;
+        public int MediumNearLargePercent { get; set; } = 60;
 
-        public int LightNearHeavyPercent { get; set; } = 35;
+        public int SmallNearLargePercent { get; set; } = 35;
 
-        public int LightNearMediumPercent { get; set; } = 45;
+        public int SmallNearMediumPercent { get; set; } = 45;
 
-        public WeightClass WeightOf(CvBlock block)
+        public BoxKind KindOf(CvBlock block)
+        {
+            return new BoxKind(SizeClassOf(block), ImportanceOf(block));
+        }
+
+        public BoxSizeClass SizeClassOf(CvBlock block)
+        {
+            int words = block.Words.Count;
+            if (words <= SmallBoxMaxWords)
+                return BoxSizeClass.Small;
+
+            return words <= MediumBoxMaxWords ? BoxSizeClass.Medium : BoxSizeClass.Large;
+        }
+
+        public Importance ImportanceOf(CvBlock block)
         {
             switch (block.Role)
             {
                 case CvBlockRole.Name:
-                    return NameWeight;
+                    return NameImportance;
                 case CvBlockRole.JobTitle:
-                    return JobTitleWeight;
+                    return JobTitleImportance;
                 case CvBlockRole.Contact:
-                    return ContactWeight;
+                    return ContactImportance;
                 default:
-                    return block.Weight;
+                    return block.Importance;
             }
         }
     }

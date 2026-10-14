@@ -14,7 +14,7 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
             List<CvBlock> blocks = CvTestBlocks.BuildCv(2, 3, 4);
             var sizer = new WarehouseSizer(new GeneratorSettings());
 
-            int nameJobTitleAndTwoContacts = 4 + 2 + 1 + 1;
+            int nameJobTitleAndTwoContacts = 1 + 1 + 1 + 1;
             Assert.AreEqual(nameJobTitleAndTwoContacts + 2 * 4 + 3 * 2 + 4, sizer.CountBoxCells(blocks));
         }
 

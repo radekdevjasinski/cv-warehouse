@@ -21,7 +21,7 @@ namespace CvWarehouse.Core.Warehouse
             int boxCells = 0;
             foreach (CvBlock block in blocks)
             {
-                GridSize footprint = BoxFootprints.For(settings.WeightOf(block));
+                GridSize footprint = BoxFootprints.For(settings.SizeClassOf(block));
                 boxCells += footprint.Width * footprint.Height;
             }
 

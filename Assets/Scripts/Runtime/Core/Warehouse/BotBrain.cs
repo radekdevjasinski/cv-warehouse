@@ -25,7 +25,7 @@ namespace CvWarehouse.Core.Warehouse
             {
                 case BotState.GoingToBox:
                     if (bot.IsAtDestination)
-                        StartWork(bot, BotState.Extracting, settings.ExtractTicks(bot.JobBox.WeightClass));
+                        StartWork(bot, BotState.Extracting, settings.ExtractTicks(bot.JobBox.Importance));
                     break;
                 case BotState.Extracting:
                     TickExtracting(bot);

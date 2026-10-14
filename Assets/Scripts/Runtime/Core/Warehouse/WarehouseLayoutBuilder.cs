@@ -42,12 +42,12 @@ namespace CvWarehouse.Core.Warehouse
             return Block(origin, size);
         }
 
-        public WarehouseLayoutBuilder AddBox(GridPosition origin, WeightClass weightClass, CvBlock block)
+        public WarehouseLayoutBuilder AddBox(GridPosition origin, BoxKind kind, CvBlock block)
         {
             if (block.LetterCount <= 0)
                 throw new ArgumentException("A box needs at least one letter.");
 
-            var box = new Box(boxes.Count, origin, weightClass, block);
+            var box = new Box(boxes.Count, origin, kind, block);
             Block(origin, box.Size);
             boxes.Add(box);
             return this;

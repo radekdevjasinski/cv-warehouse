@@ -17,8 +17,8 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         [SetUp]
         public void SetUp()
         {
-            firstBox = new Box(0, new GridPosition(0, 0), WeightClass.Light, CvTestBlocks.WithLetters(Letters));
-            secondBox = new Box(1, new GridPosition(1, 0), WeightClass.Light, CvTestBlocks.WithLetters(Letters));
+            firstBox = new Box(0, new GridPosition(0, 0), TestBoxKinds.Small, CvTestBlocks.WithLetters(Letters));
+            secondBox = new Box(1, new GridPosition(1, 0), TestBoxKinds.Small, CvTestBlocks.WithLetters(Letters));
             selection = new BoxSelection();
         }
 

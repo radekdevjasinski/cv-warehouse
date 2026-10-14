@@ -13,10 +13,10 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         private const int MaxTicks = 400000;
 
         private WarehouseSimulation simulation;
-        private Box nearLightBox;
+        private Box nearSmallBox;
         private Box farMediumBox;
-        private Box nearerHeavyBox;
-        private Box furtherHeavyBox;
+        private Box nearerLargeBox;
+        private Box furtherLargeBox;
 
         private Bot FirstBot => simulation.Bots[0];
 
@@ -27,15 +27,15 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
                 .AddDropCell(new GridPosition(0, 9))
                 .AddParkingCell(new GridPosition(8, 9))
                 .AddParkingCell(new GridPosition(9, 9))
-                .AddBox(new GridPosition(1, 7), WeightClass.Light, CvTestBlocks.WithLetters(1))
-                .AddBox(new GridPosition(5, 5), WeightClass.Medium, CvTestBlocks.WithLetters(1))
-                .AddBox(new GridPosition(1, 3), WeightClass.Heavy, CvTestBlocks.WithLetters(1))
-                .AddBox(new GridPosition(6, 0), WeightClass.Heavy, CvTestBlocks.WithLetters(1))
+                .AddBox(new GridPosition(1, 7), TestBoxKinds.Small, CvTestBlocks.WithLetters(1))
+                .AddBox(new GridPosition(5, 5), TestBoxKinds.Medium, CvTestBlocks.WithLetters(1))
+                .AddBox(new GridPosition(1, 3), TestBoxKinds.Large, CvTestBlocks.WithLetters(1))
+                .AddBox(new GridPosition(6, 0), TestBoxKinds.Large, CvTestBlocks.WithLetters(1))
                 .Build();
-            nearLightBox = layout.Boxes[0];
+            nearSmallBox = layout.Boxes[0];
             farMediumBox = layout.Boxes[1];
-            nearerHeavyBox = layout.Boxes[2];
-            furtherHeavyBox = layout.Boxes[3];
+            nearerLargeBox = layout.Boxes[2];
+            furtherLargeBox = layout.Boxes[3];
             simulation = new WarehouseSimulation(layout, new SimulationSettings(), new System.Random(Seed));
             simulation.TryAddBot();
         }
@@ -46,52 +46,52 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
             simulation.Tick();
 
             Assert.AreEqual(BotFocus.ClosestBox, FirstBot.Focus);
-            Assert.AreSame(nearLightBox, FirstBot.JobBox);
+            Assert.AreSame(nearSmallBox, FirstBot.JobBox);
         }
 
         [Test]
-        public void Tick_BotFocusedOnTheBiggestBox_GoesToTheHeavyBoxNearestTheTruck()
+        public void Tick_BotFocusedOnTheBiggestBox_GoesToTheLargeBoxNearestTheTruck()
         {
             simulation.SetFocus(FirstBot, BotFocus.BiggestBox);
 
             simulation.Tick();
 
-            Assert.Less(nearerHeavyBox.TruckDistance, furtherHeavyBox.TruckDistance);
-            Assert.AreSame(nearerHeavyBox, FirstBot.JobBox);
+            Assert.Less(nearerLargeBox.TruckDistance, furtherLargeBox.TruckDistance);
+            Assert.AreSame(nearerLargeBox, FirstBot.JobBox);
         }
 
         [Test]
-        public void Tick_BotFocusedOnTheBiggestBox_WorksDownFromHeavyToLight()
+        public void Tick_BotFocusedOnTheBiggestBox_WorksDownFromLargeToSmall()
         {
             simulation.SetFocus(FirstBot, BotFocus.BiggestBox);
 
-            Assert.AreSame(nearerHeavyBox, NextJobBox());
-            Assert.AreSame(furtherHeavyBox, NextJobBox());
+            Assert.AreSame(nearerLargeBox, NextJobBox());
+            Assert.AreSame(furtherLargeBox, NextJobBox());
             Assert.AreSame(farMediumBox, NextJobBox());
-            Assert.AreSame(nearLightBox, NextJobBox());
+            Assert.AreSame(nearSmallBox, NextJobBox());
         }
 
         [Test]
-        public void Tick_BotFocusedOnTheSmallestBox_WorksUpFromLightToHeavy()
+        public void Tick_BotFocusedOnTheSmallestBox_WorksUpFromSmallToLarge()
         {
             simulation.SetFocus(FirstBot, BotFocus.SmallestBox);
 
-            Assert.AreSame(nearLightBox, NextJobBox());
+            Assert.AreSame(nearSmallBox, NextJobBox());
             Assert.AreSame(farMediumBox, NextJobBox());
-            Assert.AreSame(nearerHeavyBox, NextJobBox());
-            Assert.AreSame(furtherHeavyBox, NextJobBox());
+            Assert.AreSame(nearerLargeBox, NextJobBox());
+            Assert.AreSame(furtherLargeBox, NextJobBox());
         }
 
         [Test]
-        public void SetFocus_FromBiggestToSmallestOnTheWay_TurnsToTheLightBox()
+        public void SetFocus_FromBiggestToSmallestOnTheWay_TurnsToTheSmallBox()
         {
             simulation.SetFocus(FirstBot, BotFocus.BiggestBox);
             simulation.Tick();
-            Assert.AreSame(nearerHeavyBox, FirstBot.JobBox);
+            Assert.AreSame(nearerLargeBox, FirstBot.JobBox);
 
             simulation.SetFocus(FirstBot, BotFocus.SmallestBox);
 
-            Assert.AreSame(nearLightBox, FirstBot.JobBox);
+            Assert.AreSame(nearSmallBox, FirstBot.JobBox);
         }
 
         [Test]
@@ -113,8 +113,8 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
 
             simulation.Tick();
 
-            Assert.AreSame(nearLightBox, FirstBot.JobBox);
-            Assert.AreSame(nearerHeavyBox, simulation.Bots[1].JobBox);
+            Assert.AreSame(nearSmallBox, FirstBot.JobBox);
+            Assert.AreSame(nearerLargeBox, simulation.Bots[1].JobBox);
         }
 
         [Test]
@@ -122,15 +122,15 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         {
             simulation.Tick();
             Assert.AreEqual(BotState.GoingToBox, FirstBot.State);
-            Assert.AreSame(nearLightBox, FirstBot.JobBox);
+            Assert.AreSame(nearSmallBox, FirstBot.JobBox);
 
             simulation.SetFocus(FirstBot, BotFocus.BiggestBox);
 
             Assert.AreEqual(BotState.GoingToBox, FirstBot.State);
-            Assert.AreSame(nearerHeavyBox, FirstBot.JobBox);
+            Assert.AreSame(nearerLargeBox, FirstBot.JobBox);
             Assert.AreEqual(FirstBot.AccessCell, FirstBot.Destination);
             Assert.AreEqual(1, FirstBot.ClaimedPieces);
-            Assert.AreEqual(nearLightBox.TotalPieces, nearLightBox.UnclaimedPieces);
+            Assert.AreEqual(nearSmallBox.TotalPieces, nearSmallBox.UnclaimedPieces);
         }
 
         [Test]
@@ -142,7 +142,7 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
             simulation.TryAddBot();
             simulation.Tick();
 
-            Assert.AreSame(nearLightBox, simulation.Bots[1].JobBox);
+            Assert.AreSame(nearSmallBox, simulation.Bots[1].JobBox);
         }
 
         [Test]
@@ -167,11 +167,11 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
             simulation.Tick();
             simulation.SetFocus(FirstBot, BotFocus.BiggestBox);
 
-            for (int tick = 0; tick < MaxTicks && !nearerHeavyBox.IsEmpty; tick++)
+            for (int tick = 0; tick < MaxTicks && !nearerLargeBox.IsEmpty; tick++)
                 simulation.Tick();
 
-            Assert.IsTrue(nearerHeavyBox.IsEmpty);
-            Assert.IsFalse(nearLightBox.IsEmpty);
+            Assert.IsTrue(nearerLargeBox.IsEmpty);
+            Assert.IsFalse(nearSmallBox.IsEmpty);
         }
 
         [Test]
@@ -184,9 +184,9 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
             simulation.SetFocus(FirstBot, BotFocus.BiggestBox);
 
             Assert.AreEqual(BotState.GoingToDrop, FirstBot.State);
-            Assert.AreSame(nearLightBox, FirstBot.JobBox);
+            Assert.AreSame(nearSmallBox, FirstBot.JobBox);
             Assert.AreEqual(dropCell, FirstBot.Destination);
-            Assert.AreSame(nearerHeavyBox, NextJobBox());
+            Assert.AreSame(nearerLargeBox, NextJobBox());
         }
 
         [Test]
@@ -198,7 +198,7 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
             simulation.SetFocus(FirstBot, BotFocus.BiggestBox);
 
             Assert.AreEqual(BotState.Extracting, FirstBot.State);
-            Assert.AreSame(nearLightBox, FirstBot.JobBox);
+            Assert.AreSame(nearSmallBox, FirstBot.JobBox);
         }
 
         [Test]
@@ -210,15 +210,38 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
 
             simulation.SetFocus(FirstBot, BotFocus.ClosestBox);
 
-            Assert.AreSame(nearLightBox, FirstBot.JobBox);
+            Assert.AreSame(nearSmallBox, FirstBot.JobBox);
             Assert.AreEqual(accessCell, FirstBot.AccessCell);
             Assert.AreEqual(routeLength, FirstBot.RouteLength);
         }
 
         [Test]
+        public void Tick_BotFocusedOnTheMostImportantBox_WorksDownFromKeyToNormal()
+        {
+            WarehouseLayout layout = new WarehouseLayoutBuilder(GridSide, GridSide)
+                .AddDropCell(new GridPosition(0, 9))
+                .AddParkingCell(new GridPosition(9, 9))
+                .AddBox(new GridPosition(1, 7), TestBoxKinds.Of(Importance.Normal), CvTestBlocks.WithLetters(1))
+                .AddBox(new GridPosition(5, 5), TestBoxKinds.Of(Importance.Important), CvTestBlocks.WithLetters(1))
+                .AddBox(new GridPosition(7, 1), TestBoxKinds.Of(Importance.Key), CvTestBlocks.WithLetters(1))
+                .AddBox(new GridPosition(2, 4), TestBoxKinds.Of(Importance.Key), CvTestBlocks.WithLetters(1))
+                .Build();
+            simulation = new WarehouseSimulation(layout, new SimulationSettings(), new System.Random(Seed));
+            simulation.TryAddBot();
+            simulation.SetFocus(FirstBot, BotFocus.MostImportant);
+
+            Assert.Less(layout.Boxes[3].TruckDistance, layout.Boxes[2].TruckDistance);
+            Assert.AreSame(layout.Boxes[3], NextJobBox());
+            Assert.AreSame(layout.Boxes[2], NextJobBox());
+            Assert.AreSame(layout.Boxes[1], NextJobBox());
+            Assert.AreSame(layout.Boxes[0], NextJobBox());
+        }
+
+        [Test]
         public void Next_LastFocus_WrapsAroundToTheFirst()
         {
-            Assert.AreEqual(BotFocus.BiggestBox, BotFocusCycle.Next(BotFocus.ClosestBox));
+            Assert.AreEqual(BotFocus.MostImportant, BotFocusCycle.Next(BotFocus.ClosestBox));
+            Assert.AreEqual(BotFocus.BiggestBox, BotFocusCycle.Next(BotFocus.MostImportant));
             Assert.AreEqual(BotFocus.SmallestBox, BotFocusCycle.Next(BotFocus.BiggestBox));
             Assert.AreEqual(BotFocus.ClosestBox, BotFocusCycle.Next(BotFocus.SmallestBox));
         }
@@ -228,7 +251,8 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         {
             Assert.AreEqual(BotFocus.SmallestBox, BotFocusCycle.Previous(BotFocus.ClosestBox));
             Assert.AreEqual(BotFocus.BiggestBox, BotFocusCycle.Previous(BotFocus.SmallestBox));
-            Assert.AreEqual(BotFocus.ClosestBox, BotFocusCycle.Previous(BotFocus.BiggestBox));
+            Assert.AreEqual(BotFocus.MostImportant, BotFocusCycle.Previous(BotFocus.BiggestBox));
+            Assert.AreEqual(BotFocus.ClosestBox, BotFocusCycle.Previous(BotFocus.MostImportant));
         }
 
         [Test]
