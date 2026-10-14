@@ -4,19 +4,24 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
+#if UNITY_EDITOR
+using UnityEditor.SceneManagement;
+#endif
 
 namespace CvWarehouse.Tests.PlayMode.Cv
 {
     public sealed class CvSceneBootTests
     {
-        private const string SceneName = "SampleScene";
+        private const string ScenePath = "Assets/Scenes/SampleScene.unity";
         private const int MaxFramesToWait = 300;
         private const int SampleCvBlockCount = 28;
 
         [UnityTest]
         public IEnumerator Scene_Booted_ShowsSampleCvWithEveryBlockHidden()
         {
-            SceneManager.LoadScene(SceneName);
+#if UNITY_EDITOR
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode(ScenePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
             yield return null;
             CvScreen screen = Object.FindAnyObjectByType<CvScreen>();
 
