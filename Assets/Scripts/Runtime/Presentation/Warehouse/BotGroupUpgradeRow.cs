@@ -11,6 +11,7 @@ namespace CvWarehouse.Presentation.Warehouse
     public sealed class BotGroupUpgradeRow
     {
         private const int NothingShown = -1;
+        private const int MaxShown = -2;
 
         [SerializeField] private BotUpgrade upgrade;
         [SerializeField] private TMP_Text levelsText;
@@ -26,10 +27,10 @@ namespace CvWarehouse.Presentation.Warehouse
 
         public BotUpgrade Upgrade => upgrade;
 
-        public void Refresh(BotShop shop, IReadOnlyList<Bot> bots)
+        public void Refresh(BotShop shop, IReadOnlyList<Bot> bots, UpgradeButtonLook look)
         {
             RefreshLevels(BotGroup.LowestLevel(bots, upgrade), BotGroup.HighestLevel(bots, upgrade));
-            RefreshButton(shop, bots);
+            RefreshButton(shop, bots, look);
         }
 
         private void RefreshLevels(int lowest, int highest)
@@ -45,25 +46,22 @@ namespace CvWarehouse.Presentation.Warehouse
                 levelsText.SetText(upgrade == BotUpgrade.Speed ? "Speed: {0}-{1}" : "Words per haul: {0}-{1}", lowest, highest);
         }
 
-        private void RefreshButton(BotShop shop, IReadOnlyList<Bot> bots)
+        private void RefreshButton(BotShop shop, IReadOnlyList<Bot> bots, UpgradeButtonLook look)
         {
             int count = shop.CountUpgradeable(bots, upgrade);
-            if (button.gameObject.activeSelf != count > 0)
-                button.gameObject.SetActive(count > 0);
-            if (count == 0)
-                return;
+            bool hasUpgrade = count > 0;
+            look.Apply(button, UpgradeButtonLook.StateOf(hasUpgrade, hasUpgrade && shop.CanUpgrade(bots, upgrade)));
 
-            bool canUpgrade = shop.CanUpgrade(bots, upgrade);
-            if (button.interactable != canUpgrade)
-                button.interactable = canUpgrade;
-
-            int price = shop.UpgradePrice(bots, upgrade);
+            int price = hasUpgrade ? shop.UpgradePrice(bots, upgrade) : MaxShown;
             if (shownCount == count && shownPrice == price)
                 return;
 
             shownCount = count;
             shownPrice = price;
-            buttonLabel.SetText(upgrade == BotUpgrade.Speed ? "Speed x{0} ({1})" : "Words x{0} ({1})", count, price);
+            if (hasUpgrade)
+                buttonLabel.SetText(upgrade == BotUpgrade.Speed ? "Speed x{0} ({1})" : "Words x{0} ({1})", count, price);
+            else
+                buttonLabel.SetText(UpgradeButtonLook.MaxLabel);
         }
     }
 }

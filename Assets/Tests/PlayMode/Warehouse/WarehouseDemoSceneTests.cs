@@ -6,6 +6,7 @@ using CvWarehouse.Presentation.Warehouse;
 using NUnit.Framework;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
@@ -48,6 +49,10 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
         private const string CloseBotGroupWindowButtonName = "CloseBotGroupWindowButton";
         private const string BoxWindowName = "BoxWindow";
         private const string BoxSizeTextName = "BoxSizeText";
+        private const string CrewPanelName = "CrewPanel";
+        private const string AffordableButtonSprite = "ButtonGreen";
+        private const string TooExpensiveButtonSprite = "ButtonBlue";
+        private const string MaxedButtonSprite = "ButtonGrey";
         private const string BoxImportanceTextName = "BoxImportanceText";
         private const string BoxCategoryTextName = "BoxCategoryText";
         private const string CloseBoxWindowButtonName = "CloseBoxWindowButton";
@@ -265,12 +270,14 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
             yield return null;
             Button upgradeCarryButton = GameObject.Find(BotUpgradeCarryButtonName).GetComponent<Button>();
             Assert.IsFalse(upgradeCarryButton.interactable);
+            Assert.AreEqual(TooExpensiveButtonSprite, upgradeCarryButton.image.sprite.name);
 
             TickUntil(() => demo.Shop.CanUpgrade(firstBot, BotUpgrade.Carry));
             int price = demo.Shop.UpgradePrice(firstBot, BotUpgrade.Carry);
             int pointsBefore = demo.Shop.Balance;
             yield return null;
             Assert.IsTrue(upgradeCarryButton.interactable);
+            Assert.AreEqual(AffordableButtonSprite, upgradeCarryButton.image.sprite.name);
             Assert.AreEqual("More words (" + price + ")", upgradeCarryButton.GetComponentInChildren<TMP_Text>().text);
 
             upgradeCarryButton.onClick.Invoke();
@@ -308,7 +315,7 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
         }
 
         [UnityTest]
-        public IEnumerator BotUpgradeButtons_BotAtTheLastLevel_AreHidden()
+        public IEnumerator BotUpgradeButtons_BotAtTheLastLevel_SayMaxAndCannotBeClicked()
         {
             Bot firstBot = demo.Simulation.Bots[0];
             while (demo.Shop.HasUpgrade(firstBot, BotUpgrade.Carry))
@@ -319,8 +326,8 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
             TapOn(firstBot);
             yield return null;
 
-            Assert.IsNull(GameObject.Find(BotUpgradeCarryButtonName));
-            Assert.IsNull(GameObject.Find(BotUpgradeSpeedButtonName));
+            AssertShowsMax(GameObject.Find(BotUpgradeCarryButtonName).GetComponent<Button>());
+            AssertShowsMax(GameObject.Find(BotUpgradeSpeedButtonName).GetComponent<Button>());
             Assert.AreEqual("Words per haul: 5", GameObject.Find(BotCarryTextName).GetComponent<TMP_Text>().text);
             Assert.AreEqual("Speed: 5", GameObject.Find(BotSpeedTextName).GetComponent<TMP_Text>().text);
         }
@@ -717,7 +724,7 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
 
             Assert.AreSame(box, demo.BoxSelection.SelectedBox);
             Assert.AreEqual(
-                "Size: " + box.SizeClass.ToString().ToLowerInvariant() + " (" + box.Block.Words.Count + " words)",
+                "Size: " + box.SizeClass.ToString().ToLowerInvariant(),
                 GameObject.Find(BoxSizeTextName).GetComponent<TMP_Text>().text);
             Assert.AreEqual(
                 "Importance: " + box.Importance.ToString().ToLowerInvariant(),
@@ -752,7 +759,7 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
             yield return null;
 
             Assert.AreSame(largeBox, demo.BoxSelection.SelectedBox);
-            StringAssert.StartsWith("Size: large", GameObject.Find(BoxSizeTextName).GetComponent<TMP_Text>().text);
+            Assert.AreEqual("Size: large", GameObject.Find(BoxSizeTextName).GetComponent<TMP_Text>().text);
         }
 
         [UnityTest]
@@ -892,6 +899,49 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
             Assert.AreEqual(0, demo.Selection.Count);
             Assert.IsFalse(crewList.Chip(0).IsSelected);
             Assert.IsNull(GameObject.Find(BotWindowName));
+        }
+
+        [UnityTest]
+        public IEnumerator Dock_Booted_GivesEveryPanelAndWindowTheSamePadding()
+        {
+            yield return null;
+            Transform dock = GameObject.Find(CrewPanelName).transform.parent;
+            RectOffset expected = dock.Find("StatsPanel").GetComponent<VerticalLayoutGroup>().padding;
+
+            foreach (string panel in new[] { CrewPanelName, "SelectionSlot/BotWindow", "SelectionSlot/BotGroupWindow", "SelectionSlot/BoxWindow" })
+            {
+                RectOffset padding = dock.Find(panel).GetComponent<VerticalLayoutGroup>().padding;
+                Assert.AreEqual(expected.left, padding.left, panel + " left");
+                Assert.AreEqual(expected.right, padding.right, panel + " right");
+                Assert.AreEqual(expected.top, padding.top, panel + " top");
+                Assert.AreEqual(expected.bottom, padding.bottom, panel + " bottom");
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator CrewPanel_ClickOnItsEmptySpace_ClearsTheSelection()
+        {
+            demo.Selection.SelectAll(demo.Simulation.Bots);
+            demo.BoxSelection.Select(demo.Simulation.Layout.Boxes[0]);
+            yield return null;
+
+            ClickThroughTheEventSystem(GameObject.Find(CrewPanelName));
+            yield return null;
+
+            Assert.AreEqual(0, demo.Selection.Count);
+            Assert.IsFalse(demo.BoxSelection.HasBox);
+        }
+
+        [UnityTest]
+        public IEnumerator CrewPanel_ClickOnAChip_SelectsThatBotInsteadOfClearing()
+        {
+            CrewListView crewList = Object.FindAnyObjectByType<CrewListView>();
+            yield return null;
+
+            ClickThroughTheEventSystem(crewList.Chip(1).gameObject);
+            yield return null;
+
+            Assert.AreSame(demo.Simulation.Bots[1], demo.Selection.SingleBot);
         }
 
         [UnityTest]
@@ -1424,7 +1474,7 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
         }
 
         [UnityTest]
-        public IEnumerator GroupWindow_EveryBotAtTheLastLevel_HidesThatUpgradeButton()
+        public IEnumerator GroupWindow_EveryBotAtTheLastLevel_SaysMaxOnThatUpgradeButton()
         {
             foreach (Bot bot in demo.Simulation.Bots)
                 while (demo.Shop.HasUpgrade(bot, BotUpgrade.Carry))
@@ -1432,8 +1482,8 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
             SelectEveryBot();
             yield return null;
 
-            Assert.IsNull(GameObject.Find(GroupUpgradeCarryButtonName));
-            Assert.IsNotNull(GameObject.Find(GroupUpgradeSpeedButtonName));
+            AssertShowsMax(GameObject.Find(GroupUpgradeCarryButtonName).GetComponent<Button>());
+            StringAssert.StartsWith("Speed x3 (", GameObject.Find(GroupUpgradeSpeedButtonName).GetComponentInChildren<TMP_Text>().text);
             Assert.AreEqual("Words per haul: 5", GameObject.Find(GroupCarryTextName).GetComponent<TMP_Text>().text);
         }
 
@@ -1563,6 +1613,19 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
 
             Assert.Fail("The warehouse has no such box.");
             return null;
+        }
+
+        private static void ClickThroughTheEventSystem(GameObject target)
+        {
+            var click = new PointerEventData(EventSystem.current) { button = PointerEventData.InputButton.Left };
+            ExecuteEvents.ExecuteHierarchy(target, click, ExecuteEvents.pointerClickHandler);
+        }
+
+        private static void AssertShowsMax(Button button)
+        {
+            Assert.IsFalse(button.interactable);
+            Assert.AreEqual("Max", button.GetComponentInChildren<TMP_Text>().text);
+            Assert.AreEqual(MaxedButtonSprite, button.image.sprite.name);
         }
 
         private static bool IsPartlyEmptiedSmallBox(Box box)

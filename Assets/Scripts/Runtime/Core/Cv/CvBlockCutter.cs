@@ -4,17 +4,24 @@ namespace CvWarehouse.Core.Cv
 {
     internal sealed class CvBlockCutter
     {
-        private const int NoOpenWord = -1;
+        private const int NoToken = -1;
+
+        private readonly List<int> glyphLetters = new List<int>();
+        private List<CvWord> words;
+        private int letterCount;
+        private int tokenStart;
+        private bool tokenHasLetter;
 
         public CvBlock Cut(string id, params string[] segments)
         {
-            var words = new List<CvWord>();
-            var segmentFirstLetters = new int[segments.Length];
-            int letterCount = 0;
+            glyphLetters.Clear();
+            words = new List<CvWord>();
+            letterCount = 0;
+            var segmentFirstGlyphs = new int[segments.Length];
             for (int segmentIndex = 0; segmentIndex < segments.Length; segmentIndex++)
             {
-                segmentFirstLetters[segmentIndex] = letterCount;
-                letterCount = CutSegment(segments[segmentIndex], letterCount, words);
+                segmentFirstGlyphs[segmentIndex] = glyphLetters.Count;
+                CutSegment(segments[segmentIndex]);
             }
 
             return new CvBlock
@@ -23,43 +30,58 @@ namespace CvWarehouse.Core.Cv
                 Category = string.Empty,
                 CategoryName = string.Empty,
                 Segments = segments,
-                SegmentFirstLetters = segmentFirstLetters,
+                SegmentFirstGlyphs = segmentFirstGlyphs,
+                GlyphLetters = glyphLetters.ToArray(),
                 Words = words,
                 LetterCount = letterCount
             };
         }
 
-        private static int CutSegment(string segment, int letterCount, List<CvWord> words)
+        private void CutSegment(string segment)
         {
-            int wordStart = NoOpenWord;
+            tokenStart = NoToken;
             for (int index = 0; index < segment.Length; index++)
             {
                 int tagLength = CvRichText.MeasureTagAt(segment, index);
                 if (tagLength > 0)
-                {
                     index += tagLength - 1;
-                }
                 else if (char.IsWhiteSpace(segment[index]))
-                {
-                    CloseWord(words, wordStart, letterCount);
-                    wordStart = NoOpenWord;
-                }
+                    CloseToken();
                 else
-                {
-                    if (wordStart == NoOpenWord)
-                        wordStart = letterCount;
-                    letterCount++;
-                }
+                    AddGlyph(segment[index]);
             }
 
-            CloseWord(words, wordStart, letterCount);
-            return letterCount;
+            CloseToken();
         }
 
-        private static void CloseWord(List<CvWord> words, int wordStart, int letterCount)
+        private void AddGlyph(char glyph)
         {
-            if (wordStart != NoOpenWord)
-                words.Add(new CvWord(wordStart, letterCount - wordStart));
+            if (tokenStart == NoToken)
+            {
+                tokenStart = glyphLetters.Count;
+                tokenHasLetter = false;
+            }
+
+            tokenHasLetter |= char.IsLetterOrDigit(glyph);
+            glyphLetters.Add(CvBlock.DecorationGlyph);
+        }
+
+        private void CloseToken()
+        {
+            if (tokenStart == NoToken)
+                return;
+
+            if (tokenHasLetter)
+                MakeWord(tokenStart);
+            tokenStart = NoToken;
+        }
+
+        private void MakeWord(int firstGlyph)
+        {
+            int firstLetter = letterCount;
+            for (int glyph = firstGlyph; glyph < glyphLetters.Count; glyph++)
+                glyphLetters[glyph] = letterCount++;
+            words.Add(new CvWord(firstLetter, letterCount - firstLetter));
         }
     }
 }

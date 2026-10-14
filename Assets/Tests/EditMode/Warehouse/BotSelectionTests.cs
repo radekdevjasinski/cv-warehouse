@@ -28,6 +28,38 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         }
 
         [Test]
+        public void Toggle_BotNotSelected_AddsItToTheSelection()
+        {
+            selection.Select(FirstBot);
+
+            selection.Toggle(SecondBot);
+
+            Assert.IsTrue(selection.HasManyBots);
+            Assert.IsTrue(selection.Contains(FirstBot));
+            Assert.IsTrue(selection.Contains(SecondBot));
+        }
+
+        [Test]
+        public void Toggle_BotAlreadySelected_RemovesOnlyThatBot()
+        {
+            selection.SelectAll(new List<Bot> { FirstBot, SecondBot });
+
+            selection.Toggle(FirstBot);
+
+            Assert.AreSame(SecondBot, selection.SingleBot);
+        }
+
+        [Test]
+        public void Toggle_TheOnlySelectedBot_ClearsTheSelection()
+        {
+            selection.Select(FirstBot);
+
+            selection.Toggle(FirstBot);
+
+            Assert.AreEqual(0, selection.Count);
+        }
+
+        [Test]
         public void Select_OneBot_MakesItTheSingleBot()
         {
             selection.Select(FirstBot);

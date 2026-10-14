@@ -9,6 +9,7 @@ namespace CvWarehouse.Presentation.Warehouse
     public sealed class BotGroupPanelView : MonoBehaviour
     {
         [SerializeField] private GameObject window;
+        [SerializeField] private UpgradeButtonLook upgradeLook;
         [SerializeField] private BotGroupUpgradeRow carryRow;
         [SerializeField] private BotGroupUpgradeRow speedRow;
         [SerializeField] private TMP_Text focusText;
@@ -105,8 +106,8 @@ namespace CvWarehouse.Presentation.Warehouse
             if (!selection.HasManyBots)
                 return;
 
-            carryRow.Refresh(shop, selection.Bots);
-            speedRow.Refresh(shop, selection.Bots);
+            carryRow.Refresh(shop, selection.Bots, upgradeLook);
+            speedRow.Refresh(shop, selection.Bots, upgradeLook);
             RefreshFocus();
             if (deleteButton.interactable != simulation.CanRemoveBot)
                 deleteButton.interactable = simulation.CanRemoveBot;

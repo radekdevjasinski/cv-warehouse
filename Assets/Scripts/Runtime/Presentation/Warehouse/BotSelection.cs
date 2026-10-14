@@ -28,6 +28,12 @@ namespace CvWarehouse.Presentation.Warehouse
             bots.Add(bot);
         }
 
+        public void Toggle(Bot bot)
+        {
+            if (!bots.Remove(bot))
+                bots.Add(bot);
+        }
+
         public void SelectAll(IReadOnlyList<Bot> selectedBots)
         {
             bots.Clear();

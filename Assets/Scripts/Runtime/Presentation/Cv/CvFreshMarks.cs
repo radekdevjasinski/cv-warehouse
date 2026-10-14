@@ -21,7 +21,7 @@ namespace CvWarehouse.Presentation.Cv
             this.pool = pool;
         }
 
-        public void Show(CvBlockReveal reveal, int firstLetter)
+        public void Show(CvBlockReveal reveal, int firstGlyph)
         {
             Clear();
             if (!reveal.HasFreshLetters)
@@ -30,21 +30,22 @@ namespace CvWarehouse.Presentation.Cv
             TMP_TextInfo textInfo = text.textInfo;
             int runStart = NoRun;
             int runEnd = NoRun;
-            int letter = firstLetter;
+            int glyph = firstGlyph;
             for (int characterIndex = 0; characterIndex < textInfo.characterCount; characterIndex++)
             {
                 if (!textInfo.characterInfo[characterIndex].isVisible)
                     continue;
 
-                bool continuesRun = reveal.IsFresh(letter) && IsOnTheLineOf(textInfo, runStart, characterIndex);
+                bool isFresh = reveal.IsFresh(reveal.Block.LetterAt(glyph));
+                bool continuesRun = isFresh && IsOnTheLineOf(textInfo, runStart, characterIndex);
                 if (!continuesRun)
                 {
                     Mark(textInfo, runStart, runEnd);
-                    runStart = reveal.IsFresh(letter) ? characterIndex : NoRun;
+                    runStart = isFresh ? characterIndex : NoRun;
                 }
 
                 runEnd = characterIndex;
-                letter++;
+                glyph++;
             }
 
             Mark(textInfo, runStart, runEnd);

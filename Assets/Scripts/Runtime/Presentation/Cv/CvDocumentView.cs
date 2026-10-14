@@ -13,12 +13,16 @@ namespace CvWarehouse.Presentation.Cv
         [SerializeField] private TMP_Text footerText;
         [SerializeField] private CvAutoScroll autoScroll;
         [SerializeField] private Color freshColor = new Color32(0xe8, 0xc5, 0x47, 0x80);
+        [SerializeField] private Color hiddenWordColor = new Color32(0xdd, 0xd5, 0xc2, 0xff);
 
         private readonly Dictionary<string, CvRevealable> revealables = new Dictionary<string, CvRevealable>();
         private CvRevealState revealState;
         private CvHighlightPool highlights;
+        private CvHighlightPool hiddenWords;
 
         public int FreshMarkCount => highlights == null ? 0 : highlights.RentedCount;
+
+        public int HiddenWordMarkCount => hiddenWords == null ? 0 : hiddenWords.RentedCount;
 
         public void Show(CvDocument document, CvRevealState state)
         {
@@ -28,8 +32,12 @@ namespace CvWarehouse.Presentation.Cv
                 Instantiate(sectionPrefab, sectionsRoot).Show(section, state, revealables);
             footerText.SetText(document.Footer);
             highlights = new CvHighlightPool(autoScroll.transform, freshColor);
+            hiddenWords = new CvHighlightPool(autoScroll.transform, hiddenWordColor);
             foreach (CvRevealable revealable in revealables.Values)
+            {
                 revealable.MarkFreshLettersWith(highlights);
+                revealable.MarkHiddenWordsWith(hiddenWords);
+            }
             autoScroll.Follow(state, revealables);
 
             if (isActiveAndEnabled)

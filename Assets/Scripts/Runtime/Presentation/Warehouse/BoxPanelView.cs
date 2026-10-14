@@ -27,16 +27,16 @@ namespace CvWarehouse.Presentation.Warehouse
             Refresh();
         }
 
-        private static string SizeFormatOf(BoxSizeClass sizeClass)
+        private static string SizeLabelOf(BoxSizeClass sizeClass)
         {
             switch (sizeClass)
             {
                 case BoxSizeClass.Large:
-                    return "Size: large ({0} words)";
+                    return "Size: large";
                 case BoxSizeClass.Medium:
-                    return "Size: medium ({0} words)";
+                    return "Size: medium";
                 default:
-                    return "Size: small ({0} words)";
+                    return "Size: small";
             }
         }
 
@@ -83,7 +83,7 @@ namespace CvWarehouse.Presentation.Warehouse
 
             shownBox = selection.SelectedBox;
             string categoryName = shownBox.Block.CategoryName;
-            sizeText.SetText(SizeFormatOf(shownBox.SizeClass), shownBox.Block.Words.Count);
+            sizeText.SetText(SizeLabelOf(shownBox.SizeClass));
             importanceText.SetText(ImportanceLabelOf(shownBox.Importance));
             categoryText.SetText(string.IsNullOrEmpty(categoryName) ? NoCategory : CategoryPrefix + categoryName);
         }

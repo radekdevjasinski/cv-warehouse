@@ -2,11 +2,15 @@ using System;
 using System.Collections.Generic;
 using CvWarehouse.Core.Warehouse;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace CvWarehouse.Presentation.Warehouse
 {
     public sealed class CrewListView : MonoBehaviour
     {
+        private const string AddToSelectionActionName = "Player/AddToSelection";
+
+        [SerializeField] private InputActionAsset inputActions;
         [SerializeField] private CrewChipView chipPrefab;
         [SerializeField] private RectTransform chipsRoot;
         [SerializeField] private WarehouseSettings settings;
@@ -15,6 +19,7 @@ namespace CvWarehouse.Presentation.Warehouse
         private IReadOnlyList<Bot> bots;
         private BotSelection selection;
         private BoxSelection boxSelection;
+        private InputAction addToSelectionAction;
 
         public int VisibleChipCount { get; private set; }
 
@@ -40,8 +45,14 @@ namespace CvWarehouse.Presentation.Warehouse
             Refresh();
         }
 
+        private void Awake()
+        {
+            addToSelectionAction = inputActions.FindAction(AddToSelectionActionName, true);
+        }
+
         private void OnEnable()
         {
+            addToSelectionAction.Enable();
             foreach (CrewChipView chip in chips)
                 chip.Picked += Pick;
         }
@@ -50,6 +61,7 @@ namespace CvWarehouse.Presentation.Warehouse
         {
             foreach (CrewChipView chip in chips)
                 chip.Picked -= Pick;
+            addToSelectionAction.Disable();
         }
 
         private void LateUpdate()
@@ -61,7 +73,9 @@ namespace CvWarehouse.Presentation.Warehouse
         private void Pick(Bot bot)
         {
             boxSelection.Clear();
-            if (selection.SingleBot == bot)
+            if (addToSelectionAction.IsPressed())
+                selection.Toggle(bot);
+            else if (selection.SingleBot == bot)
                 selection.Clear();
             else
                 selection.Select(bot);

@@ -18,6 +18,7 @@ namespace CvWarehouse.Presentation.Warehouse
         [SerializeField] private PointsView pointsView;
         [SerializeField] private ShiftStatusView shiftStatusView;
         [SerializeField] private CrewListView crewListView;
+        [SerializeField] private SelectionClearArea crewPanelClearArea;
         [SerializeField] private BotRouteView routeView;
         [SerializeField] private BotPanelView botPanelView;
         [SerializeField] private BotGroupPanelView botGroupPanelView;
@@ -73,6 +74,7 @@ namespace CvWarehouse.Presentation.Warehouse
             pointsView.Show(Shop);
             shiftStatusView.Show(Simulation);
             crewListView.Show(Simulation, Selection, BoxSelection);
+            crewPanelClearArea.Connect(Selection, BoxSelection);
             botPanelView.Show(Simulation, Shop, Selection);
             botGroupPanelView.Show(Simulation, Shop, Selection);
             boxPanelView.Show(BoxSelection);

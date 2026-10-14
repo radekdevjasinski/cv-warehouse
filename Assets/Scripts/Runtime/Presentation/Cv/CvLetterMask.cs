@@ -15,17 +15,27 @@ namespace CvWarehouse.Presentation.Cv
 
         private CvBlockReveal reveal;
         private CvFreshMarks freshMarks;
-        private int firstLetter;
+        private CvHiddenWordMarks hiddenWordMarks;
+        private int firstGlyph;
+        private bool areHiddenWordsStale;
 
-        public void Bind(CvBlockReveal blockReveal, int firstLetterInBlock)
+        public int HiddenWordMarkCount => hiddenWordMarks == null ? 0 : hiddenWordMarks.Count;
+
+        public void Bind(CvBlockReveal blockReveal, int firstGlyphInBlock)
         {
             reveal = blockReveal;
-            firstLetter = firstLetterInBlock;
+            firstGlyph = firstGlyphInBlock;
         }
 
         public void MarkFreshLettersWith(CvHighlightPool pool)
         {
             freshMarks = new CvFreshMarks(text, pool);
+        }
+
+        public void MarkHiddenWordsWith(CvHighlightPool pool)
+        {
+            hiddenWordMarks = new CvHiddenWordMarks(text, pool);
+            areHiddenWordsStale = true;
         }
 
         public void Refresh()
@@ -35,7 +45,8 @@ namespace CvWarehouse.Presentation.Cv
 
             ApplyVisibility(text.textInfo);
             text.UpdateVertexData(TMP_VertexDataUpdateFlags.Colors32);
-            freshMarks?.Show(reveal, firstLetter);
+            freshMarks?.Show(reveal, firstGlyph);
+            ShowHiddenWords();
         }
 
         private void OnEnable()
@@ -48,20 +59,37 @@ namespace CvWarehouse.Presentation.Cv
             text.OnPreRenderText -= ApplyVisibility;
         }
 
+        private void LateUpdate()
+        {
+            if (areHiddenWordsStale)
+                ShowHiddenWords();
+        }
+
+        private void ShowHiddenWords()
+        {
+            if (hiddenWordMarks == null || reveal == null)
+                return;
+
+            areHiddenWordsStale = false;
+            hiddenWordMarks.Show(reveal, firstGlyph);
+        }
+
         private void ApplyVisibility(TMP_TextInfo textInfo)
         {
             if (reveal == null)
                 return;
 
-            int letter = firstLetter;
+            areHiddenWordsStale = true;
+            int glyph = firstGlyph;
             for (int characterIndex = 0; characterIndex < textInfo.characterCount; characterIndex++)
             {
                 ref TMP_CharacterInfo character = ref textInfo.characterInfo[characterIndex];
                 if (!character.isVisible)
                     continue;
 
-                SetAlpha(textInfo, ref character, reveal.IsRevealed(letter) ? VisibleAlpha : HiddenAlpha);
-                letter++;
+                bool isShown = reveal.IsRevealed(reveal.Block.LetterAt(glyph));
+                SetAlpha(textInfo, ref character, isShown ? VisibleAlpha : HiddenAlpha);
+                glyph++;
             }
         }
 

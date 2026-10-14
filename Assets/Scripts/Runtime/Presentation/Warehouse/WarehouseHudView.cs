@@ -10,14 +10,12 @@ namespace CvWarehouse.Presentation.Warehouse
         private const int NothingShown = -1;
 
         [SerializeField] private TMP_Text botsText;
-        [SerializeField] private TMP_Text deliveredText;
         [SerializeField] private Button buyBotButton;
         [SerializeField] private TMP_Text buyBotLabel;
 
         private WarehouseSimulation simulation;
         private BotShop shop;
         private int shownBots = NothingShown;
-        private int shownDelivered = NothingShown;
         private int shownBotPrice = NothingShown;
 
         public void Show(WarehouseSimulation shownSimulation, BotShop shownShop)
@@ -25,6 +23,12 @@ namespace CvWarehouse.Presentation.Warehouse
             simulation = shownSimulation;
             shop = shownShop;
             Refresh();
+        }
+
+        private static void SetInteractable(Button button, bool isInteractable)
+        {
+            if (button.interactable != isInteractable)
+                button.interactable = isInteractable;
         }
 
         private void OnEnable()
@@ -51,23 +55,17 @@ namespace CvWarehouse.Presentation.Warehouse
 
         private void Refresh()
         {
-            RefreshCounters();
+            RefreshBotCount();
             RefreshBuyBotButton();
         }
 
-        private void RefreshCounters()
+        private void RefreshBotCount()
         {
-            if (shownBots != simulation.Bots.Count)
-            {
-                shownBots = simulation.Bots.Count;
-                botsText.SetText("{0}/{1}", shownBots, simulation.MaxBots);
-            }
+            if (shownBots == simulation.Bots.Count)
+                return;
 
-            if (shownDelivered != simulation.Score.DeliveredPieces)
-            {
-                shownDelivered = simulation.Score.DeliveredPieces;
-                deliveredText.SetText("{0}/{1}", shownDelivered, simulation.Layout.TotalPieces);
-            }
+            shownBots = simulation.Bots.Count;
+            botsText.SetText("{0}/{1}", shownBots, simulation.MaxBots);
         }
 
         private void RefreshBuyBotButton()
@@ -82,12 +80,6 @@ namespace CvWarehouse.Presentation.Warehouse
                 buyBotLabel.SetText("Buy bot ({0})", botPrice);
             else
                 buyBotLabel.SetText("No free bot slots");
-        }
-
-        private static void SetInteractable(Button button, bool isInteractable)
-        {
-            if (button.interactable != isInteractable)
-                button.interactable = isInteractable;
         }
     }
 }

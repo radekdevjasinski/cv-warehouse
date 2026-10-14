@@ -21,6 +21,8 @@ namespace CvWarehouse.Tests.PlayMode.Cv
         private const float WidthTolerance = 0.5f;
         private const int BlockCount = 7;
         private const int NameLetterCount = 11;
+        private const int FirstNameLetterCount = 3;
+        private const string FirstProjectId = "section.1.entry.0";
         private const string ValidCv =
             "{\"name\":\"Ada Lovelace\",\"title\":\"Programmer\","
             + "\"contacts\":[{\"kind\":\"email\",\"text\":\"ada@example.com\",\"link\":\"mailto:ada@example.com\"}],"
@@ -61,8 +63,6 @@ namespace CvWarehouse.Tests.PlayMode.Cv
         {
             yield return Show(CvTextResponse.Success(ValidCv));
             TMP_Text nameText = screen.transform.Find(NamePath).GetComponent<TMP_Text>();
-            Graphic placeholder = screen.transform.Find(NamePath + "/Placeholder").GetComponent<Graphic>();
-            Assert.IsTrue(placeholder.enabled);
 
             screen.RevealState.RevealLetter(CvItemId.Name, 1);
             yield return null;
@@ -70,7 +70,43 @@ namespace CvWarehouse.Tests.PlayMode.Cv
             Assert.AreEqual("Ada Lovelace", nameText.text);
             Assert.AreEqual(0, ReadLetterAlpha(nameText, 0));
             Assert.AreEqual(255, ReadLetterAlpha(nameText, 1));
-            Assert.IsFalse(placeholder.enabled);
+        }
+
+        [UnityTest]
+        public IEnumerator ShowAsync_NothingRevealed_ShowsTheBulletOfAnEntryWithoutABar()
+        {
+            yield return Show(CvTextResponse.Success(ValidCv));
+            yield return null;
+
+            CvRevealable entry = RevealableOf(FirstProjectId);
+            TMP_Text heading = entry.GetComponentInChildren<TMP_Text>();
+            StringAssert.StartsWith("•", heading.text);
+            Assert.AreEqual(255, ReadLetterAlpha(heading, 0));
+            Assert.AreEqual(0, ReadLetterAlpha(heading, 2));
+            Assert.AreEqual(1, entry.HiddenWordMarkCount);
+        }
+
+        [UnityTest]
+        public IEnumerator ShowAsync_NothingRevealed_DrawsABarUnderEveryWord()
+        {
+            yield return Show(CvTextResponse.Success(ValidCv));
+            yield return null;
+
+            Assert.AreEqual(2, RevealableOf(CvItemId.Name).HiddenWordMarkCount);
+            Assert.AreEqual(1, RevealableOf(CvItemId.JobTitle).HiddenWordMarkCount);
+        }
+
+        [UnityTest]
+        public IEnumerator RevealLetter_WholeFirstWordOfTheName_LeavesABarOnlyUnderTheOtherWord()
+        {
+            yield return Show(CvTextResponse.Success(ValidCv));
+            yield return null;
+
+            for (int letter = 0; letter < FirstNameLetterCount; letter++)
+                screen.RevealState.RevealLetter(CvItemId.Name, letter);
+            yield return null;
+
+            Assert.AreEqual(1, RevealableOf(CvItemId.Name).HiddenWordMarkCount);
         }
 
         [UnityTest]
@@ -122,13 +158,15 @@ namespace CvWarehouse.Tests.PlayMode.Cv
         public IEnumerator ResetButton_ClickedAfterReveal_HidesEverythingAgain()
         {
             yield return Show(CvTextResponse.Success(ValidCv));
-            Graphic placeholder = screen.transform.Find(NamePath + "/Placeholder").GetComponent<Graphic>();
             Click("RevealAllButton");
+            yield return null;
+            Assert.AreEqual(0, RevealableOf(CvItemId.Name).HiddenWordMarkCount);
 
             Click("ResetButton");
+            yield return null;
 
             Assert.AreEqual(0, screen.RevealState.RevealedLetterCount);
-            Assert.IsTrue(placeholder.enabled);
+            Assert.AreEqual(2, RevealableOf(CvItemId.Name).HiddenWordMarkCount);
         }
 
         [UnityTest]
@@ -179,6 +217,16 @@ namespace CvWarehouse.Tests.PlayMode.Cv
             Awaitable showing = screen.ShowAsync(new FakeCvTextSource(response));
             yield return null;
             Assert.IsTrue(showing.IsCompleted);
+        }
+
+        private CvRevealable RevealableOf(string blockId)
+        {
+            foreach (CvRevealable revealable in screen.GetComponentsInChildren<CvRevealable>(true))
+                if (revealable.Reveal.Block.Id == blockId)
+                    return revealable;
+
+            Assert.Fail("No view shows block " + blockId);
+            return null;
         }
 
         private void Click(string buttonName)

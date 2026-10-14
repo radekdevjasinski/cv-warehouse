@@ -37,9 +37,51 @@ namespace CvWarehouse.Tests.EditMode.Cv
                 "{\"sections\":[{\"entries\":[{\"title\":\"Game\",\"meta\":\"2026\",\"description\":\"A <i>fine</i> one\"}]}]}")[0];
 
             CollectionAssert.AreEqual(new[] { "<b>Game</b>", "2026", "A <i>fine</i> one" }, block.Segments);
-            CollectionAssert.AreEqual(new[] { 0, 4, 8 }, block.SegmentFirstLetters);
+            CollectionAssert.AreEqual(new[] { 0, 4, 8 }, block.SegmentFirstGlyphs);
             Assert.AreEqual(16, block.LetterCount);
             Assert.AreEqual(5, block.Words.Count);
+        }
+
+        [Test]
+        public void Build_BulletEntryWithSubtitle_LeavesTheBulletAndTheDashOutOfTheLetters()
+        {
+            CvBlock block = CvTestBlocks.Build(
+                "{\"sections\":[{\"style\":\"bullets\",\"entries\":[{\"title\":\"Game\",\"subtitle\":\"Unity\"}]}]}")[0];
+
+            Assert.AreEqual("Game".Length + "Unity".Length, block.LetterCount);
+            Assert.AreEqual(2, block.Words.Count);
+            Assert.AreEqual(CvBlock.DecorationGlyph, block.LetterAt(0));
+            Assert.AreEqual(0, block.LetterAt(1));
+            Assert.AreEqual(CvBlock.DecorationGlyph, block.LetterAt(5));
+            Assert.AreEqual(4, block.LetterAt(6));
+        }
+
+        [Test]
+        public void Build_TokenWithoutLettersOrDigits_IsADecorationNotAWord()
+        {
+            CvBlock block = CvTestBlocks.FromText("2017 - 2021");
+
+            Assert.AreEqual(8, block.LetterCount);
+            Assert.AreEqual(2, block.Words.Count);
+            CollectionAssert.AreEqual(new[] { 0, 1, 2, 3, CvBlock.DecorationGlyph, 4, 5, 6, 7 }, block.GlyphLetters);
+        }
+
+        [Test]
+        public void Build_PunctuationInsideAWord_StaysPartOfThatWord()
+        {
+            CvBlock block = CvTestBlocks.FromText("C#, Unity.");
+
+            Assert.AreEqual(9, block.LetterCount);
+            Assert.AreEqual(3, block.Words[0].LetterCount);
+        }
+
+        [Test]
+        public void LetterAt_GlyphOutsideTheBlock_IsADecoration()
+        {
+            CvBlock block = CvTestBlocks.FromText("Hi");
+
+            Assert.AreEqual(CvBlock.DecorationGlyph, block.LetterAt(-1));
+            Assert.AreEqual(CvBlock.DecorationGlyph, block.LetterAt(2));
         }
 
         [Test]

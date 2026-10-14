@@ -8,10 +8,12 @@ namespace CvWarehouse.Presentation.Warehouse
     public sealed class BotPanelView : MonoBehaviour
     {
         private const int NothingShown = -1;
+        private const int MaxShown = -2;
         private const int UpgradeCount = 2;
 
         [SerializeField] private GameObject window;
         [SerializeField] private WarehouseSettings settings;
+        [SerializeField] private UpgradeButtonLook upgradeLook;
         [SerializeField] private TMP_Text nameText;
         [SerializeField] private Image swatch;
         [SerializeField] private BotStatusText statusText;
@@ -159,7 +161,7 @@ namespace CvWarehouse.Presentation.Warehouse
             if (HasNewLevel(bot, BotUpgrade.Carry))
                 carryText.SetText("Words per haul: {0}", bot.CarryLevel);
             if (RefreshUpgradeButton(bot, BotUpgrade.Carry, upgradeCarryButton))
-                upgradeCarryLabel.SetText("More words ({0})", shop.UpgradePrice(bot, BotUpgrade.Carry));
+                ShowPrice(upgradeCarryLabel, "More words ({0})", BotUpgrade.Carry);
         }
 
         private void RefreshSpeed(Bot bot)
@@ -167,7 +169,7 @@ namespace CvWarehouse.Presentation.Warehouse
             if (HasNewLevel(bot, BotUpgrade.Speed))
                 speedText.SetText("Speed: {0}", bot.SpeedLevel);
             if (RefreshUpgradeButton(bot, BotUpgrade.Speed, upgradeSpeedButton))
-                upgradeSpeedLabel.SetText("More speed ({0})", shop.UpgradePrice(bot, BotUpgrade.Speed));
+                ShowPrice(upgradeSpeedLabel, "More speed ({0})", BotUpgrade.Speed);
         }
 
         private bool HasNewLevel(Bot bot, BotUpgrade upgrade)
@@ -183,14 +185,22 @@ namespace CvWarehouse.Presentation.Warehouse
         private bool RefreshUpgradeButton(Bot bot, BotUpgrade upgrade, Button button)
         {
             bool hasUpgrade = shop.HasUpgrade(bot, upgrade);
-            SetActive(button.gameObject, hasUpgrade);
-            SetInteractable(button, shop.CanUpgrade(bot, upgrade));
-            int price = hasUpgrade ? shop.UpgradePrice(bot, upgrade) : NothingShown;
-            if (!hasUpgrade || shownPrices[(int)upgrade] == price)
+            upgradeLook.Apply(button, UpgradeButtonLook.StateOf(hasUpgrade, shop.CanUpgrade(bot, upgrade)));
+            int price = hasUpgrade ? shop.UpgradePrice(bot, upgrade) : MaxShown;
+            if (shownPrices[(int)upgrade] == price)
                 return false;
 
             shownPrices[(int)upgrade] = price;
             return true;
+        }
+
+        private void ShowPrice(TMP_Text label, string priceFormat, BotUpgrade upgrade)
+        {
+            int price = shownPrices[(int)upgrade];
+            if (price == MaxShown)
+                label.SetText(UpgradeButtonLook.MaxLabel);
+            else
+                label.SetText(priceFormat, price);
         }
 
         private void RefreshFocus(Bot bot)
