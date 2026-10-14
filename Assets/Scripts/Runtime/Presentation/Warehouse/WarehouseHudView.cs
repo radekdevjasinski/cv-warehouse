@@ -12,6 +12,7 @@ namespace CvWarehouse.Presentation.Warehouse
         [SerializeField] private TMP_Text botsText;
         [SerializeField] private Button buyBotButton;
         [SerializeField] private TMP_Text buyBotLabel;
+        [SerializeField] private UpgradeButtonLook buyBotLook;
 
         private WarehouseSimulation simulation;
         private BotShop shop;
@@ -23,12 +24,6 @@ namespace CvWarehouse.Presentation.Warehouse
             simulation = shownSimulation;
             shop = shownShop;
             Refresh();
-        }
-
-        private static void SetInteractable(Button button, bool isInteractable)
-        {
-            if (button.interactable != isInteractable)
-                button.interactable = isInteractable;
         }
 
         private void OnEnable()
@@ -70,7 +65,7 @@ namespace CvWarehouse.Presentation.Warehouse
 
         private void RefreshBuyBotButton()
         {
-            SetInteractable(buyBotButton, shop.CanBuyBot);
+            buyBotLook.Apply(buyBotButton, UpgradeButtonLook.StateOf(shop.HasBotSlot, shop.CanBuyBot));
             int botPrice = shop.HasBotSlot ? shop.BotPrice : 0;
             if (shownBotPrice == botPrice)
                 return;

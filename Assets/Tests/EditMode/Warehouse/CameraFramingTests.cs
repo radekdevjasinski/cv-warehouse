@@ -6,68 +6,135 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
 {
     public sealed class CameraFramingTests
     {
-        private const float ClosestSize = 5f;
-        private const float Margin = 2f;
+        private const int SpritePixelsPerUnit = 16;
+        private const float ClosestViewCells = 5f;
+        private const float FarthestViewCells = 20f;
         private const float Tolerance = 0.001f;
 
-        private static readonly Vector2 MapSize = new Vector2(80f, 56f);
+        private static readonly Vector2 MapSize = new Vector2(40f, 30f);
+        private static readonly Vector2Int ViewPixels = new Vector2Int(640, 320);
 
         private CameraFraming framing;
 
         [SetUp]
         public void SetUp()
         {
-            framing = new CameraFraming(MapSize, ClosestSize, Margin);
-            framing.SetAspect(2f);
-            framing.LookAt(MapSize * 0.5f, 10f);
+            framing = CreateFraming(MapSize, ViewPixels);
         }
 
         [Test]
-        public void Pan_InsideTheMap_MovesTheCentre()
+        public void ZoomOutFully_View_ScalesEverySpritePixelToWholeScreenPixels()
         {
-            framing.Pan(new Vector2(3f, -2f));
+            framing.ZoomIn();
+            framing.ZoomOutFully();
 
-            Assert.AreEqual(43f, framing.Centre.x, Tolerance);
-            Assert.AreEqual(26f, framing.Centre.y, Tolerance);
+            Assert.AreEqual(1, framing.Scale);
+            Assert.AreEqual(ViewPixels.y * 0.5f / SpritePixelsPerUnit, framing.Size, Tolerance);
         }
 
         [Test]
-        public void Pan_FarPastTheEdge_StopsAtTheMapEdgePlusMargin()
+        public void ZoomIn_PastTheClosestLimit_StopsAtTheLastScaleShowingTheClosestViewCells()
         {
+            for (int step = 0; step < 10; step++)
+                framing.ZoomIn();
+
+            Assert.AreEqual(4, framing.Scale);
+            Assert.AreEqual(ClosestViewCells, framing.Size * 2f, Tolerance);
+        }
+
+        [Test]
+        public void ZoomOut_PastTheFarthestLimit_StopsAtTheFarthestScale()
+        {
+            framing.ZoomIn();
+
+            framing.ZoomOut();
+            framing.ZoomOut();
+
+            Assert.AreEqual(1, framing.Scale);
+        }
+
+        [Test]
+        public void ZoomOutFully_BigMap_ShowsNoMoreThanTheFarthestViewCells()
+        {
+            CameraFraming bigMap = CreateFraming(new Vector2(200f, 200f), new Vector2Int(1280, 700));
+
+            bigMap.ZoomOutFully();
+
+            Assert.AreEqual(3, bigMap.Scale);
+            Assert.LessOrEqual(bigMap.Size * 2f, FarthestViewCells);
+        }
+
+        [Test]
+        public void ZoomOutFully_MapNarrowerThanTheView_KeepsTheWholeViewInsideTheMap()
+        {
+            CameraFraming smallMap = CreateFraming(new Vector2(30f, 30f), new Vector2Int(1280, 640));
+
+            smallMap.ZoomOutFully();
+
+            Assert.AreEqual(3, smallMap.Scale);
+            Assert.LessOrEqual(1280 * smallMap.UnitsPerScreenPixel, 30f);
+        }
+
+        [Test]
+        public void SetViewPixels_TwiceAsManyPixels_ShowsTheSameCellsAtTwiceTheScale()
+        {
+            framing.SetViewPixels(ViewPixels * 2);
+            framing.ZoomOutFully();
+
+            Assert.AreEqual(2, framing.Scale);
+            Assert.AreEqual(ViewPixels.y * 0.5f / SpritePixelsPerUnit, framing.Size, Tolerance);
+        }
+
+        [Test]
+        public void Pan_FarPastTheCorner_StopsWithTheViewOnTheMapEdges()
+        {
+            framing.ZoomIn();
+            framing.ZoomIn();
+
             framing.Pan(new Vector2(-1000f, 1000f));
 
-            Assert.AreEqual(20f - Margin, framing.Centre.x, Tolerance);
-            Assert.AreEqual(MapSize.y - 10f + Margin, framing.Centre.y, Tolerance);
+            Assert.AreEqual(0f, framing.Centre.x - ViewPixels.x * 0.5f * framing.UnitsPerScreenPixel, Tolerance);
+            Assert.AreEqual(MapSize.y, framing.Centre.y + framing.Size, Tolerance);
         }
 
         [Test]
-        public void Zoom_InPastTheLimit_StopsAtTheClosestSize()
+        public void Pan_StepsSmallerThanAScreenPixel_StillAddUp()
         {
-            framing.Zoom(0.01f);
+            framing.ZoomIn();
+            framing.ZoomIn();
 
-            Assert.AreEqual(ClosestSize, framing.Size, Tolerance);
+            for (int step = 0; step < 100; step++)
+                framing.Pan(new Vector2(0.005f, 0f));
+
+            Assert.AreEqual(MapSize.x * 0.5f + 0.5f, framing.Centre.x, Tolerance);
         }
 
-        [Test]
-        public void Zoom_OutPastTheLimit_ShowsTheWholeMapCentred()
+        [TestCase(640, 320)]
+        [TestCase(641, 321)]
+        public void Centre_AfterAnyPan_PutsTheViewEdgesOnWholeScreenPixels(int viewWidth, int viewHeight)
         {
-            framing.Pan(new Vector2(20f, 10f));
+            CameraFraming odd = CreateFraming(MapSize, new Vector2Int(viewWidth, viewHeight));
+            odd.ZoomIn();
+            odd.ZoomIn();
 
-            framing.Zoom(100f);
+            odd.Pan(new Vector2(0.013f, -0.021f));
 
-            Assert.AreEqual(MapSize.y * 0.5f + Margin, framing.Size, Tolerance);
-            Assert.AreEqual(MapSize.x * 0.5f, framing.Centre.x, Tolerance);
-            Assert.AreEqual(MapSize.y * 0.5f, framing.Centre.y, Tolerance);
+            AssertOnWholeScreenPixel(odd.Centre.x / odd.UnitsPerScreenPixel - viewWidth * 0.5f);
+            AssertOnWholeScreenPixel(odd.Centre.y / odd.UnitsPerScreenPixel - viewHeight * 0.5f);
         }
 
-        [Test]
-        public void SetAspect_NarrowScreen_AllowsZoomingOutToTheFullWidth()
+        private static CameraFraming CreateFraming(Vector2 mapSize, Vector2Int viewPixels)
         {
-            framing.SetAspect(0.5f);
+            var limits = new CameraZoomLimits(SpritePixelsPerUnit, ClosestViewCells, FarthestViewCells);
+            var created = new CameraFraming(mapSize, limits);
+            created.SetViewPixels(viewPixels);
+            created.ZoomOutFully();
+            return created;
+        }
 
-            framing.Zoom(100f);
-
-            Assert.AreEqual(MapSize.x + Margin, framing.Size, Tolerance);
+        private static void AssertOnWholeScreenPixel(float pixel)
+        {
+            Assert.AreEqual(Mathf.Round(pixel), pixel, Tolerance);
         }
     }
 }

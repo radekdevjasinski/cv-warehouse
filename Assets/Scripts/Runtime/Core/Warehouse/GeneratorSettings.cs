@@ -4,11 +4,11 @@ namespace CvWarehouse.Core.Warehouse
 {
     public sealed class GeneratorSettings
     {
-        public int FillPercent { get; set; } = 6;
+        public int FillPercent { get; set; } = 18;
 
         public int WidthToHeightPercent { get; set; } = 150;
 
-        public int MinWidth { get; set; } = 30;
+        public int MinWidth { get; set; } = 22;
 
         public int MinStorageHeight { get; set; } = 12;
 

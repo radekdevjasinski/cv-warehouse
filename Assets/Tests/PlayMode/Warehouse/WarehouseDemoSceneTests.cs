@@ -132,11 +132,13 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
         }
 
         [UnityTest]
-        public IEnumerator BuyBotButton_NotEnoughPoints_IsDisabled()
+        public IEnumerator BuyBotButton_NotEnoughPoints_IsDisabledAndBlue()
         {
             yield return null;
 
-            Assert.IsFalse(GameObject.Find(BuyBotButtonName).GetComponent<Button>().interactable);
+            Button buyBotButton = GameObject.Find(BuyBotButtonName).GetComponent<Button>();
+            Assert.IsFalse(buyBotButton.interactable);
+            Assert.AreEqual(TooExpensiveButtonSprite, buyBotButton.image.sprite.name);
             Assert.AreEqual("0", GameObject.Find(PointsTextName).GetComponent<TMP_Text>().text);
         }
 
@@ -149,6 +151,7 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
             int botPrice = demo.Shop.BotPrice;
             yield return null;
             Assert.IsTrue(buyBotButton.interactable);
+            Assert.AreEqual(AffordableButtonSprite, buyBotButton.image.sprite.name);
 
             buyBotButton.onClick.Invoke();
             yield return null;
@@ -156,6 +159,20 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
             Assert.AreEqual(StartingBots + 1, Object.FindAnyObjectByType<WarehouseBotsView>().VisibleBotCount);
             Assert.AreEqual(pointsBefore - botPrice, demo.Shop.Balance);
             Assert.AreEqual(demo.Shop.Balance.ToString(), GameObject.Find(PointsTextName).GetComponent<TMP_Text>().text);
+        }
+
+        [UnityTest]
+        public IEnumerator BuyBotButton_EveryParkingSlotTaken_IsDisabledAndGrey()
+        {
+            while (demo.Simulation.TryAddBot())
+            {
+            }
+
+            yield return null;
+
+            Button buyBotButton = GameObject.Find(BuyBotButtonName).GetComponent<Button>();
+            Assert.IsFalse(buyBotButton.interactable);
+            Assert.AreEqual(MaxedButtonSprite, buyBotButton.image.sprite.name);
         }
 
         [UnityTest]

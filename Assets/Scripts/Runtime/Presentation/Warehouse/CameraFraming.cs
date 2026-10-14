@@ -4,67 +4,103 @@ namespace CvWarehouse.Presentation.Warehouse
 {
     public sealed class CameraFraming
     {
-        private readonly Vector2 mapSize;
-        private readonly float closestSize;
-        private readonly float margin;
-        private float aspect = 1f;
+        private const float ScaleEpsilon = 0.0001f;
 
-        public CameraFraming(Vector2 mapSize, float closestSize, float margin)
+        private readonly Vector2 mapSize;
+        private readonly CameraZoomLimits limits;
+        private Vector2Int viewPixels = Vector2Int.one;
+        private Vector2 centre;
+        private int closestScale = 1;
+        private int farthestScale = 1;
+
+        public CameraFraming(Vector2 mapSize, CameraZoomLimits limits)
         {
             this.mapSize = mapSize;
-            this.closestSize = closestSize;
-            this.margin = margin;
-            Size = closestSize;
-            Centre = mapSize * 0.5f;
+            this.limits = limits;
+            centre = mapSize * 0.5f;
+            Scale = 1;
         }
 
-        public Vector2 Centre { get; private set; }
+        public int Scale { get; private set; }
 
-        public float Size { get; private set; }
+        public float UnitsPerScreenPixel => 1f / (limits.SpritePixelsPerUnit * Scale);
 
-        private float WholeMapSize => Mathf.Max(mapSize.y * 0.5f, mapSize.x * 0.5f / aspect) + margin;
+        public float Size => viewPixels.y * 0.5f * UnitsPerScreenPixel;
 
-        public void SetAspect(float newAspect)
+        public Vector2 Centre => new Vector2(SnapToScreenPixel(centre.x, viewPixels.x), SnapToScreenPixel(centre.y, viewPixels.y));
+
+        public void SetViewPixels(Vector2Int newViewPixels)
         {
-            if (Mathf.Approximately(aspect, newAspect))
+            if (newViewPixels == viewPixels || newViewPixels.x <= 0 || newViewPixels.y <= 0)
                 return;
 
-            aspect = newAspect;
+            viewPixels = newViewPixels;
+            UpdateScaleRange();
             Clamp();
         }
 
-        public void LookAt(Vector2 centre, float size)
+        public void LookAt(Vector2 newCentre)
         {
-            Centre = centre;
-            Size = size;
+            centre = newCentre;
             Clamp();
         }
 
         public void Pan(Vector2 worldDelta)
         {
-            Centre += worldDelta;
+            centre += worldDelta;
             Clamp();
         }
 
-        public void Zoom(float sizeFactor)
+        public void ZoomIn()
         {
-            Size *= sizeFactor;
+            Scale++;
             Clamp();
+        }
+
+        public void ZoomOut()
+        {
+            Scale--;
+            Clamp();
+        }
+
+        public void ZoomOutFully()
+        {
+            Scale = farthestScale;
+            Clamp();
+        }
+
+        private void UpdateScaleRange()
+        {
+            int shortSide = Mathf.Min(viewPixels.x, viewPixels.y);
+            int fitsTheMap = Mathf.Max(ScaleShowingAtMost(viewPixels.x, mapSize.x), ScaleShowingAtMost(viewPixels.y, mapSize.y));
+            farthestScale = Mathf.Max(fitsTheMap, ScaleShowingAtMost(shortSide, limits.FarthestViewCells));
+            int closest = Mathf.FloorToInt(shortSide / (limits.SpritePixelsPerUnit * limits.ClosestViewCells) + ScaleEpsilon);
+            closestScale = Mathf.Max(farthestScale, closest);
+        }
+
+        private int ScaleShowingAtMost(int pixels, float cells)
+        {
+            return Mathf.Max(1, Mathf.CeilToInt(pixels / (limits.SpritePixelsPerUnit * cells) - ScaleEpsilon));
         }
 
         private void Clamp()
         {
-            Size = Mathf.Clamp(Size, Mathf.Min(closestSize, WholeMapSize), WholeMapSize);
-            Centre = new Vector2(
-                ClampAxis(Centre.x, Size * aspect, mapSize.x),
-                ClampAxis(Centre.y, Size, mapSize.y));
+            Scale = Mathf.Clamp(Scale, farthestScale, closestScale);
+            Vector2 halfView = (Vector2)viewPixels * (0.5f * UnitsPerScreenPixel);
+            centre = new Vector2(ClampAxis(centre.x, halfView.x, mapSize.x), ClampAxis(centre.y, halfView.y, mapSize.y));
         }
 
-        private float ClampAxis(float centre, float halfView, float mapLength)
+        private static float ClampAxis(float axisCentre, float halfView, float mapLength)
         {
-            float lowest = halfView - margin;
-            float highest = mapLength - halfView + margin;
-            return lowest > highest ? mapLength * 0.5f : Mathf.Clamp(centre, lowest, highest);
+            float highest = mapLength - halfView;
+            return halfView > highest ? mapLength * 0.5f : Mathf.Clamp(axisCentre, halfView, highest);
+        }
+
+        private float SnapToScreenPixel(float axisCentre, int axisPixels)
+        {
+            float halfViewPixels = axisPixels * 0.5f;
+            float viewStartPixel = Mathf.Round(axisCentre / UnitsPerScreenPixel - halfViewPixels);
+            return (viewStartPixel + halfViewPixels) * UnitsPerScreenPixel;
         }
     }
 }

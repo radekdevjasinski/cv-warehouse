@@ -6200,7 +6200,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 8dbcf89975672e846a1fa06a5883b182, type: 3}
+  m_Sprite: {fileID: 21300000, guid: b648001ae7534294290dc2494726f010, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -8379,13 +8379,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: CvWarehouse.Runtime::CvWarehouse.Presentation.Warehouse.WarehouseCamera
   inputActions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   eventSystem: {fileID: 735926712}
-  startSize: 12
-  closestSize: 5
-  margin: 1
+  spritePixelsPerUnit: 16
+  closestViewCells: 6
+  farthestViewCells: 24
+  zoomCooldownSeconds: 0.15
   keyPanViewsPerSecond: 1.2
-  zoomStep: 0.12
-  edgePanViewsPerSecond: 0.6
-  edgePanScreenFraction: 0.03
 --- !u!81 &1543590676
 AudioListener:
   m_ObjectHideFlags: 0
@@ -9853,6 +9851,10 @@ MonoBehaviour:
   botsText: {fileID: 1793468514}
   buyBotButton: {fileID: 1713467703}
   buyBotLabel: {fileID: 1792174330}
+  buyBotLook:
+    affordableSprite: {fileID: 21300000, guid: 6ed6e4cfd3e584147b0d4f4ed640db6e, type: 3}
+    tooExpensiveSprite: {fileID: 21300000, guid: 8dbcf89975672e846a1fa06a5883b182, type: 3}
+    maxedSprite: {fileID: 21300000, guid: b648001ae7534294290dc2494726f010, type: 3}
 --- !u!114 &1736857396
 MonoBehaviour:
   m_ObjectHideFlags: 0

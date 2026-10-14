@@ -9,9 +9,9 @@ namespace CvWarehouse.Presentation.Warehouse
     public sealed class GeneratorConfig : ScriptableObject
     {
         [Header("Map, sized to the boxes of the CV")]
-        [SerializeField, Range(1, 50)] private int fillPercent = 6;
+        [SerializeField, Range(1, 50)] private int fillPercent = 18;
         [SerializeField] private int widthToHeightPercent = 150;
-        [SerializeField] private int minWidth = 30;
+        [SerializeField] private int minWidth = 22;
         [SerializeField] private int minStorageHeight = 12;
         [SerializeField] private int truckWidth = 10;
         [SerializeField] private int dropCells = 6;

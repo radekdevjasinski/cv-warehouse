@@ -12,20 +12,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8e9b1df266bc244eb8ea796fefc6ccb, type: 3}
   m_Name: GeneratorConfig
   m_EditorClassIdentifier: CvWarehouse.Runtime::CvWarehouse.Presentation.Warehouse.GeneratorConfig
-  width: 80
-  height: 56
+  fillPercent: 18
+  widthToHeightPercent: 150
+  minWidth: 22
+  minStorageHeight: 12
   truckWidth: 10
   dropCells: 6
   parkingPerSide: 6
   rampDepth: 4
-  heavyBoxes: 10
-  mediumBoxes: 30
-  lightBoxes: 90
-  heavyPieces: 6
-  mediumPieces: 4
-  lightPieces: 2
+  nameImportance: 2
+  jobTitleImportance: 1
+  contactImportance: 0
+  openingRadius: 4
+  smallBoxMaxWords: 8
+  mediumBoxMaxWords: 20
   bigClusterRadius: 6
   mediumClusterRadius: 3
-  mediumNearHeavyPercent: 60
-  lightNearHeavyPercent: 35
-  lightNearMediumPercent: 45
+  mediumNearLargePercent: 60
+  smallNearLargePercent: 35
+  smallNearMediumPercent: 45

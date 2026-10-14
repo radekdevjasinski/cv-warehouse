@@ -18,13 +18,11 @@ namespace CvWarehouse.Presentation.Warehouse
 
         [SerializeField] private InputActionAsset inputActions;
         [SerializeField] private EventSystem eventSystem;
-        [SerializeField] private float startSize = 12f;
-        [SerializeField] private float closestSize = 5f;
-        [SerializeField] private float margin = 2f;
+        [SerializeField] private int spritePixelsPerUnit = 16;
+        [SerializeField] private float closestViewCells = 6f;
+        [SerializeField] private float farthestViewCells = 24f;
+        [SerializeField] private float zoomCooldownSeconds = 0.15f;
         [SerializeField] private float keyPanViewsPerSecond = 1.2f;
-        [SerializeField] private float zoomStep = 0.12f;
-        [SerializeField] private float edgePanViewsPerSecond = 0.6f;
-        [SerializeField, Range(0f, 0.2f)] private float edgePanScreenFraction = 0.03f;
 
         private Camera warehouseCamera;
         private InputAction moveAction;
@@ -38,13 +36,16 @@ namespace CvWarehouse.Presentation.Warehouse
         private bool wasPressed;
         private bool isDragging;
         private bool isPointerAMouse;
+        private float nextZoomTime;
 
         public void Frame(WarehouseLayout layout)
         {
-            framing = new CameraFraming(new Vector2(layout.Grid.Width, layout.Grid.Height), closestSize, margin);
-            framing.SetAspect(warehouseCamera.aspect);
+            var limits = new CameraZoomLimits(spritePixelsPerUnit, closestViewCells, farthestViewCells);
+            framing = new CameraFraming(new Vector2(layout.Grid.Width, layout.Grid.Height), limits);
+            framing.SetViewPixels(ViewPixels);
+            framing.ZoomOutFully();
             float truckCentreX = layout.TruckOrigin.X + layout.TruckSize.Width * 0.5f;
-            framing.LookAt(new Vector2(truckCentreX, layout.Grid.Height), startSize);
+            framing.LookAt(new Vector2(truckCentreX, layout.Grid.Height));
             Apply();
         }
 
@@ -86,13 +87,14 @@ namespace CvWarehouse.Presentation.Warehouse
             if (framing == null)
                 return;
 
-            framing.SetAspect(warehouseCamera.aspect);
+            framing.SetViewPixels(ViewPixels);
             PanWithKeys();
             PanWithDrag();
-            PanWithScreenEdges();
             ZoomWithScroll();
             Apply();
         }
+
+        private Vector2Int ViewPixels => new Vector2Int(warehouseCamera.pixelWidth, warehouseCamera.pixelHeight);
 
         private void PanWithKeys()
         {
@@ -113,7 +115,7 @@ namespace CvWarehouse.Presentation.Warehouse
             if (isPressed && !wasPressed)
                 isDragging = !eventSystem.IsPointerOverGameObject();
             else if (isPressed && isDragging)
-                framing.Pan((lastPointer - pointer) * (framing.Size * 2f / Screen.height));
+                framing.Pan((lastPointer - pointer) * framing.UnitsPerScreenPixel);
 
             wasPressed = isPressed;
             lastPointer = pointer;
@@ -125,18 +127,6 @@ namespace CvWarehouse.Presentation.Warehouse
             return isTouchPressed || IsPressed(rightPressAction) || IsPressed(middlePressAction);
         }
 
-        private void PanWithScreenEdges()
-        {
-            if (!isPointerAMouse || wasPressed || eventSystem.IsPointerOverGameObject())
-                return;
-
-            float edgeWidth = Screen.height * edgePanScreenFraction;
-            Vector2 direction = EdgePan.DirectionAt(lastPointer, warehouseCamera.pixelRect, edgeWidth);
-            float frameSeconds = Mathf.Min(Time.unscaledDeltaTime, Time.maximumDeltaTime);
-            if (direction != Vector2.zero)
-                framing.Pan(direction * (framing.Size * 2f * edgePanViewsPerSecond * frameSeconds));
-        }
-
         private void RememberPointerDevice(InputAction.CallbackContext context)
         {
             isPointerAMouse = context.control.device is Mouse;
@@ -145,8 +135,14 @@ namespace CvWarehouse.Presentation.Warehouse
         private void ZoomWithScroll()
         {
             float scroll = scrollAction.ReadValue<Vector2>().y;
-            if (scroll != 0f && !eventSystem.IsPointerOverGameObject())
-                framing.Zoom(1f - Mathf.Sign(scroll) * zoomStep);
+            if (scroll == 0f || Time.unscaledTime < nextZoomTime || eventSystem.IsPointerOverGameObject())
+                return;
+
+            nextZoomTime = Time.unscaledTime + zoomCooldownSeconds;
+            if (scroll > 0f)
+                framing.ZoomIn();
+            else
+                framing.ZoomOut();
         }
 
         private void Apply()
