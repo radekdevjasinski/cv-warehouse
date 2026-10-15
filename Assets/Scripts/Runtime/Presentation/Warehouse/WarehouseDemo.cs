@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using CvWarehouse.Core.Cv;
 using CvWarehouse.Core.Warehouse;
+using CvWarehouse.Presentation.Audio;
 using UnityEngine;
 
 namespace CvWarehouse.Presentation.Warehouse
@@ -27,6 +28,7 @@ namespace CvWarehouse.Presentation.Warehouse
         [SerializeField] private SelectionBoxView selectionBoxView;
         [SerializeField] private WarehouseBotSelector botSelector;
         [SerializeField] private WarehousePauseControl pauseControl;
+        [SerializeField] private WarehouseSounds sounds;
         [SerializeField] private int seed = 12345;
 
         private SquareShapeFactory shapes;
@@ -58,6 +60,7 @@ namespace CvWarehouse.Presentation.Warehouse
             warehouseCamera.Frame(layout);
             ShowWarehouse(layout);
             ShowControls();
+            sounds.Listen(Simulation, Selection);
             return true;
         }
 

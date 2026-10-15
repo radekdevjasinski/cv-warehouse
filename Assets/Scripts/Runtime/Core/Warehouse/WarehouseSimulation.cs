@@ -22,8 +22,11 @@ namespace CvWarehouse.Core.Warehouse
             reservations = new ReservationTable(layout.Grid);
             mover = new BotMover(layout.Grid, settings);
             brain = new BotBrain(layout, settings, reservations, Score, random);
+            brain.Extracted += RaiseExtracted;
             roster = new CrewRoster(settings.CrewNames);
         }
+
+        public event Action<Bot> Extracted;
 
         public WarehouseLayout Layout { get; }
 
@@ -123,6 +126,11 @@ namespace CvWarehouse.Core.Warehouse
 
             brain.AbandonWork(bot);
             return true;
+        }
+
+        private void RaiseExtracted(Bot bot)
+        {
+            Extracted?.Invoke(bot);
         }
 
         private bool TryFindFreeParkingCell(out GridPosition freeCell)

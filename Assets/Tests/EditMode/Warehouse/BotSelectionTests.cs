@@ -129,5 +129,78 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
 
             Assert.AreEqual(0, selection.Count);
         }
+
+        [Test]
+        public void Select_Bot_AnnouncesThatBot()
+        {
+            List<Bot> announced = RecordAnnouncements();
+
+            selection.Select(FirstBot);
+
+            CollectionAssert.AreEqual(new[] { FirstBot }, announced);
+        }
+
+        [Test]
+        public void Toggle_BotAdded_AnnouncesOnlyTheAddedBot()
+        {
+            selection.Select(FirstBot);
+            List<Bot> announced = RecordAnnouncements();
+
+            selection.Toggle(SecondBot);
+
+            CollectionAssert.AreEqual(new[] { SecondBot }, announced);
+        }
+
+        [Test]
+        public void Toggle_BotRemoved_AnnouncesNothing()
+        {
+            selection.Select(FirstBot);
+            List<Bot> announced = RecordAnnouncements();
+
+            selection.Toggle(FirstBot);
+
+            Assert.AreEqual(0, announced.Count);
+        }
+
+        [Test]
+        public void SelectAll_ManyBots_AnnouncesThemTogether()
+        {
+            int announcements = 0;
+            List<Bot> announced = RecordAnnouncements();
+            selection.BotsSelected += bots => announcements++;
+
+            selection.SelectAll(new List<Bot> { FirstBot, SecondBot });
+
+            Assert.AreEqual(1, announcements);
+            CollectionAssert.AreEqual(new[] { FirstBot, SecondBot }, announced);
+        }
+
+        [Test]
+        public void SelectAll_NoBots_AnnouncesNothing()
+        {
+            List<Bot> announced = RecordAnnouncements();
+
+            selection.SelectAll(new List<Bot>());
+
+            Assert.AreEqual(0, announced.Count);
+        }
+
+        [Test]
+        public void Clear_BotsSelected_AnnouncesNothing()
+        {
+            selection.Select(FirstBot);
+            List<Bot> announced = RecordAnnouncements();
+
+            selection.Clear();
+
+            Assert.AreEqual(0, announced.Count);
+        }
+
+        private List<Bot> RecordAnnouncements()
+        {
+            var announced = new List<Bot>();
+            selection.BotsSelected += bots => announced.AddRange(bots);
+            return announced;
+        }
     }
 }

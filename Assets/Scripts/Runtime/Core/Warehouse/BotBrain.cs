@@ -19,6 +19,8 @@ namespace CvWarehouse.Core.Warehouse
             taskQueue = new TaskQueue(layout, reservations, random);
         }
 
+        public event Action<Bot> Extracted;
+
         public void Tick(Bot bot)
         {
             switch (bot.State)
@@ -151,6 +153,7 @@ namespace CvWarehouse.Core.Warehouse
             bot.DropCell = dropCell;
             bot.State = BotState.GoingToDrop;
             bot.SetDestination(dropCell);
+            Extracted?.Invoke(bot);
         }
 
         private void TakeCargo(Bot bot)

@@ -111,3 +111,16 @@ This is a living document. It is edited as development progresses.
 - **Edge cases:** an empty section is skipped.
 - **Robustness:** missing fields get default values, an invalid file shows a readable message.
 - **Swapping:** the file can be replaced on the server without rebuilding the game, and a second language version is a second file.
+
+## Audio
+
+- **Music:** the tracks in `Assets/Audio/Music` play one after another in a fixed order, and after the last one the first starts again. Music never stops for the pause button or the end of the game.
+- **Mix:** music and sound effects go to their own groups in one Audio Mixer. The effects group is 30% quieter than the music group, so effects never drown the music. Each effect also has its own volume, pitch and pitch variation in a settings asset, which can be tuned while the game runs.
+- **Extract sound:** a short sound plays when a bot takes letters out of a box.
+- **Delivery sound:** a short sound plays when a bot unloads letters at the truck, so a busy truck sounds like bubbles bursting rather than one repeated click.
+- **Bot voices:** every crew slot has its own voice, made with sfxr, in the same order as the crew names and colours, so a bot keeps its voice for the whole game and a ninth bot wraps around to the first voice. Clicking a bot plays its voice with a very small pitch change.
+- **Selecting several bots:** their voices play one after another in crew order, a moment apart, like a strummed chord. At most four voices play and each is a little quieter than a single voice. Deselecting a bot plays nothing.
+- **Variation:** every effect picks a random clip, never the same one twice in a row, at a slightly random pitch. Plays of the same effect closer together than a short cooldown are skipped, so many bots acting in the same moment do not stack into noise.
+- **Browser start:** the browser lets sound play only after the first click or tap, so the first track waits for it.
+- **Download size:** music is mono AAC at the lowest quality the encoder offers, loaded only when its track starts, and a finished track is unloaded.
+- **Credits:** the music comes from the [Cute and Silly RPG Music Pack](https://chajamakesmusic.itch.io/cute-and-silly-rpg-music-pack) by Chaja Makes Music, and the sound effects from the [400 Sounds Pack](https://ci.itch.io/400-sounds-pack) by Chequered Ink, both credited in the README.
