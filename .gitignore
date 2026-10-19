@@ -128,3 +128,7 @@ cv*.pdf
 !/Assets/Audio/SFX/Retro/click2.wav.meta
 !/Assets/Audio/SFX/Retro/jump_short.wav
 !/Assets/Audio/SFX/Retro/jump_short.wav.meta
+!/Assets/Audio/SFX/Retro/power_up.wav
+!/Assets/Audio/SFX/Retro/power_up.wav.meta
+!/Assets/Audio/SFX/Retro/power_up_2.wav
+!/Assets/Audio/SFX/Retro/power_up_2.wav.meta
