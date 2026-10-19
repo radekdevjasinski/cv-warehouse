@@ -23,12 +23,17 @@ namespace CvWarehouse.Core.Warehouse
             mover = new BotMover(layout.Grid, settings);
             brain = new BotBrain(layout, settings, reservations, Score, random);
             brain.Extracted += RaiseExtracted;
+            brain.Unloaded += RaiseUnloaded;
             roster = new CrewRoster(settings.CrewNames);
         }
 
         public event Action<Bot> Extracted;
 
         public event Action<Bot> BotAdded;
+
+        public event Action<Bot, int> Unloaded;
+
+        public event Action<Bot, BotUpgrade> Upgraded;
 
         public WarehouseLayout Layout { get; }
 
@@ -90,6 +95,7 @@ namespace CvWarehouse.Core.Warehouse
                 bot.SpeedLevel++;
             else
                 bot.CarryLevel++;
+            Upgraded?.Invoke(bot, upgrade);
         }
 
         public void SetFocus(Bot bot, BotFocus focus)
@@ -134,6 +140,11 @@ namespace CvWarehouse.Core.Warehouse
         private void RaiseExtracted(Bot bot)
         {
             Extracted?.Invoke(bot);
+        }
+
+        private void RaiseUnloaded(Bot bot, int points)
+        {
+            Unloaded?.Invoke(bot, points);
         }
 
         private bool TryFindFreeParkingCell(out GridPosition freeCell)

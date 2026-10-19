@@ -90,6 +90,10 @@ This is a living document. It is edited as development progresses.
 - **Start:** the player begins with a few bots that carry one word each. Nothing else is given for free.
 - **Actions:** the player buys and removes bots and buys upgrades and specializations. A removed bot is not refunded, and its upgrades are lost with it. The last bot cannot be removed, so the game can always be finished.
 - **Points on screen:** the points the player can spend are shown large in the top bar, above the middle of the warehouse view. The button for buying a bot and, in the bot window, the buttons for that bot's next carry and speed levels show their price. An upgrade button the player can afford turns green; one they cannot afford yet stays blue and faded. The buy bot button follows the same colours: green when the player can afford a bot, blue and faded until then, and grey when every parking slot is taken.
+- **Points at the truck:** when a bot finishes unloading, the points it just earned float up above it in the same gold as the points in the top bar with a black outline, for example "+24", and fade out within about a second. Popups from bots unloading side by side stack above each other instead of overlapping. A deleted bot whose letters count as delivered shows nothing, because it never reached the truck.
+- **Points counter pulse:** whenever the points in the top bar go up, the number swells briefly and settles back. Spending points does not pulse it.
+- **New bot:** a bought bot pops in at its parking cell, growing from nothing with a small overshoot. The bots the game starts with are simply there.
+- **Upgrade flash:** every bot that gets an upgrade flashes white for a moment and fades back to its crew colour.
 - **Currency:** research points, earned for delivered text. Every letter is worth more in a more important box; a bigger box is worth more only because it holds more letters.
 - **Shop:** available at all times.
 - **Upgrade price:** paid per bot and per level. Every level costs more than the one before, and every bot pays the same price for the same level. Carry and speed are priced separately.

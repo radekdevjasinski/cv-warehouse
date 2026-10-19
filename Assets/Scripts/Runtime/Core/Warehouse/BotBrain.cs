@@ -21,6 +21,8 @@ namespace CvWarehouse.Core.Warehouse
 
         public event Action<Bot> Extracted;
 
+        public event Action<Bot, int> Unloaded;
+
         public void Tick(Bot bot)
         {
             switch (bot.State)
@@ -178,13 +180,14 @@ namespace CvWarehouse.Core.Warehouse
                 return;
             }
 
-            score.Deliver(bot.JobBox, bot.Letters);
+            int points = score.Deliver(bot.JobBox, bot.Letters);
             bot.Letters.Clear();
             reservations.Release(bot.DropCell, bot.Id);
             bot.CargoPieces = 0;
             bot.CargoWords = 0;
             bot.JobBox = null;
             bot.State = BotState.Idle;
+            Unloaded?.Invoke(bot, points);
         }
     }
 }

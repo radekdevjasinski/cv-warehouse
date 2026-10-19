@@ -47,6 +47,8 @@ namespace CvWarehouse.Presentation.Warehouse
 
         public BotProgressBar ProgressBar => progressBar;
 
+        public float Scale => root.transform.localScale.x;
+
         public void Hide()
         {
             if (root.activeSelf)
@@ -65,6 +67,11 @@ namespace CvWarehouse.Presentation.Warehouse
             ShowCargo(bot, pose);
             progressBar.Show(bot.ExtractProgress);
             Sort(bot.CentreY - FeetBelowCentre);
+        }
+
+        public void SetScale(float scale)
+        {
+            root.transform.localScale = new Vector3(scale, scale, 1f);
         }
 
         private void ShowCargo(Bot bot, BotPose pose)

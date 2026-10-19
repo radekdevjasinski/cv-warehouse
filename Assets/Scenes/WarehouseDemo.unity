@@ -4664,6 +4664,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: CvWarehouse.Runtime::CvWarehouse.Presentation.Warehouse.PointsView
   pointsText: {fileID: 1324778052}
+  effects: {fileID: 11400000, guid: de6f27e4b0ddecc449c53398dfb8f57b, type: 2}
 --- !u!114 &794287053
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11352,6 +11353,7 @@ MonoBehaviour:
     blinkSeconds: 0.12
     blinkDelayPerCrewSlot: 0.7
   selectionFrame: {fileID: 21300000, guid: 3581ae10786fa144ab269d5654658ba5, type: 3}
+  effects: {fileID: 11400000, guid: de6f27e4b0ddecc449c53398dfb8f57b, type: 2}
 --- !u!4 &1828392828
 Transform:
   m_ObjectHideFlags: 0
@@ -11814,6 +11816,7 @@ MonoBehaviour:
   gridView: {fileID: 1023413465}
   boxesView: {fileID: 2085743118}
   botsView: {fileID: 1828392827}
+  deliveryPointsView: {fileID: 2027839545}
   hudView: {fileID: 1736857395}
   pointsView: {fileID: 794287052}
   shiftStatusView: {fileID: 794287051}
@@ -11848,6 +11851,7 @@ Transform:
   - {fileID: 1828392828}
   - {fileID: 2040491511}
   - {fileID: 854281021}
+  - {fileID: 2027839544}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1889679429
@@ -12779,6 +12783,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1995498683}
   m_CullTransparentMesh: 1
+--- !u!1 &2027839543
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2027839544}
+  - component: {fileID: 2027839545}
+  m_Layer: 0
+  m_Name: DeliveryPoints
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2027839544
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2027839543}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1889679428}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2027839545
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2027839543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bb6445f682cbe4409d70140433870cb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CvWarehouse.Runtime::CvWarehouse.Presentation.Effects.DeliveryPointsView
+  config: {fileID: 11400000, guid: e013c1bdee49b694c82ac831c6b1e9bd, type: 2}
 --- !u!1 &2038462940
 GameObject:
   m_ObjectHideFlags: 0

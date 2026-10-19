@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using CvWarehouse.Core.Cv;
 using CvWarehouse.Core.Warehouse;
 using CvWarehouse.Presentation.Audio;
+using CvWarehouse.Presentation.Effects;
 using UnityEngine;
 
 namespace CvWarehouse.Presentation.Warehouse
@@ -15,6 +16,7 @@ namespace CvWarehouse.Presentation.Warehouse
         [SerializeField] private WarehouseGridView gridView;
         [SerializeField] private WarehouseBoxesView boxesView;
         [SerializeField] private WarehouseBotsView botsView;
+        [SerializeField] private DeliveryPointsView deliveryPointsView;
         [SerializeField] private WarehouseHudView hudView;
         [SerializeField] private PointsView pointsView;
         [SerializeField] private ShiftStatusView shiftStatusView;
@@ -70,6 +72,7 @@ namespace CvWarehouse.Presentation.Warehouse
             boxesView.Show(layout, shapes);
             boxHighlightView.Show(BoxSelection, shapes);
             botsView.Show(Simulation, Selection, shapes);
+            deliveryPointsView.Listen(Simulation);
             routeView.Show(Selection, shapeMaterial, Simulation.MaxBots);
             selectionBoxView.Show(shapes);
         }

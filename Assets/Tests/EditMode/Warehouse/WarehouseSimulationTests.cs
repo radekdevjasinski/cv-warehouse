@@ -308,6 +308,65 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
             Assert.AreEqual(firstRun.TickCount, secondRun.TickCount);
         }
 
+        [TestCase(Importance.Normal)]
+        [TestCase(Importance.Key)]
+        public void Tick_BotUnloadsAtTheTruck_ReportsThePointsItEarned(Importance importance)
+        {
+            WarehouseSimulation simulation = NewSimulationWithOneBox(CvTestBlocks.WithLetters(SmallBoxPieces), new SimulationSettings(), TestBoxKinds.Of(importance));
+            simulation.TryAddBot();
+            int reportedPoints = 0;
+            int pointsBeforeUnload = 0;
+            simulation.Unloaded += (bot, points) =>
+            {
+                Assert.AreSame(simulation.Bots[0], bot);
+                Assert.AreEqual(simulation.Score.Points - pointsBeforeUnload, points);
+                pointsBeforeUnload = simulation.Score.Points;
+                reportedPoints += points;
+            };
+
+            RunUntilComplete(simulation);
+
+            Assert.Greater(reportedPoints, 0);
+            Assert.AreEqual(simulation.Score.Points, reportedPoints);
+        }
+
+        [TestCase(BotUpgrade.Carry)]
+        [TestCase(BotUpgrade.Speed)]
+        public void Upgrade_Bot_AnnouncesTheBotAndTheUpgrade(BotUpgrade upgrade)
+        {
+            WarehouseSimulation simulation = NewSmallSimulation(new SimulationSettings());
+            simulation.TryAddBot();
+            Bot announcedBot = null;
+            BotUpgrade? announcedUpgrade = null;
+            simulation.Upgraded += (bot, bought) =>
+            {
+                announcedBot = bot;
+                announcedUpgrade = bought;
+            };
+
+            simulation.Upgrade(simulation.Bots[0], upgrade);
+
+            Assert.AreSame(simulation.Bots[0], announcedBot);
+            Assert.AreEqual(upgrade, announcedUpgrade);
+        }
+
+        [Test]
+        public void TryRemoveBot_BotCarryingText_ReportsNoUnloadAtTheTruck()
+        {
+            WarehouseSimulation simulation = NewSmallSimulation(new SimulationSettings());
+            simulation.TryAddBot();
+            simulation.TryAddBot();
+            Bot carrier = simulation.Bots[0];
+            for (int tick = 0; tick < MaxTicks && carrier.CargoPieces == 0; tick++)
+                simulation.Tick();
+            bool hasUnloaded = false;
+            simulation.Unloaded += (bot, points) => hasUnloaded = true;
+
+            simulation.TryRemoveBot(carrier);
+
+            Assert.IsFalse(hasUnloaded);
+        }
+
         [Test]
         public void TryAddBot_FreeParkingCell_AnnouncesTheNewBot()
         {

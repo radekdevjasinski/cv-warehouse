@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f4baaf87e1fbac40a61a1ea46c82908, type: 3}
+  m_Name: DeliveryPointsPopup
+  m_EditorClassIdentifier: CvWarehouse.Runtime::CvWarehouse.Presentation.Effects.PointsPopupConfig
+  font: {fileID: 11400000, guid: 24a59aaee681c784689fea70deee4dc4, type: 2}
+  outlinedMaterial: {fileID: 2100000, guid: d7d79e15ee02c514ea81a843ae2c0210, type: 2}
+  color: {r: 0.91, g: 0.77, b: 0.28, a: 1}
+  fontSize: 6
+  startHeight: 0.6
+  capacity: 12
+  durationSeconds: 1.2
+  riseDistance: 1
+  fadeStartFraction: 0.5
+  overlapWidth: 1.5
+  lineHeight: 0.6

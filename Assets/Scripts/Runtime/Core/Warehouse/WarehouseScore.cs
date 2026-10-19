@@ -28,14 +28,16 @@ namespace CvWarehouse.Core.Warehouse
             return box.TotalPieces * settings.PointsPerPiece(box.Importance);
         }
 
-        public void Deliver(Box box, IReadOnlyList<int> letters)
+        public int Deliver(Box box, IReadOnlyList<int> letters)
         {
             if (letters.Count == 0)
-                return;
+                return 0;
 
+            int points = letters.Count * settings.PointsPerPiece(box.Importance);
             DeliveredPieces += letters.Count;
-            Points += letters.Count * settings.PointsPerPiece(box.Importance);
+            Points += points;
             Delivered?.Invoke(box.Block, letters);
+            return points;
         }
     }
 }

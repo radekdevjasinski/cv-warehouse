@@ -332,6 +332,19 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         }
 
         [Test]
+        public void TryUpgradeGroup_EnoughPoints_ReportsEveryUpgradedBotToTheSimulation()
+        {
+            FillTheCrew();
+            Earn(simulation.Score.MaxPoints);
+            int upgradedBots = 0;
+            simulation.Upgraded += (bot, upgrade) => upgradedBots++;
+
+            shop.TryUpgrade(simulation.Bots, BotUpgrade.Carry);
+
+            Assert.AreEqual(simulation.Bots.Count, upgradedBots);
+        }
+
+        [Test]
         public void TryUpgradeGroup_EveryBotAtTheLastLevel_AnnouncesNothing()
         {
             FillTheCrew();
