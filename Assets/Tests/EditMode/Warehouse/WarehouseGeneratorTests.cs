@@ -14,7 +14,6 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
     {
         private const int Seed = 12345;
         private const int SeedsToCheck = 40;
-        private const int WallHeight = 2;
         private const int OpeningBlocks = 4;
 
         private static readonly int[] EntriesPerSize = { 1, 4, 12, 40 };
@@ -159,7 +158,7 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
                 for (int seed = 0; seed < SeedsToCheck; seed++)
                 {
                     WarehouseLayout layout = Generate(blocks, settings, seed);
-                    int storageTop = layout.Grid.Height - WallHeight - settings.RampDepth;
+                    int storageTop = layout.Grid.Height - WarehouseGenerator.WallHeight - settings.RampDepth;
                     var takenCells = new HashSet<GridPosition>();
                     foreach (Box box in layout.Boxes)
                     {

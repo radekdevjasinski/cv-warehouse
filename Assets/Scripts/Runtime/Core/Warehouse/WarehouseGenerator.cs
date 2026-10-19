@@ -6,7 +6,7 @@ namespace CvWarehouse.Core.Warehouse
 {
     public sealed class WarehouseGenerator
     {
-        private const int WallHeight = 2;
+        public const int WallHeight = 4;
         private const int ClusterAttempts = 24;
         private const int FreeAttempts = 400;
         private const int MaxGrowthSteps = 8;

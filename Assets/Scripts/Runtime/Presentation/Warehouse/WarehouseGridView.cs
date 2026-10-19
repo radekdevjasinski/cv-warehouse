@@ -15,14 +15,12 @@ namespace CvWarehouse.Presentation.Warehouse
         [SerializeField] private Sprite[] floorSprites;
         [SerializeField] private Sprite[] speckledFloorSprites;
         [SerializeField] private Sprite wallSprite;
-        [SerializeField] private Sprite truckSprite;
 
         private WarehouseLayout layout;
         private Tilemap tilemap;
         private Tile[] floorTiles;
         private Tile[] speckledFloorTiles;
         private Tile wallTile;
-        private Tile truckTile;
         private bool[] isUnderBox;
         private int shownVersion;
 
@@ -54,7 +52,6 @@ namespace CvWarehouse.Presentation.Warehouse
             DestroyTiles(floorTiles);
             DestroyTiles(speckledFloorTiles);
             Destroy(wallTile);
-            Destroy(truckTile);
         }
 
         private static Tile CreateTile(Sprite sprite)
@@ -84,7 +81,6 @@ namespace CvWarehouse.Presentation.Warehouse
             floorTiles = CreateTiles(floorSprites);
             speckledFloorTiles = CreateTiles(speckledFloorSprites);
             wallTile = CreateTile(wallSprite);
-            truckTile = CreateTile(truckSprite);
         }
 
         private void CreateTilemap(Material material)
@@ -110,7 +106,7 @@ namespace CvWarehouse.Presentation.Warehouse
                 tilemap.SetTile(new Vector3Int(cell.X, cell.Y, 0), TileOf(cell, cellIndex));
             }
 
-            PaintTruck();
+            PaintWallBehindTruck();
         }
 
         private void MarkCellsUnderBoxes()
@@ -131,12 +127,12 @@ namespace CvWarehouse.Presentation.Warehouse
                     isUnderBox[layout.Grid.IndexOf(new GridPosition(x, y))] = true;
         }
 
-        private void PaintTruck()
+        private void PaintWallBehindTruck()
         {
             GridPosition origin = layout.TruckOrigin;
             for (int y = origin.Y; y < origin.Y + layout.TruckSize.Height; y++)
                 for (int x = origin.X; x < origin.X + layout.TruckSize.Width; x++)
-                    tilemap.SetTile(new Vector3Int(x, y, 0), truckTile);
+                    tilemap.SetTile(new Vector3Int(x, y, 0), wallTile);
         }
 
         private Tile TileOf(GridPosition cell, int cellIndex)

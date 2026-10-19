@@ -15,6 +15,7 @@ namespace CvWarehouse.Presentation.Warehouse
         [SerializeField] private WarehouseCamera warehouseCamera;
         [SerializeField] private WarehouseGridView gridView;
         [SerializeField] private WarehouseBoxesView boxesView;
+        [SerializeField] private TruckView truckView;
         [SerializeField] private WarehouseBotsView botsView;
         [SerializeField] private DeliveryPointsView deliveryPointsView;
         [SerializeField] private WarehouseHudView hudView;
@@ -70,6 +71,7 @@ namespace CvWarehouse.Presentation.Warehouse
         {
             gridView.Show(layout, shapeMaterial);
             boxesView.Show(layout, shapes);
+            truckView.Show(layout, shapeMaterial);
             boxHighlightView.Show(BoxSelection, shapes);
             botsView.Show(Simulation, Selection, shapes);
             deliveryPointsView.Listen(Simulation);

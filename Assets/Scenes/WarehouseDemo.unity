@@ -6031,7 +6031,6 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 8ff80edabe36f9140bd39fc1fb8e6ca3, type: 3}
   - {fileID: 21300000, guid: 64432fbbf427ed04d8fdfd0ac6ea76bc, type: 3}
   wallSprite: {fileID: 21300000, guid: 897ea6ad6d3907b4795048043e091554, type: 3}
-  truckSprite: {fileID: 21300000, guid: f7b6b56e1382b0847a83129e9aa5b817, type: 3}
 --- !u!4 &1023413466
 Transform:
   m_ObjectHideFlags: 0
@@ -7370,6 +7369,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1242515293}
   m_CullTransparentMesh: 1
+--- !u!1 &1282060665
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1282060666}
+  - component: {fileID: 1282060667}
+  m_Layer: 0
+  m_Name: Truck
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1282060666
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1282060665}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1889679428}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1282060667
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1282060665}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b60e7779867eed242befce361a19dd98, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CvWarehouse.Runtime::CvWarehouse.Presentation.Warehouse.TruckView
+  skin: {fileID: 11400000, guid: 6c2a3bcadded02f468d96a7d637a83cf, type: 2}
 --- !u!1 &1317840690
 GameObject:
   m_ObjectHideFlags: 0
@@ -11815,6 +11859,7 @@ MonoBehaviour:
   warehouseCamera: {fileID: 1543590675}
   gridView: {fileID: 1023413465}
   boxesView: {fileID: 2085743118}
+  truckView: {fileID: 1282060667}
   botsView: {fileID: 1828392827}
   deliveryPointsView: {fileID: 2027839545}
   hudView: {fileID: 1736857395}
@@ -11852,6 +11897,7 @@ Transform:
   - {fileID: 2040491511}
   - {fileID: 854281021}
   - {fileID: 2027839544}
+  - {fileID: 1282060666}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1889679429
