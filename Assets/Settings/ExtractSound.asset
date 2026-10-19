@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ffa1ee5c6f69b449836198c2a557511, type: 3}
+  m_Name: ExtractSound
+  m_EditorClassIdentifier: CvWarehouse.Runtime::CvWarehouse.Presentation.Audio.SoundVariationConfig
+  clips:
+  - {fileID: 8300000, guid: 26d0f9f932a095b4c91831e1fcd4c0c2, type: 3}
+  volume: 0.1
+  pitch: 1
+  pitchVariation: 0
+  minSecondsBetweenPlays: 0.05
+  voices: 4

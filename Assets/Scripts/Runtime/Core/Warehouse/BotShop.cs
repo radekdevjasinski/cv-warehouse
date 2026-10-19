@@ -19,6 +19,8 @@ namespace CvWarehouse.Core.Warehouse
             this.settings = settings;
         }
 
+        public event Action<BotUpgrade> Upgraded;
+
         public int Balance => simulation.Score.Points - spentPoints;
 
         public bool HasBotSlot => simulation.Bots.Count < simulation.MaxBots;
@@ -88,11 +90,10 @@ namespace CvWarehouse.Core.Warehouse
 
         public bool TryUpgrade(Bot bot, BotUpgrade upgrade)
         {
-            if (!CanUpgrade(bot, upgrade))
+            if (!TryBuyUpgrade(bot, upgrade))
                 return false;
 
-            spentPoints += UpgradePrice(bot, upgrade);
-            simulation.Upgrade(bot, upgrade);
+            Upgraded?.Invoke(upgrade);
             return true;
         }
 
@@ -102,7 +103,18 @@ namespace CvWarehouse.Core.Warehouse
                 return false;
 
             for (int index = 0; index < bots.Count; index++)
-                TryUpgrade(bots[index], upgrade);
+                TryBuyUpgrade(bots[index], upgrade);
+            Upgraded?.Invoke(upgrade);
+            return true;
+        }
+
+        private bool TryBuyUpgrade(Bot bot, BotUpgrade upgrade)
+        {
+            if (!CanUpgrade(bot, upgrade))
+                return false;
+
+            spentPoints += UpgradePrice(bot, upgrade);
+            simulation.Upgrade(bot, upgrade);
             return true;
         }
 

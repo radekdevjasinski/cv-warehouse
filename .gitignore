@@ -115,3 +115,16 @@ cv*.pdf
 # Performance Testing files the test runner drops into Resources during a run
 /[Aa]ssets/[Rr]esources/PerformanceTestRun*.json*
 /[Aa]ssets/[Rr]esources.meta
+
+# 400 Sounds Pack: its licence forbids redistributing the unaltered assets,
+# so only the clips the game references are committed. Un-ignore a clip and
+# its .meta when a sound config starts using it.
+/Assets/Audio/SFX/Card and Board/
+/Assets/Audio/SFX/Card and Board.meta
+/Assets/Audio/SFX/UI/
+/Assets/Audio/SFX/UI.meta
+/Assets/Audio/SFX/Retro/*
+!/Assets/Audio/SFX/Retro/click2.wav
+!/Assets/Audio/SFX/Retro/click2.wav.meta
+!/Assets/Audio/SFX/Retro/jump_short.wav
+!/Assets/Audio/SFX/Retro/jump_short.wav.meta

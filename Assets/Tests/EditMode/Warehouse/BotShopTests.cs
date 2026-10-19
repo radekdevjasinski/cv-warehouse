@@ -282,6 +282,70 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
             Assert.IsFalse(shop.TryUpgrade(simulation.Bots, BotUpgrade.Speed));
         }
 
+        [Test]
+        public void TryUpgrade_EnoughPoints_AnnouncesTheUpgradeOnce()
+        {
+            Earn(PlentyOfPoints);
+            int announcements = 0;
+            shop.Upgraded += upgrade => announcements++;
+
+            shop.TryUpgrade(FirstBot, BotUpgrade.Speed);
+
+            Assert.AreEqual(1, announcements);
+        }
+
+        [TestCase(BotUpgrade.Carry)]
+        [TestCase(BotUpgrade.Speed)]
+        public void TryUpgrade_EnoughPoints_AnnouncesWhichUpgradeWasBought(BotUpgrade upgrade)
+        {
+            Earn(PlentyOfPoints);
+            BotUpgrade? announcedUpgrade = null;
+            shop.Upgraded += bought => announcedUpgrade = bought;
+
+            shop.TryUpgrade(FirstBot, upgrade);
+
+            Assert.AreEqual(upgrade, announcedUpgrade);
+        }
+
+        [Test]
+        public void TryUpgrade_NotEnoughPoints_AnnouncesNothing()
+        {
+            int announcements = 0;
+            shop.Upgraded += upgrade => announcements++;
+
+            shop.TryUpgrade(FirstBot, BotUpgrade.Carry);
+
+            Assert.AreEqual(0, announcements);
+        }
+
+        [Test]
+        public void TryUpgradeGroup_EnoughPoints_AnnouncesTheUpgradeOnceForTheWholeGroup()
+        {
+            FillTheCrew();
+            Earn(simulation.Score.MaxPoints);
+            int announcements = 0;
+            shop.Upgraded += upgrade => announcements++;
+
+            shop.TryUpgrade(simulation.Bots, BotUpgrade.Carry);
+
+            Assert.AreEqual(1, announcements);
+        }
+
+        [Test]
+        public void TryUpgradeGroup_EveryBotAtTheLastLevel_AnnouncesNothing()
+        {
+            FillTheCrew();
+            foreach (Bot bot in simulation.Bots)
+                while (shop.HasUpgrade(bot, BotUpgrade.Speed))
+                    simulation.Upgrade(bot, BotUpgrade.Speed);
+            int announcements = 0;
+            shop.Upgraded += upgrade => announcements++;
+
+            shop.TryUpgrade(simulation.Bots, BotUpgrade.Speed);
+
+            Assert.AreEqual(0, announcements);
+        }
+
         private static WarehouseSimulation NewSimulation(int letters)
         {
             WarehouseLayout layout = new WarehouseLayoutBuilder(GridSide, GridSide)

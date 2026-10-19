@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7917e105c33c293468b63d1ba6462d31, type: 3}
+  m_Name: BotVoices
+  m_EditorClassIdentifier: CvWarehouse.Runtime::CvWarehouse.Presentation.Audio.BotVoiceConfig
+  voices:
+  - {fileID: 8300000, guid: d9512116d2aa7dc42830e28087d46ee5, type: 3}
+  - {fileID: 8300000, guid: 3f2fc1b22c2b2d24389c40d75ca579a5, type: 3}
+  - {fileID: 8300000, guid: 36f8fa280279dcc47acd9b40f7afb29d, type: 3}
+  - {fileID: 8300000, guid: 391c238e08c4ba645aef11cb79c70f16, type: 3}
+  - {fileID: 8300000, guid: 99de59abc6668d04182cc4abab563ae9, type: 3}
+  - {fileID: 8300000, guid: b0afa3b8cee79c245ab84aeb6eb31270, type: 3}
+  - {fileID: 8300000, guid: 0647d7270cd5bc9458cc486ee8365017, type: 3}
+  - {fileID: 8300000, guid: b060bcf447f24bf4c96ae93063b5f740, type: 3}
+  volume: 0.2
+  pitch: 1
+  pitchVariation: 0.03
+  maxVoicesInCascade: 4
+  secondsBetweenVoices: 0.05
+  groupVolume: 0.5

@@ -45,6 +45,29 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         }
 
         [Test]
+        public void Tick_BotTakesLettersOutOfABox_ReportsTheExtractionOnceBeforeTheDelivery()
+        {
+            WarehouseSimulation simulation = NewSmallSimulation(new SimulationSettings());
+            simulation.TryAddBot();
+            Bot bot = simulation.Bots[0];
+            var extractedBots = new List<Bot>();
+            int deliveredPiecesAtExtraction = -1;
+            simulation.Extracted += extractedBot =>
+            {
+                extractedBots.Add(extractedBot);
+                deliveredPiecesAtExtraction = simulation.Score.DeliveredPieces;
+            };
+
+            for (int tick = 0; tick < MaxTicks && extractedBots.Count == 0; tick++)
+                simulation.Tick();
+
+            CollectionAssert.AreEqual(new[] { bot }, extractedBots);
+            Assert.AreEqual(BotState.GoingToDrop, bot.State);
+            Assert.Greater(bot.CargoPieces, 0);
+            Assert.AreEqual(0, deliveredPiecesAtExtraction);
+        }
+
+        [Test]
         public void Tick_BoxEmptied_OpensItsCellsForBots()
         {
             WarehouseSimulation simulation = NewSmallSimulation(new SimulationSettings());
@@ -283,6 +306,30 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
             RunUntilComplete(secondRun);
 
             Assert.AreEqual(firstRun.TickCount, secondRun.TickCount);
+        }
+
+        [Test]
+        public void TryAddBot_FreeParkingCell_AnnouncesTheNewBot()
+        {
+            WarehouseSimulation simulation = NewSmallSimulation(new SimulationSettings());
+            Bot announcedBot = null;
+            simulation.BotAdded += bot => announcedBot = bot;
+
+            simulation.TryAddBot();
+
+            Assert.AreSame(simulation.Bots[0], announcedBot);
+        }
+
+        [Test]
+        public void TryAddBot_EveryParkingCellTaken_AnnouncesNothing()
+        {
+            WarehouseSimulation simulation = NewGeneratedSimulation(EveryBotSlot);
+            bool hasAnnounced = false;
+            simulation.BotAdded += bot => hasAnnounced = true;
+
+            simulation.TryAddBot();
+
+            Assert.IsFalse(hasAnnounced);
         }
 
         [Test]

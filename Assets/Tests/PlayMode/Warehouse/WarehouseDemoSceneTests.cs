@@ -1334,7 +1334,7 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
         public IEnumerator Waybill_Booted_ShowsAnIconOfItsKindBesideEveryContact()
         {
             yield return null;
-            CvChipView[] chips = Object.FindObjectsByType<CvChipView>(FindObjectsSortMode.None);
+            CvChipView[] chips = Object.FindObjectsByType<CvChipView>();
             var shownIcons = new System.Collections.Generic.List<string>();
             foreach (CvChipView chip in chips)
                 if (chip.HasIcon)
@@ -1392,7 +1392,7 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
             CvRevealState waybill = Object.FindAnyObjectByType<CvScreen>().RevealState;
             yield return null;
             CvChipView contactChip = null;
-            foreach (CvChipView chip in Object.FindObjectsByType<CvChipView>(FindObjectsSortMode.None))
+            foreach (CvChipView chip in Object.FindObjectsByType<CvChipView>())
                 if (chip.HasIcon)
                     contactChip = chip;
 
