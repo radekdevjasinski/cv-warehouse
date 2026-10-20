@@ -13,6 +13,5 @@ namespace CvWarehouse.Core.Cv.Dto
         public string link;
         public string importance;
         public string category;
-        public string effect;
     }
 }

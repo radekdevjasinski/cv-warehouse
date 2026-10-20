@@ -54,8 +54,7 @@ namespace CvWarehouse.Core.Cv
                 Bullets = CleanBullets(source.bullets),
                 Link = CvText.Clean(source.link),
                 Importance = ReadImportance(source.importance, id),
-                Category = ReadCategory(source.category, id),
-                Effect = CvText.Clean(source.effect)
+                Category = ReadCategory(source.category, id)
             };
         }
 

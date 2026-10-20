@@ -105,7 +105,6 @@ namespace CvWarehouse.Tests.EditMode.Cv
             Assert.AreEqual(string.Empty, entry.Description);
             Assert.AreEqual(string.Empty, entry.Link);
             Assert.AreEqual(string.Empty, entry.Category);
-            Assert.AreEqual(string.Empty, entry.Effect);
             Assert.AreEqual(Importance.Normal, entry.Importance);
             Assert.IsEmpty(entry.Bullets);
         }

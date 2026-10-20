@@ -82,14 +82,13 @@ This is a living document. It is edited as development progresses.
 - **Names:** every bot has a name and a colour from the crew roster (PIP, BLIP, NIB, MOX, ZEE, TUK, FIG, LUM). A new bot takes the first name nobody in the crew is using, so the name of a removed bot goes to the next bot bought. Bots beyond the roster are numbered ("BOT 9").
 - **Crew list:** a panel under the warehouse view lists the whole crew, one chip per bot with its colour and name. A click on a chip selects that bot, and a click on the chip of the selected bot deselects it. Holding Shift or Ctrl while clicking adds the bot to the selection, or takes it out if it is already selected, so several bots can be picked from the list. A click on the empty space of the panel, around the chips, clears the selection, just like a click on empty floor.
 - **Focus:** each bot has a focus that decides which box it takes next, and the player switches it in the bot window for free. *Closest box* takes the box nearest the truck and is the default. *Most important* takes key boxes first, then important, then normal, and the nearest to the truck within one level. *Biggest box* takes large boxes first, then medium, then small, and the nearest to the truck within one size. *Smallest box* is the reverse: small boxes first, then medium, then large, again the nearest to the truck within one size. The cycle runs in that order. The bot window shows one focus at a time, with an arrow on each side to step to the previous or the next one. A bot on its way to a box drops that job and turns to the box of its new focus straight away, also while the game is paused. A bot already taking text out or carrying it back finishes the trip first.
-- **Specializations:** a bot can specialize in a category and carries boxes of that category faster.
-- **Category:** a list from the file (e.g. technical and soft, up to 4–5). Each gets a colour.
+- **Category:** a list from the file (e.g. technical and soft, up to 4–5). Each gets a colour. A category only decides the colour of a box and is shown in the box window; it has no effect on bots, points or prices.
 - **Crowding:** more bots does not mean proportionally faster, because a box only has as many access cells as it has open sides and the truck only has a few drop cells. On top of that there is a limit on bot slots.
 
 ## Player and Economy
 
 - **Start:** the player begins with a few bots that carry one word each. Nothing else is given for free.
-- **Actions:** the player buys and removes bots and buys upgrades and specializations. A removed bot is not refunded, and its upgrades are lost with it. The last bot cannot be removed, so the game can always be finished.
+- **Actions:** the player buys and removes bots and buys upgrades. A removed bot is not refunded, and its upgrades are lost with it. The last bot cannot be removed, so the game can always be finished.
 - **Points on screen:** the points the player can spend are shown large in the top bar, above the middle of the warehouse view. The button for buying a bot and, in the bot window, the buttons for that bot's next carry and speed levels show their price. An upgrade button the player can afford turns green; one they cannot afford yet stays blue and faded. The buy bot button follows the same colours: green when the player can afford a bot, blue and faded until then, and grey when every parking slot is taken.
 - **Points at the truck:** when a bot finishes unloading, the points it just earned float up above it in the same gold as the points in the top bar with a black outline, for example "+24", and fade out within about a second. Popups from bots unloading side by side stack above each other instead of overlapping. A deleted bot whose letters count as delivered shows nothing, because it never reached the truck.
 - **Points counter pulse:** whenever the points in the top bar go up, the number swells briefly and settles back. Spending points does not pulse it.
@@ -100,7 +99,6 @@ This is a living document. It is edited as development progresses.
 - **Upgrade price:** paid per bot and per level. Every level costs more than the one before, and every bot pays the same price for the same level. Carry and speed are priced separately.
 - **Prices:** scaled to the size of the CV, so that a long file does not produce a game without challenge. Every price is a share of all the points in the warehouse.
 - **Bot price:** the starting bots are free. Each bought bot costs more than the one before.
-- **Upgrades:** named after projects. Effects come from a ready-made pool in code, and an entry in the file points to one of them.
 
 ## CV Data
 
@@ -109,7 +107,7 @@ This is a living document. It is edited as development progresses.
 - **Letters and words:** they are not written in the file. The game cuts a block into words and letters by itself.
 - **Decorations:** a piece of text between spaces with no letter or digit in it, such as the bullet in front of a list entry, the dash between a title and its subtitle or the dash in "2017 - 2021", is a decoration. It is shown on the waybill from the start, never gets a bar, and is not a letter in any box. Punctuation stuck to a word, such as the comma in "Unity,", stays part of that word.
 - **List styles:** `style` only changes the look of a list: `rows`, `bullets`, `keyValue` or `inline`.
-- **Entry:** every field is optional and an empty one is not drawn: title, subtitle, meta (date or link text on the right), description, bullets, link, plus the game fields importance (`normal`, `important` or `key`), category and effect. Text may use the `<i>` and `<b>` tags.
+- **Entry:** every field is optional and an empty one is not drawn: title, subtitle, meta (date or link text on the right), description, bullets, link, plus the game fields importance (`normal`, `important` or `key`) and category. Text may use the `<i>` and `<b>` tags.
 - **Reveal:** every block has an id built from its position in the file. The waybill lays out the full text of the block from the start and covers each hidden word with a grey bar. Each delivered letter or word appears in its own place, and the bar under a word goes away once all its letters are delivered.
 - **Footer and section titles:** shown from the start, they are not boxes.
 - **Extensibility:** adding or removing entries changes the number of boxes and the map size without touching code.

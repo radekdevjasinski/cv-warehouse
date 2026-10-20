@@ -71,7 +71,6 @@ Docs/
 - **Time is injected.** `Core` receives delta time as a parameter instead of reading `Time.deltaTime`, so the simulation can be stepped in tests.
 - **Dependencies go through constructors or serialized fields.** No `FindObjectOfType`, no `GameObject.Find`, no singletons with static access.
 - **Tunable values live in ScriptableObjects**, not in constants scattered through code: bot speeds, box values per weight class, prices, generator parameters.
-- **Upgrade effects are a fixed pool in code.** The JSON only points at an effect by id. An unknown id is a data error handled by the robustness rules, never an exception.
 
 ## WebGL rules
 
@@ -134,7 +133,7 @@ In WebGL the garbage collector runs only between frames, so garbage created insi
 
 ## Testing
 
-- **EditMode tests** cover everything in `Core`. Required coverage includes the generator guarantees for many seeds and CV sizes, CV parsing with missing fields and malformed files, empty sections, cutting blocks into words and letters, emptying a box at each carry size, category specializations, task queue ordering, pricing scaled to CV size and scoring.
+- **EditMode tests** cover everything in `Core`. Required coverage includes the generator guarantees for many seeds and CV sizes, CV parsing with missing fields and malformed files, empty sections, cutting blocks into words and letters, emptying a box at each carry size, task queue ordering, pricing scaled to CV size and scoring.
 - **PlayMode tests** cover scene wiring: the game boots from a CV file, bots empty boxes and deliver text, the final CV screen appears, and the skip button works from any state.
 - **Manual WebGL check** is required for anything that behaves differently in a browser: JSON loading over HTTP, file download, audio start, fullscreen, resizing and touch input. Automated tests run in the Editor and do not prove WebGL behaviour.
 - A bug fix starts with a test that reproduces the bug.

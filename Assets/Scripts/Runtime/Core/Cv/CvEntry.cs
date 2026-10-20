@@ -13,6 +13,5 @@ namespace CvWarehouse.Core.Cv
         public string Link { get; internal set; }
         public Importance Importance { get; internal set; }
         public string Category { get; internal set; }
-        public string Effect { get; internal set; }
     }
 }
