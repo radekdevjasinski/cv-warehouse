@@ -36,7 +36,7 @@ namespace CvWarehouse.Presentation.Warehouse
         {
             if (simulation.IsComplete)
                 Show(ShippedLabel, shippedColor);
-            else if (simulation.IsPaused)
+            else if (simulation.IsPaused || simulation.IsHeld)
                 Show(PausedLabel, pausedColor);
             else
                 Show(OnShiftLabel, onShiftColor);

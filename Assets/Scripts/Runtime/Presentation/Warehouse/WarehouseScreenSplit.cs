@@ -25,6 +25,12 @@ namespace CvWarehouse.Presentation.Warehouse
 
         public bool IsWaybillExpanded { get; private set; }
 
+        public void ExpandWaybill()
+        {
+            if (!IsWaybillExpanded)
+                ToggleWaybill();
+        }
+
         private void Awake()
         {
             float warehouseWidth = 1f - waybillWidthFraction;

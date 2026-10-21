@@ -31,6 +31,7 @@ namespace CvWarehouse.Presentation.Warehouse
         [SerializeField] private SelectionBoxView selectionBoxView;
         [SerializeField] private WarehouseBotSelector botSelector;
         [SerializeField] private WarehousePauseControl pauseControl;
+        [SerializeField] private GameMenuView gameMenu;
         [SerializeField] private WarehouseSounds sounds;
         [SerializeField] private int seed = 12345;
 
@@ -91,6 +92,7 @@ namespace CvWarehouse.Presentation.Warehouse
             boxPanelView.Show(BoxSelection);
             botSelector.Connect(Simulation, Selection, BoxSelection);
             pauseControl.Show(Simulation);
+            gameMenu.Show(Simulation);
         }
 
         private void Update()

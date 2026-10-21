@@ -15,6 +15,12 @@ This is a living document. It is edited as development progresses.
 - **No fail state:** the result is the time. Left alone, the starting crew keeps delivering, only very slowly.
 - **Emergency exit:** a "skip and show CV" button is visible from the first second. It is the way out for a recruiter in a hurry.
 
+## Menus
+
+- **Main menu:** the game opens on a main menu. It is the first scene of the build and stays small, so the page becomes interactive quickly. At the top is the gold Silkscreen title "cv-warehouse" with two hard shadows, one dark gold and one near-black. Under it the subtitle "an interactive CV by" is followed by the name from the CV file, or ends after "CV" if the file cannot be read. In the middle is a dark panel with a yellow-and-black hazard stripe along its top and bevelled buttons: START SHIFT in green, then View CV (marked "skip the game"), How to play and Settings, and a sound button below them. GitHub and LinkedIn links and the build version sit in the bottom right corner. The game is English only, so there is no language switch, and there is no Exit button because a browser page cannot close itself. For now only START SHIFT works.
+- **Menu backdrop:** a close-up of the bare warehouse floor, without walls, in the same 16-pixel art and whole-step pixel-perfect zoom as the game. A few boxes stand around, and one bot walks back and forth between two open boxes: it takes paper out of one, carries it over on its head and puts it into the other, forever. The timings live in a settings asset.
+- **Game menu:** a Menu button in the top bar, or Esc, opens a panel with Resume, Restart, Show CV and Main menu. While it is open the warehouse stands still and the shift shows as paused; closing it does not undo a pause the player set before. Restart starts the run again with the same CV and seed. Show CV reveals the whole CV and expands the waybill, and the warehouse keeps working behind it. Main menu leaves the run.
+
 ## Warehouse
 
 - **Map:** one per game, procedurally generated from the CV file and a seed. The boxes come from the CV, one per block, and the map is sized to them: the generator adds up the floor the boxes take and leaves a set share of the storage floor free, so a longer CV gives a bigger warehouse of the same density. The density is high on purpose: boxes take about a fifth of the storage floor, so the warehouse feels cramped and the bots stay in view. Cluster sizes, ramp size and the shape of the map are parameters. The random seed is visible on screen.
@@ -30,7 +36,7 @@ This is a living document. It is edited as development progresses.
 - **Selection frame:** whatever is selected, a bot or a box, gets steady yellow corner brackets around it.
 - **Scanlines:** the warehouse view, and only it, is covered with faint CRT scanlines: one dark line every three screen pixels, whatever the zoom. They are a flat overlay, not a post-processing effect.
 - **Vignette:** the corners of the warehouse view fade towards black while the middle stays clear. It is a second flat overlay under the view frame, also without post-processing.
-- **Top bar:** runs across the whole screen with the title, the points and the state of the shift (on shift, paused or shipped). It stays visible when the waybill is expanded.
+- **Top bar:** runs across the whole screen with the title, the points, the state of the shift (on shift, paused or shipped) and the Menu button. It stays visible when the waybill is expanded.
 - **Dock:** a strip under the warehouse view holds the bot counter with the buy and pause buttons, the crew list, and the window of whatever is selected.
 - **CV.DOC bar:** the header of the waybill shows a progress bar and the percentage of the letters of the CV delivered so far.
 - **Screen:** on a wide screen the warehouse takes the left side and the waybill stays visible the whole time as a panel on the right, so every delivery shows up on the CV straight away. The player scrolls the waybill with the mouse wheel or by dragging it. A button on the waybill expands it to the full screen and back, and the warehouse keeps working while it is expanded. The page narrows to fit the panel, and contacts and links wrap instead of overlapping.

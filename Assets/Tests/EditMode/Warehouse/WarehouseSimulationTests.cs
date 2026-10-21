@@ -573,6 +573,46 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         }
 
         [Test]
+        public void Advance_Held_RunsNoTicks()
+        {
+            WarehouseSimulation simulation = NewSmallSimulation(new SimulationSettings { TickSeconds = TestTickSeconds });
+            simulation.Hold();
+
+            simulation.Advance(0.35f);
+
+            Assert.IsTrue(simulation.IsHeld);
+            Assert.AreEqual(0, simulation.TickCount);
+        }
+
+        [Test]
+        public void Release_AfterAHold_RunsTicksAgain()
+        {
+            WarehouseSimulation simulation = NewSmallSimulation(new SimulationSettings { TickSeconds = TestTickSeconds });
+            simulation.Hold();
+            simulation.Advance(0.35f);
+
+            simulation.Release();
+            simulation.Advance(0.25f);
+
+            Assert.IsFalse(simulation.IsHeld);
+            Assert.AreEqual(2, simulation.TickCount);
+        }
+
+        [Test]
+        public void Release_WhilePaused_KeepsThePause()
+        {
+            WarehouseSimulation simulation = NewSmallSimulation(new SimulationSettings { TickSeconds = TestTickSeconds });
+            simulation.TogglePause();
+            simulation.Hold();
+
+            simulation.Release();
+            simulation.Advance(0.35f);
+
+            Assert.IsTrue(simulation.IsPaused);
+            Assert.AreEqual(0, simulation.TickCount);
+        }
+
+        [Test]
         public void Upgrade_WhilePaused_StillApplies()
         {
             WarehouseSimulation simulation = NewSmallSimulation(new SimulationSettings());

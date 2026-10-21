@@ -47,6 +47,8 @@ namespace CvWarehouse.Core.Warehouse
 
         public bool IsPaused { get; private set; }
 
+        public bool IsHeld { get; private set; }
+
         public bool CanRemoveBot => bots.Count > 1;
 
         public bool IsComplete => Score.DeliveredPieces == Layout.TotalPieces;
@@ -56,9 +58,19 @@ namespace CvWarehouse.Core.Warehouse
             IsPaused = !IsPaused;
         }
 
+        public void Hold()
+        {
+            IsHeld = true;
+        }
+
+        public void Release()
+        {
+            IsHeld = false;
+        }
+
         public void Advance(float deltaTime)
         {
-            if (IsPaused)
+            if (IsPaused || IsHeld)
                 return;
 
             accumulatedSeconds += deltaTime;

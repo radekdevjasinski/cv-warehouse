@@ -13,10 +13,18 @@ namespace CvWarehouse.Presentation.Warehouse
         [SerializeField] private WarehouseDemo demo;
         [SerializeField] private CvScreen screen;
         [SerializeField] private CvProgressView progressView;
+        [SerializeField] private WarehouseScreenSplit screenSplit;
         [SerializeField] private string cvFileName = "cv_en.json";
         [SerializeField] private float highlightSeconds = 2f;
 
         private WarehouseScore score;
+
+        public void ShowFullCv()
+        {
+            if (screen.RevealState != null)
+                screen.RevealState.RevealAll();
+            screenSplit.ExpandWaybill();
+        }
 
         private async void Start()
         {
