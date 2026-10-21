@@ -14,6 +14,7 @@ namespace CvWarehouse.Presentation.Warehouse
         [SerializeField] private CvScreen screen;
         [SerializeField] private CvProgressView progressView;
         [SerializeField] private WarehouseScreenSplit screenSplit;
+        [SerializeField] private GameStartRequest startRequest;
         [SerializeField] private string cvFileName = "cv_en.json";
         [SerializeField] private float highlightSeconds = 2f;
 
@@ -21,6 +22,8 @@ namespace CvWarehouse.Presentation.Warehouse
 
         public void SkipToFullCv()
         {
+            if (demo.Simulation != null)
+                demo.Simulation.Skip();
             if (screen.RevealState != null)
                 screen.RevealState.RevealAll();
             screenSplit.ExpandWaybill();
@@ -28,6 +31,7 @@ namespace CvWarehouse.Presentation.Warehouse
 
         private async void Start()
         {
+            bool isSkipRequested = startRequest.TakeSkipRequest();
             await screen.ShowAsync(new HttpCvTextSource(cvFileName));
             if (this == null || screen.RevealState == null)
                 return;
@@ -42,6 +46,8 @@ namespace CvWarehouse.Presentation.Warehouse
             score = demo.Simulation.Score;
             if (isActiveAndEnabled)
                 score.Delivered += ShowDelivery;
+            if (isSkipRequested)
+                SkipToFullCv();
         }
 
         private void Update()

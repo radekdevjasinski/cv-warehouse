@@ -49,6 +49,8 @@ namespace CvWarehouse.Core.Warehouse
 
         public bool IsHeld { get; private set; }
 
+        public bool IsSkipped { get; private set; }
+
         public bool CanRemoveBot => bots.Count > 1;
 
         public bool IsComplete => Score.DeliveredPieces == Layout.TotalPieces;
@@ -66,6 +68,14 @@ namespace CvWarehouse.Core.Warehouse
         public void Release()
         {
             IsHeld = false;
+        }
+
+        public void Skip()
+        {
+            IsSkipped = true;
+            Layout.DiscardAllBoxes();
+            foreach (Bot bot in bots)
+                brain.DropWork(bot);
         }
 
         public void Advance(float deltaTime)

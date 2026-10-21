@@ -25,7 +25,7 @@ namespace CvWarehouse.Core.Warehouse
 
         public bool HasBotSlot => simulation.Bots.Count < simulation.MaxBots;
 
-        public bool CanBuyBot => HasBotSlot && Balance >= BotPrice;
+        public bool CanBuyBot => !simulation.IsSkipped && HasBotSlot && Balance >= BotPrice;
 
         public int BotPrice
         {
@@ -43,7 +43,7 @@ namespace CvWarehouse.Core.Warehouse
 
         public bool CanUpgrade(Bot bot, BotUpgrade upgrade)
         {
-            return HasUpgrade(bot, upgrade) && Balance >= UpgradePrice(bot, upgrade);
+            return !simulation.IsSkipped && HasUpgrade(bot, upgrade) && Balance >= UpgradePrice(bot, upgrade);
         }
 
         public int UpgradePrice(Bot bot, BotUpgrade upgrade)
@@ -75,7 +75,7 @@ namespace CvWarehouse.Core.Warehouse
 
         public bool CanUpgrade(IReadOnlyList<Bot> bots, BotUpgrade upgrade)
         {
-            return CountUpgradeable(bots, upgrade) > 0 && Balance >= UpgradePrice(bots, upgrade);
+            return !simulation.IsSkipped && CountUpgradeable(bots, upgrade) > 0 && Balance >= UpgradePrice(bots, upgrade);
         }
 
         public bool TryBuyBot()

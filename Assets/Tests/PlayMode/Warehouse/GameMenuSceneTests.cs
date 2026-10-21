@@ -1,4 +1,5 @@
 using System.Collections;
+using CvWarehouse.Core.Warehouse;
 using CvWarehouse.Presentation.Cv;
 using CvWarehouse.Presentation.Menu;
 using CvWarehouse.Presentation.Warehouse;
@@ -26,6 +27,12 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
         private const string ConfirmSkipButtonName = "ConfirmSkipButton";
         private const string CancelSkipButtonName = "CancelSkipButton";
         private const string MenuWindowName = "GameMenuWindow";
+        private const string SkippedLabel = "SKIPPED";
+        private const string ShiftEndBadgeName = "ShiftEndBadge";
+        private const string ShiftEndTextName = "ShiftEndText";
+        private const string ShippedLabel = "CV SHIPPED";
+        private const int TicksToPark = 3000;
+        private const int MaxTicks = 600000;
         private const string ShowCvLabel = "Show CV";
         private const string HideCvLabel = "Hide CV";
         private const string MainMenuButtonName = "MainMenuButton";
@@ -50,6 +57,31 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
                 yield return null;
 
             Assert.IsNotNull(demo.Simulation, "The warehouse did not boot from the CV in time.");
+        }
+
+        [UnityTest]
+        public IEnumerator ShiftEndBadge_DuringTheShift_IsHidden()
+        {
+            yield return null;
+
+            Assert.IsFalse(Object.FindAnyObjectByType<ShiftEndBadge>().IsShown);
+            Assert.IsNull(GameObject.Find(ShiftEndBadgeName));
+        }
+
+        [UnityTest]
+        public IEnumerator ShiftEndBadge_LastLetterDelivered_SaysCvShippedAndStays()
+        {
+            demo.enabled = false;
+            for (int tick = 0; tick < MaxTicks && !demo.Simulation.IsComplete; tick++)
+                demo.Simulation.Tick();
+            yield return null;
+
+            Assert.IsTrue(demo.Simulation.IsComplete);
+            Assert.AreEqual(ShippedLabel, GameObject.Find(ShiftEndTextName).GetComponent<TMP_Text>().text);
+            Click(MenuButtonName);
+            Click(ResumeButtonName);
+            yield return null;
+            Assert.IsNotNull(GameObject.Find(ShiftEndBadgeName));
         }
 
         [UnityTest]
@@ -180,6 +212,34 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
 
             Assert.IsFalse(gameMenu.IsAskingToSkip);
             Assert.IsNotNull(GameObject.Find(MenuWindowName));
+        }
+
+        [UnityTest]
+        public IEnumerator ConfirmSkipButton_Clicked_ClearsTheWarehouseAndSendsTheBotsHome()
+        {
+            Click(MenuButtonName);
+            Click(SkipGameButtonName);
+            yield return null;
+
+            Click(ConfirmSkipButtonName);
+            for (int tick = 0; tick < TicksToPark; tick++)
+                demo.Simulation.Tick();
+            yield return null;
+
+            Assert.IsTrue(demo.Simulation.IsSkipped);
+            Assert.IsFalse(Object.FindAnyObjectByType<ShiftEndBadge>().IsShown);
+            Object.FindAnyObjectByType<WarehouseScreenSplit>().CollapseWaybill();
+            yield return null;
+            Assert.IsTrue(Object.FindAnyObjectByType<ShiftEndBadge>().IsShown);
+            foreach (Bot bot in demo.Simulation.Bots)
+                Assert.AreEqual(BotState.Parked, bot.State, bot.Name);
+            foreach (Box box in demo.Simulation.Layout.Boxes)
+                Assert.IsTrue(box.IsDiscarded, "box " + box.Id);
+            foreach (SpriteRenderer boxRenderer in Object.FindAnyObjectByType<WarehouseBoxesView>().GetComponentsInChildren<SpriteRenderer>())
+                Assert.IsFalse(boxRenderer.enabled, boxRenderer.name);
+            foreach (Bot bot in demo.Simulation.Bots)
+                Assert.AreEqual(0, bot.CargoPieces);
+            Assert.AreEqual(SkippedLabel, GameObject.Find(ShiftStatusTextName).GetComponent<TMP_Text>().text);
         }
 
         [UnityTest]

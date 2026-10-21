@@ -41,6 +41,29 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         }
 
         [Test]
+        public void TryBuyBot_AfterSkip_AddsNoBot()
+        {
+            Earn(PlentyOfPoints);
+            simulation.Skip();
+
+            Assert.IsFalse(shop.CanBuyBot);
+            Assert.IsFalse(shop.TryBuyBot());
+            Assert.AreEqual(1, simulation.Bots.Count);
+        }
+
+        [Test]
+        public void TryUpgrade_AfterSkip_KeepsEveryLevel()
+        {
+            Earn(PlentyOfPoints);
+            simulation.Skip();
+
+            Assert.IsFalse(shop.TryUpgrade(FirstBot, BotUpgrade.Speed));
+            Assert.IsFalse(shop.TryUpgrade(simulation.Bots, BotUpgrade.Carry));
+            Assert.AreEqual(Bot.FirstLevel, FirstBot.SpeedLevel);
+            Assert.AreEqual(Bot.FirstLevel, FirstBot.CarryLevel);
+        }
+
+        [Test]
         public void TryBuyBot_EnoughPoints_AddsABotAndTakesItsPrice()
         {
             Earn(FirstBotPrice);

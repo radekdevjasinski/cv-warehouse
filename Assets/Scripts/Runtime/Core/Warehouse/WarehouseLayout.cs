@@ -28,11 +28,26 @@ namespace CvWarehouse.Core.Warehouse
             if (!box.IsEmpty)
                 throw new InvalidOperationException("Box " + box.Id + " still holds pieces.");
 
+            FreeCellsUnder(box);
+            RefreshAccess();
+        }
+
+        internal void DiscardAllBoxes()
+        {
+            foreach (Box box in Boxes)
+            {
+                box.Discard();
+                FreeCellsUnder(box);
+            }
+
+            RefreshAccess();
+        }
+
+        private void FreeCellsUnder(Box box)
+        {
             for (int y = box.Origin.Y; y < box.Origin.Y + box.Size.Height; y++)
                 for (int x = box.Origin.X; x < box.Origin.X + box.Size.Width; x++)
                     Grid.SetCellType(new GridPosition(x, y), CellType.Floor);
-
-            RefreshAccess();
         }
 
         internal void RefreshAccess()

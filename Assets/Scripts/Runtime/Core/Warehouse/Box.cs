@@ -49,6 +49,8 @@ namespace CvWarehouse.Core.Warehouse
 
         public bool IsEmpty => RemainingPieces == 0;
 
+        public bool IsDiscarded { get; private set; }
+
         public int Claim(int words, Random random, List<int> claimed)
         {
             claimed.Clear();
@@ -66,6 +68,12 @@ namespace CvWarehouse.Core.Warehouse
         public void TakeClaimed(int pieces)
         {
             RemainingPieces -= pieces;
+        }
+
+        internal void Discard()
+        {
+            RemainingPieces = 0;
+            IsDiscarded = true;
         }
 
         internal void ClearAccessCells()

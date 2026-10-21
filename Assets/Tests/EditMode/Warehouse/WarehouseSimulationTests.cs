@@ -15,6 +15,7 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
         private const int SmallBoxPieces = 3;
         private const string SmallBoxText = "a b c";
         private const int TicksToPark = 3000;
+        private const int TicksIntoTheShift = 600;
         private const int EveryBotSlot = int.MaxValue;
         private const float TestTickSeconds = 0.1f;
 
@@ -596,6 +597,68 @@ namespace CvWarehouse.Tests.EditMode.Warehouse
 
             Assert.IsFalse(simulation.IsHeld);
             Assert.AreEqual(2, simulation.TickCount);
+        }
+
+        [Test]
+        public void Skip_BusyWarehouse_RemovesEveryBoxAndFreesItsCells()
+        {
+            WarehouseSimulation simulation = NewGeneratedSimulation(3);
+            for (int tick = 0; tick < TicksIntoTheShift; tick++)
+                simulation.Tick();
+
+            simulation.Skip();
+
+            Assert.IsTrue(simulation.IsSkipped);
+            foreach (Box box in simulation.Layout.Boxes)
+            {
+                Assert.IsTrue(box.IsDiscarded, "box " + box.Id);
+                Assert.IsTrue(box.IsEmpty, "box " + box.Id);
+                Assert.AreEqual(0, box.AccessCells.Count, "box " + box.Id);
+                for (int y = box.Origin.Y; y < box.Origin.Y + box.Size.Height; y++)
+                    for (int x = box.Origin.X; x < box.Origin.X + box.Size.Width; x++)
+                        Assert.AreEqual(CellType.Floor, simulation.Layout.Grid.GetCellType(new GridPosition(x, y)));
+            }
+        }
+
+        [Test]
+        public void Skip_BotsAtWork_DropEverythingWithoutDelivering()
+        {
+            WarehouseSimulation simulation = NewGeneratedSimulation(3);
+            for (int tick = 0; tick < TicksIntoTheShift; tick++)
+                simulation.Tick();
+            int deliveredPieces = simulation.Score.DeliveredPieces;
+
+            simulation.Skip();
+
+            Assert.AreEqual(deliveredPieces, simulation.Score.DeliveredPieces);
+            foreach (Bot bot in simulation.Bots)
+            {
+                Assert.AreEqual(BotState.Idle, bot.State);
+                Assert.IsNull(bot.JobBox);
+                Assert.AreEqual(0, bot.CargoPieces);
+                Assert.AreEqual(0, bot.ClaimedPieces);
+            }
+        }
+
+        [Test]
+        public void Tick_AfterSkip_BotsWalkBackToParkingAndScoreNothing()
+        {
+            WarehouseSimulation simulation = NewGeneratedSimulation(3);
+            for (int tick = 0; tick < TicksIntoTheShift; tick++)
+                simulation.Tick();
+            int points = simulation.Score.Points;
+
+            simulation.Skip();
+            for (int tick = 0; tick < TicksToPark; tick++)
+                simulation.Tick();
+
+            Assert.AreEqual(points, simulation.Score.Points);
+            Assert.IsFalse(simulation.IsComplete);
+            foreach (Bot bot in simulation.Bots)
+            {
+                Assert.AreEqual(BotState.Parked, bot.State, bot.Name);
+                CollectionAssert.Contains(simulation.Layout.ParkingCells, bot.Cell);
+            }
         }
 
         [Test]

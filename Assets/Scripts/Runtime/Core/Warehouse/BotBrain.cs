@@ -52,6 +52,12 @@ namespace CvWarehouse.Core.Warehouse
             if (bot.JobBox != null)
                 DeliverOrRelease(bot);
 
+            DropWork(bot);
+        }
+
+        public void DropWork(Bot bot)
+        {
+            bot.Letters.Clear();
             bot.JobBox = null;
             bot.ClaimedPieces = 0;
             bot.ClaimedWords = 0;

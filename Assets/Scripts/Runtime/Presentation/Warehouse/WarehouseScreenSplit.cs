@@ -24,7 +24,6 @@ namespace CvWarehouse.Presentation.Warehouse
         [SerializeField] private CvAutoScroll waybillAutoScroll;
 
         public bool IsWaybillExpanded { get; private set; }
-
         public void ExpandWaybill()
         {
             if (!IsWaybillExpanded)

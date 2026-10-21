@@ -24,6 +24,10 @@ namespace CvWarehouse.Tests.PlayMode.Menu
         private const string LinkedInLinkName = "LinkedInLink";
         private const string VersionTextName = "VersionText";
         private static readonly string[] MenuButtonNames = { StartShiftButtonName, "ViewCvButton", "HowToPlayButton", "SettingsButton", "SoundButton" };
+        private const string ViewCvButtonName = "ViewCvButton";
+        private const string ConfirmSkipButtonName = "ConfirmSkipButton";
+        private const string CancelSkipButtonName = "CancelSkipButton";
+        private const string MenuPanelName = "MenuPanel";
         private const string BotBodyName = "Body";
         private const string CargoName = "Cargo";
         private const int MaxFramesToWait = 300;
@@ -38,6 +42,78 @@ namespace CvWarehouse.Tests.PlayMode.Menu
             yield return EditorSceneManager.LoadSceneAsyncInPlayMode(ScenePath, new LoadSceneParameters(LoadSceneMode.Single));
 #endif
             yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator ViewCvButton_Clicked_AsksBeforeSkippingInPlaceOfTheMenu()
+        {
+            Click(ViewCvButtonName);
+            yield return null;
+
+            Assert.IsTrue(Object.FindAnyObjectByType<MainMenuSkipDialog>().IsOpen);
+            Assert.IsNotNull(GameObject.Find(ConfirmSkipButtonName));
+            Assert.IsNull(GameObject.Find(MenuPanelName));
+            Assert.IsNull(Object.FindAnyObjectByType<WarehouseDemo>());
+        }
+
+        [UnityTest]
+        public IEnumerator CancelSkipButton_Clicked_BringsTheMenuBack()
+        {
+            Click(ViewCvButtonName);
+            yield return null;
+
+            Click(CancelSkipButtonName);
+            yield return null;
+
+            Assert.IsFalse(Object.FindAnyObjectByType<MainMenuSkipDialog>().IsOpen);
+            Assert.IsNotNull(GameObject.Find(MenuPanelName));
+        }
+
+        [UnityTest]
+        public IEnumerator ConfirmSkipButton_Clicked_OpensTheGameSkippedWithTheFullCvOnScreen()
+        {
+            Click(ViewCvButtonName);
+            yield return null;
+
+            Click(ConfirmSkipButtonName);
+            WarehouseDemo demo = null;
+            for (int frame = 0; frame < MaxFramesToWait && (demo == null || demo.Simulation == null || !demo.Simulation.IsSkipped); frame++)
+            {
+                yield return null;
+                demo = Object.FindAnyObjectByType<WarehouseDemo>();
+            }
+
+            Assert.IsNotNull(demo, "The game did not open.");
+            Assert.IsTrue(demo.Simulation.IsSkipped);
+            Assert.IsTrue(Object.FindAnyObjectByType<CvWarehouse.Presentation.Cv.CvScreen>().RevealState.IsComplete);
+            Assert.IsTrue(Object.FindAnyObjectByType<WarehouseScreenSplit>().IsWaybillExpanded);
+        }
+
+        [UnityTest]
+        public IEnumerator StartShift_AfterAnEarlierSkip_StartsANormalGame()
+        {
+            Click(ViewCvButtonName);
+            yield return null;
+            Click(ConfirmSkipButtonName);
+            for (int frame = 0; frame < MaxFramesToWait && !IsSkippedGameRunning(); frame++)
+                yield return null;
+#if UNITY_EDITOR
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode(ScenePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+            yield return null;
+
+            Click(StartShiftButtonName);
+            WarehouseDemo demo = null;
+            for (int frame = 0; frame < MaxFramesToWait && (demo == null || demo.Simulation == null); frame++)
+            {
+                yield return null;
+                demo = Object.FindAnyObjectByType<WarehouseDemo>();
+            }
+            yield return null;
+
+            Assert.IsNotNull(demo.Simulation);
+            Assert.IsFalse(demo.Simulation.IsSkipped);
+            Assert.IsFalse(Object.FindAnyObjectByType<WarehouseScreenSplit>().IsWaybillExpanded);
         }
 
         [UnityTest]
@@ -106,6 +182,17 @@ namespace CvWarehouse.Tests.PlayMode.Menu
 
             Assert.IsNotNull(Object.FindAnyObjectByType<WarehouseDemo>());
             Assert.IsNull(Object.FindAnyObjectByType<MainMenu>());
+        }
+
+        private static void Click(string buttonName)
+        {
+            GameObject.Find(buttonName).GetComponent<Button>().onClick.Invoke();
+        }
+
+        private static bool IsSkippedGameRunning()
+        {
+            WarehouseDemo demo = Object.FindAnyObjectByType<WarehouseDemo>();
+            return demo != null && demo.Simulation != null && demo.Simulation.IsSkipped;
         }
 
         private static IEnumerator StepUntil(MenuBotLoop loop, MenuBotPhase phase)

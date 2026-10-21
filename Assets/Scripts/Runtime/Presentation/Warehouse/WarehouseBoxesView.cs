@@ -8,6 +8,7 @@ namespace CvWarehouse.Presentation.Warehouse
     {
         private const int BoxLayer = 0;
         private const int NothingShown = -1;
+        private const int DiscardedShown = -2;
         private const float BottomEdgeAboveOrigin = 1f / DepthSorting.PixelsPerUnit;
 
         [SerializeField] private BoxSkin skin;
@@ -58,16 +59,18 @@ namespace CvWarehouse.Presentation.Warehouse
             for (int index = 0; index < boxes.Count; index++)
             {
                 Box box = boxes[index];
-                if (shownPieces[index] == box.RemainingPieces)
+                int shownState = box.IsDiscarded ? DiscardedShown : box.RemainingPieces;
+                if (shownPieces[index] == shownState)
                     continue;
 
-                shownPieces[index] = box.RemainingPieces;
+                shownPieces[index] = shownState;
                 RefreshBox(boxRenderers[index], box);
             }
         }
 
         private void RefreshBox(SpriteRenderer boxRenderer, Box box)
         {
+            boxRenderer.enabled = !box.IsDiscarded;
             boxRenderer.sprite = skin.LookOf(box).SpriteOf(box);
             boxRenderer.sortingOrder = box.IsEmpty
                 ? DepthSorting.OnTheFloorOrder
