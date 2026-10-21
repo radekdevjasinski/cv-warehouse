@@ -28,6 +28,14 @@ namespace CvWarehouse.Tests.PlayMode.Menu
         private const string ConfirmSkipButtonName = "ConfirmSkipButton";
         private const string CancelSkipButtonName = "CancelSkipButton";
         private const string MenuPanelName = "MenuPanel";
+        private const string HowToPlayButtonName = "HowToPlayButton";
+        private const string HowToPlayBackButtonName = "HowToPlayBackButton";
+        private const string PreviousCardButtonName = "PreviousCardButton";
+        private const string NextCardButtonName = "NextCardButton";
+        private const string JobCardName = "JobCard";
+        private const string PointsCardName = "PointsCard";
+        private const string MouseControlsName = "MouseControls";
+        private const string TouchControlsName = "TouchControls";
         private const string BotBodyName = "Body";
         private const string CargoName = "Cargo";
         private const int MaxFramesToWait = 300;
@@ -114,6 +122,79 @@ namespace CvWarehouse.Tests.PlayMode.Menu
             Assert.IsNotNull(demo.Simulation);
             Assert.IsFalse(demo.Simulation.IsSkipped);
             Assert.IsFalse(Object.FindAnyObjectByType<WarehouseScreenSplit>().IsWaybillExpanded);
+        }
+
+        [UnityTest]
+        public IEnumerator HowToPlayButton_Clicked_ShowsTheFirstCardInPlaceOfTheMenu()
+        {
+            Click(HowToPlayButtonName);
+            yield return null;
+
+            Assert.IsTrue(Object.FindAnyObjectByType<HowToPlayPanel>().IsOpen);
+            Assert.IsNotNull(GameObject.Find(JobCardName));
+            Assert.IsNull(GameObject.Find(PointsCardName));
+            Assert.IsNull(GameObject.Find(MenuPanelName));
+            Assert.IsFalse(GameObject.Find(PreviousCardButtonName).GetComponent<Button>().interactable);
+            Assert.IsTrue(GameObject.Find(NextCardButtonName).GetComponent<Button>().interactable);
+        }
+
+        [UnityTest]
+        public IEnumerator NextCardButton_Clicked_ShowsTheNextCard()
+        {
+            Click(HowToPlayButtonName);
+            yield return null;
+
+            Click(NextCardButtonName);
+            yield return null;
+
+            Assert.AreEqual(1, Object.FindAnyObjectByType<HowToPlayPanel>().CurrentCard);
+            Assert.IsNull(GameObject.Find(JobCardName));
+            Assert.IsNotNull(GameObject.Find(PointsCardName));
+            Assert.IsTrue(GameObject.Find(PreviousCardButtonName).GetComponent<Button>().interactable);
+        }
+
+        [UnityTest]
+        public IEnumerator NextCardButton_OnTheLastCard_ShowsTheControlsForAMouse()
+        {
+            Click(HowToPlayButtonName);
+            yield return null;
+
+            Click(NextCardButtonName);
+            Click(NextCardButtonName);
+            yield return null;
+
+            Assert.IsFalse(GameObject.Find(NextCardButtonName).GetComponent<Button>().interactable);
+            Assert.IsNotNull(GameObject.Find(MouseControlsName));
+            Assert.IsNull(GameObject.Find(TouchControlsName));
+        }
+
+        [UnityTest]
+        public IEnumerator HowToPlayBackButton_Clicked_BringsTheMenuBack()
+        {
+            Click(HowToPlayButtonName);
+            yield return null;
+
+            Click(HowToPlayBackButtonName);
+            yield return null;
+
+            Assert.IsFalse(Object.FindAnyObjectByType<HowToPlayPanel>().IsOpen);
+            Assert.IsNotNull(GameObject.Find(MenuPanelName));
+        }
+
+        [UnityTest]
+        public IEnumerator HowToPlayButton_ReopenedAfterPaging_StartsAtTheFirstCard()
+        {
+            Click(HowToPlayButtonName);
+            yield return null;
+            Click(NextCardButtonName);
+            Click(HowToPlayBackButtonName);
+            yield return null;
+
+            Click(HowToPlayButtonName);
+            yield return null;
+
+            Assert.AreEqual(0, Object.FindAnyObjectByType<HowToPlayPanel>().CurrentCard);
+            Assert.IsNotNull(GameObject.Find(JobCardName));
         }
 
         [UnityTest]
