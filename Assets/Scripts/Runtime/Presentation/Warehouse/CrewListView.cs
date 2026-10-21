@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using CvWarehouse.Core.Warehouse;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 namespace CvWarehouse.Presentation.Warehouse
 {
@@ -14,6 +15,7 @@ namespace CvWarehouse.Presentation.Warehouse
         [SerializeField] private CrewChipView chipPrefab;
         [SerializeField] private RectTransform chipsRoot;
         [SerializeField] private WarehouseSettings settings;
+        [SerializeField] private Button selectAllButton;
 
         private CrewChipView[] chips = Array.Empty<CrewChipView>();
         private IReadOnlyList<Bot> bots;
@@ -53,12 +55,14 @@ namespace CvWarehouse.Presentation.Warehouse
         private void OnEnable()
         {
             addToSelectionAction.Enable();
+            selectAllButton.onClick.AddListener(SelectAll);
             foreach (CrewChipView chip in chips)
                 chip.Picked += Pick;
         }
 
         private void OnDisable()
         {
+            selectAllButton.onClick.RemoveListener(SelectAll);
             foreach (CrewChipView chip in chips)
                 chip.Picked -= Pick;
             addToSelectionAction.Disable();
@@ -79,6 +83,15 @@ namespace CvWarehouse.Presentation.Warehouse
                 selection.Clear();
             else
                 selection.Select(bot);
+        }
+
+        private void SelectAll()
+        {
+            if (bots == null || bots.Count == 0)
+                return;
+
+            boxSelection.Clear();
+            selection.SelectAll(bots);
         }
 
         private void Refresh()

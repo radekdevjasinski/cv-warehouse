@@ -12,16 +12,19 @@ namespace CvWarehouse.Presentation.Warehouse
         private const int FrameOrder = DepthSorting.OverEverythingOrder + 1;
         private const int FillOrder = FrameOrder + 1;
 
+        private readonly Transform holder;
         private readonly SpriteRenderer frame;
         private readonly SpriteRenderer fill;
 
         public BotProgressBar(Transform parent, BotSkin skin, SquareShapeFactory shapes)
         {
-            frame = shapes.CreateSquare("Progress Bar", parent, FrameOrder);
+            holder = new GameObject("Progress Bar").transform;
+            holder.SetParent(parent, false);
+            frame = shapes.CreateSquare("Progress Frame", holder, FrameOrder);
             frame.color = skin.ProgressFrameColor;
             frame.transform.localPosition = new Vector3(0f, -CentreBelowBot);
             frame.transform.localScale = new Vector3((FillPixels + 2 * BorderPixels) * Pixel, (FillHeightPixels + 2 * BorderPixels) * Pixel, 1f);
-            fill = shapes.CreateSquare("Progress Fill", parent, FillOrder);
+            fill = shapes.CreateSquare("Progress Fill", holder, FillOrder);
             fill.color = skin.ProgressFillColor;
             frame.gameObject.SetActive(false);
             fill.gameObject.SetActive(false);
@@ -30,6 +33,11 @@ namespace CvWarehouse.Presentation.Warehouse
         public bool IsVisible => frame.gameObject.activeSelf;
 
         public int FilledPixels { get; private set; }
+
+        public void MoveTo(Vector3 botCentre)
+        {
+            holder.localPosition = botCentre;
+        }
 
         public void Show(float progress)
         {

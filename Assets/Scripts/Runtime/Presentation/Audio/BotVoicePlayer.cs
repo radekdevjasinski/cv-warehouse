@@ -14,6 +14,7 @@ namespace CvWarehouse.Presentation.Audio
         private readonly BotVoiceSettings settings = new BotVoiceSettings();
         private readonly List<int> crewSlots = new List<int>();
         private readonly List<BotVoiceCue> dueCues = new List<BotVoiceCue>();
+        private System.Random random;
         private BotVoiceCascade cascade;
         private AudioSource[] sources;
         private int nextSource;
@@ -33,9 +34,21 @@ namespace CvWarehouse.Presentation.Audio
             StartCascade();
         }
 
+        public void PlayRandomVoice()
+        {
+            config.CopyTo(settings);
+            if (settings.VoiceCount == 0)
+                return;
+
+            crewSlots.Clear();
+            crewSlots.Add(random.Next(settings.VoiceCount));
+            StartCascade();
+        }
+
         private void Awake()
         {
-            cascade = new BotVoiceCascade(settings, new System.Random());
+            random = new System.Random();
+            cascade = new BotVoiceCascade(settings, random);
             sources = new AudioSource[config.MaxVoicesInCascade];
             for (int source = 0; source < sources.Length; source++)
                 sources[source] = CreateSource();

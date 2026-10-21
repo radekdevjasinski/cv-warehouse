@@ -1,5 +1,6 @@
 using CvWarehouse.Core.Warehouse;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace CvWarehouse.Presentation.Warehouse
 {
@@ -12,9 +13,11 @@ namespace CvWarehouse.Presentation.Warehouse
         private const float CargoLeft = -4f / DepthSorting.PixelsPerUnit;
         private const float HeadTop = 5f / DepthSorting.PixelsPerUnit;
         private const float StepBob = 1f / DepthSorting.PixelsPerUnit;
+        private const float DepthTieBreakStep = 0.01f;
 
         private readonly BotSkin skin;
         private readonly GameObject root;
+        private readonly SortingGroup sortingGroup;
         private readonly SpriteRenderer body;
         private readonly SpriteRenderer face;
         private readonly SpriteRenderer cargo;
@@ -26,8 +29,9 @@ namespace CvWarehouse.Presentation.Warehouse
             body = shapes.CreateSquare(name, parent, BodyLayer);
             face = shapes.CreateSquare("Face", body.transform, FaceLayer);
             cargo = shapes.CreateSquare("Cargo", body.transform, CargoLayer);
-            progressBar = new BotProgressBar(body.transform, skin, shapes);
+            progressBar = new BotProgressBar(parent, skin, shapes);
             root = body.gameObject;
+            sortingGroup = root.AddComponent<SortingGroup>();
             root.SetActive(false);
         }
 
@@ -43,7 +47,7 @@ namespace CvWarehouse.Presentation.Warehouse
 
         public Sprite CargoSprite => cargo.sprite;
 
-        public int SortingOrder => body.sortingOrder;
+        public int SortingOrder => sortingGroup.sortingOrder;
 
         public BotProgressBar ProgressBar => progressBar;
 
@@ -53,6 +57,7 @@ namespace CvWarehouse.Presentation.Warehouse
         {
             if (root.activeSelf)
                 root.SetActive(false);
+            progressBar.Show(0f);
         }
 
         public void Show(Bot bot, BotPose pose, Color color)
@@ -60,13 +65,15 @@ namespace CvWarehouse.Presentation.Warehouse
             if (!root.activeSelf)
                 root.SetActive(true);
 
-            root.transform.localPosition = new Vector3(bot.CentreX, bot.CentreY);
+            var centre = new Vector3(bot.CentreX, bot.CentreY);
+            root.transform.localPosition = new Vector3(centre.x, centre.y, -(bot.CrewSlot + 1) * DepthTieBreakStep);
             body.sprite = skin.Body(pose);
             body.color = color;
             face.sprite = skin.Face(pose);
             ShowCargo(bot, pose);
+            progressBar.MoveTo(centre);
             progressBar.Show(bot.ExtractProgress);
-            Sort(bot.CentreY - FeetBelowCentre);
+            sortingGroup.sortingOrder = DepthSorting.OrderAt(bot.CentreY - FeetBelowCentre, BodyLayer);
         }
 
         public void SetScale(float scale)
@@ -84,13 +91,6 @@ namespace CvWarehouse.Presentation.Warehouse
             Vector3 halfSize = cargo.sprite.bounds.extents;
             float headTop = pose.IsStepping ? HeadTop + StepBob : HeadTop;
             cargo.transform.localPosition = new Vector3(CargoLeft + halfSize.x, headTop + halfSize.y);
-        }
-
-        private void Sort(float feetY)
-        {
-            body.sortingOrder = DepthSorting.OrderAt(feetY, BodyLayer);
-            face.sortingOrder = DepthSorting.OrderAt(feetY, FaceLayer);
-            cargo.sortingOrder = DepthSorting.OrderAt(feetY, CargoLayer);
         }
     }
 }

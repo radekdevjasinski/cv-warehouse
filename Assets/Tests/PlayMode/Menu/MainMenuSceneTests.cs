@@ -138,6 +138,21 @@ namespace CvWarehouse.Tests.PlayMode.Menu
         }
 
         [UnityTest]
+        public IEnumerator Title_EveryFrame_SitsAtItsRestingPlacePlusTheBob()
+        {
+            MenuTitleBob bob = Object.FindAnyObjectByType<MenuTitleBob>();
+            RectTransform title = GameObject.Find(TitleTextName).transform.parent as RectTransform;
+            yield return null;
+            float restingY = title.anchoredPosition.y - bob.Offset;
+
+            for (int frame = 0; frame < 10; frame++)
+            {
+                yield return null;
+                Assert.AreEqual(restingY + bob.Offset, title.anchoredPosition.y, 0.001f);
+            }
+        }
+
+        [UnityTest]
         public IEnumerator Footer_Loaded_ShowsTheLinksAndTheBuildVersion()
         {
             yield return null;

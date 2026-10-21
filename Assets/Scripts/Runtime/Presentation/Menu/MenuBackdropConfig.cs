@@ -19,7 +19,18 @@ namespace CvWarehouse.Presentation.Menu
         [SerializeField] private float putInSeconds = 0.35f;
         [SerializeField] private int[] cargoWordsPerTrip = { 1, 2, 3, 2 };
 
+        [Header("Title bob, in canvas units at 1920x1080")]
+        [SerializeField] private float titleBobSeconds = 2.4f;
+        [SerializeField] private float titleBobHeight = 8f;
+        [SerializeField] private float titleBobStep = 4f;
+
         public BotSkin Skin => skin;
+
+        public float TitleBobSeconds => titleBobSeconds;
+
+        public float TitleBobHeight => titleBobHeight;
+
+        public float TitleBobStep => titleBobStep;
 
         public BotAnimation BotAnimation => botAnimation;
 

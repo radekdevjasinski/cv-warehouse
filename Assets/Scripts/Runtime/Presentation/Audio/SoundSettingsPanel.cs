@@ -18,6 +18,8 @@ namespace CvWarehouse.Presentation.Audio
         [SerializeField] private Slider sfxSlider;
         [SerializeField] private TMP_Text musicValueText;
         [SerializeField] private TMP_Text sfxValueText;
+        [SerializeField] private SliderReleaseRelay sfxSliderRelease;
+        [SerializeField] private BotVoicePlayer sfxPreview;
 
         private SoundSettings settings;
 
@@ -52,10 +54,12 @@ namespace CvWarehouse.Presentation.Audio
             closeButton.onClick.AddListener(Close);
             musicSlider.onValueChanged.AddListener(SetMusicVolume);
             sfxSlider.onValueChanged.AddListener(SetSfxVolume);
+            sfxSliderRelease.Released += sfxPreview.PlayRandomVoice;
         }
 
         private void OnDisable()
         {
+            sfxSliderRelease.Released -= sfxPreview.PlayRandomVoice;
             sfxSlider.onValueChanged.RemoveListener(SetSfxVolume);
             musicSlider.onValueChanged.RemoveListener(SetMusicVolume);
             closeButton.onClick.RemoveListener(Close);

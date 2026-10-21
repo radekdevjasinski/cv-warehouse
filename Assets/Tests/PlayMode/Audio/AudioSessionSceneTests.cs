@@ -5,6 +5,7 @@ using CvWarehouse.Presentation.Warehouse;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
@@ -30,6 +31,8 @@ namespace CvWarehouse.Tests.PlayMode.Audio
         private const string MusicValueName = "MusicValue";
         private const string SoundOnIconName = "SoundIcon";
         private const string SoundOffIconName = "SoundOffIcon";
+        private const string SfxPreviewName = "SfxPreview";
+        private const string SfxGroupName = "SFX";
         private const string MusicParameter = "MusicVolume";
         private const string SfxParameter = "SfxVolume";
         private const int MaxFramesToWait = 300;
@@ -160,6 +163,42 @@ namespace CvWarehouse.Tests.PlayMode.Audio
             SoundLevels saved = new PlayerPrefsSoundSettingsStore().Load();
             Assert.AreEqual(0.5f, saved.MusicVolume, 0.0001f);
             Assert.AreEqual(0.25f, saved.SfxVolume, 0.0001f);
+        }
+
+        [UnityTest]
+        public IEnumerator SfxSlider_Released_PlaysABotVoiceThroughTheEffectsGroup()
+        {
+            Click(SettingsButtonName);
+            yield return null;
+            AudioSource[] voices = GameObject.Find(SfxPreviewName).GetComponents<AudioSource>();
+            Assert.IsFalse(AnyPlaying(voices));
+
+            GameObject.Find(SfxSliderName).GetComponent<SliderReleaseRelay>().OnPointerUp(new PointerEventData(EventSystem.current));
+            yield return null;
+
+            Assert.IsTrue(AnyPlaying(voices));
+            foreach (AudioSource voice in voices)
+                Assert.AreEqual(SfxGroupName, voice.outputAudioMixerGroup.name);
+        }
+
+        [UnityTest]
+        public IEnumerator MusicSlider_Released_PlaysNoVoice()
+        {
+            Click(SettingsButtonName);
+            yield return null;
+
+            ExecuteEvents.Execute(GameObject.Find(MusicSliderName), new PointerEventData(EventSystem.current), ExecuteEvents.pointerUpHandler);
+            yield return null;
+
+            Assert.IsFalse(AnyPlaying(GameObject.Find(SfxPreviewName).GetComponents<AudioSource>()));
+        }
+
+        private static bool AnyPlaying(AudioSource[] sources)
+        {
+            foreach (AudioSource source in sources)
+                if (source.isPlaying)
+                    return true;
+            return false;
         }
 
         private static void Click(string buttonName)
