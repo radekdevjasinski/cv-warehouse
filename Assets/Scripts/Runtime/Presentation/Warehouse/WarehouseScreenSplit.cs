@@ -31,6 +31,12 @@ namespace CvWarehouse.Presentation.Warehouse
                 ToggleWaybill();
         }
 
+        public void CollapseWaybill()
+        {
+            if (IsWaybillExpanded)
+                ToggleWaybill();
+        }
+
         private void Awake()
         {
             float warehouseWidth = 1f - waybillWidthFraction;

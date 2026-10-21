@@ -19,7 +19,7 @@ namespace CvWarehouse.Presentation.Warehouse
 
         private WarehouseScore score;
 
-        public void ShowFullCv()
+        public void SkipToFullCv()
         {
             if (screen.RevealState != null)
                 screen.RevealState.RevealAll();

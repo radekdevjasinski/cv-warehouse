@@ -22,6 +22,12 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
         private const string ResumeButtonName = "ResumeButton";
         private const string RestartButtonName = "RestartButton";
         private const string ShowCvButtonName = "ShowCvButton";
+        private const string SkipGameButtonName = "SkipGameButton";
+        private const string ConfirmSkipButtonName = "ConfirmSkipButton";
+        private const string CancelSkipButtonName = "CancelSkipButton";
+        private const string MenuWindowName = "GameMenuWindow";
+        private const string ShowCvLabel = "Show CV";
+        private const string HideCvLabel = "Hide CV";
         private const string MainMenuButtonName = "MainMenuButton";
         private const string PauseButtonName = "PauseButton";
         private const string ShiftStatusTextName = "ShiftStatusText";
@@ -100,12 +106,90 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
         }
 
         [UnityTest]
-        public IEnumerator ShowCvButton_Clicked_RevealsTheWholeCvOnTheExpandedWaybill()
+        public IEnumerator ShowCvButton_Clicked_ExpandsTheWaybillWithoutRevealingIt()
+        {
+            Click(MenuButtonName);
+            yield return null;
+            Assert.AreEqual(ShowCvLabel, LabelOf(ShowCvButtonName));
+
+            Click(ShowCvButtonName);
+            yield return null;
+
+            Assert.IsTrue(Object.FindAnyObjectByType<WarehouseScreenSplit>().IsWaybillExpanded);
+            Assert.IsFalse(Object.FindAnyObjectByType<CvScreen>().RevealState.IsComplete);
+            Assert.IsFalse(gameMenu.IsOpen);
+            Assert.IsFalse(demo.Simulation.IsHeld);
+        }
+
+        [UnityTest]
+        public IEnumerator ShowCvButton_WaybillAlreadyExpanded_ReadsHideCvAndCollapsesIt()
+        {
+            Object.FindAnyObjectByType<WarehouseScreenSplit>().ExpandWaybill();
+            Click(MenuButtonName);
+            yield return null;
+            Assert.AreEqual(HideCvLabel, LabelOf(ShowCvButtonName));
+
+            Click(ShowCvButtonName);
+            yield return null;
+
+            Assert.IsFalse(Object.FindAnyObjectByType<WarehouseScreenSplit>().IsWaybillExpanded);
+            Assert.IsFalse(gameMenu.IsOpen);
+        }
+
+        [UnityTest]
+        public IEnumerator SkipGameButton_Clicked_AsksBeforeRevealingAnything()
         {
             Click(MenuButtonName);
             yield return null;
 
-            Click(ShowCvButtonName);
+            Click(SkipGameButtonName);
+            yield return null;
+
+            Assert.IsTrue(gameMenu.IsAskingToSkip);
+            Assert.IsNull(GameObject.Find(MenuWindowName));
+            Assert.IsFalse(Object.FindAnyObjectByType<CvScreen>().RevealState.IsComplete);
+            Assert.IsTrue(demo.Simulation.IsHeld);
+        }
+
+        [UnityTest]
+        public IEnumerator CancelSkipButton_Clicked_GoesBackToTheMenuWithoutRevealing()
+        {
+            Click(MenuButtonName);
+            Click(SkipGameButtonName);
+            yield return null;
+
+            Click(CancelSkipButtonName);
+            yield return null;
+
+            Assert.IsFalse(gameMenu.IsAskingToSkip);
+            Assert.IsNotNull(GameObject.Find(MenuWindowName));
+            Assert.IsTrue(gameMenu.IsOpen);
+            Assert.IsFalse(Object.FindAnyObjectByType<CvScreen>().RevealState.IsComplete);
+        }
+
+        [UnityTest]
+        public IEnumerator MenuReopened_AfterAskingToSkip_StartsOnTheMenuAgain()
+        {
+            Click(MenuButtonName);
+            Click(SkipGameButtonName);
+            gameMenu.Close();
+            yield return null;
+
+            Click(MenuButtonName);
+            yield return null;
+
+            Assert.IsFalse(gameMenu.IsAskingToSkip);
+            Assert.IsNotNull(GameObject.Find(MenuWindowName));
+        }
+
+        [UnityTest]
+        public IEnumerator ConfirmSkipButton_Clicked_RevealsTheWholeCvOnTheExpandedWaybill()
+        {
+            Click(MenuButtonName);
+            Click(SkipGameButtonName);
+            yield return null;
+
+            Click(ConfirmSkipButtonName);
             yield return null;
 
             Assert.IsTrue(Object.FindAnyObjectByType<CvScreen>().RevealState.IsComplete);
@@ -146,6 +230,11 @@ namespace CvWarehouse.Tests.PlayMode.Warehouse
         private static void Click(string buttonName)
         {
             GameObject.Find(buttonName).GetComponent<Button>().onClick.Invoke();
+        }
+
+        private static string LabelOf(string buttonName)
+        {
+            return GameObject.Find(buttonName).GetComponentInChildren<TMP_Text>().text;
         }
 
         private IEnumerator WaitForNewDemo(WarehouseDemo oldDemo)

@@ -1,4 +1,5 @@
 using CvWarehouse.Core.Warehouse;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -9,6 +10,8 @@ namespace CvWarehouse.Presentation.Warehouse
     public sealed class GameMenuView : MonoBehaviour
     {
         private const string MenuActionName = "Player/Menu";
+        private const string ShowCvLabel = "Show CV";
+        private const string HideCvLabel = "Hide CV";
 
         [SerializeField] private InputActionAsset inputActions;
         [SerializeField] private Button openButton;
@@ -16,14 +19,23 @@ namespace CvWarehouse.Presentation.Warehouse
         [SerializeField] private Button resumeButton;
         [SerializeField] private Button restartButton;
         [SerializeField] private Button showCvButton;
+        [SerializeField] private TMP_Text showCvButtonLabel;
+        [SerializeField] private Button skipGameButton;
         [SerializeField] private Button mainMenuButton;
+        [SerializeField] private GameObject menuWindow;
+        [SerializeField] private GameObject skipConfirmWindow;
+        [SerializeField] private Button confirmSkipButton;
+        [SerializeField] private Button cancelSkipButton;
         [SerializeField] private WarehouseWaybill waybill;
+        [SerializeField] private WarehouseScreenSplit screenSplit;
         [SerializeField] private string mainMenuSceneName = "MainMenu";
 
         private WarehouseSimulation simulation;
         private InputAction menuAction;
 
         public bool IsOpen => panel.activeSelf;
+
+        public bool IsAskingToSkip => skipConfirmWindow.activeSelf;
 
         public void Show(WarehouseSimulation shownSimulation)
         {
@@ -34,6 +46,8 @@ namespace CvWarehouse.Presentation.Warehouse
 
         public void Open()
         {
+            showCvButtonLabel.SetText(screenSplit.IsWaybillExpanded ? HideCvLabel : ShowCvLabel);
+            ShowMenuWindow();
             panel.SetActive(true);
             if (simulation != null)
                 simulation.Hold();
@@ -59,14 +73,20 @@ namespace CvWarehouse.Presentation.Warehouse
             openButton.onClick.AddListener(Open);
             resumeButton.onClick.AddListener(Close);
             restartButton.onClick.AddListener(Restart);
-            showCvButton.onClick.AddListener(ShowCv);
+            showCvButton.onClick.AddListener(ToggleCv);
+            skipGameButton.onClick.AddListener(AskToSkip);
+            confirmSkipButton.onClick.AddListener(SkipGame);
+            cancelSkipButton.onClick.AddListener(ShowMenuWindow);
             mainMenuButton.onClick.AddListener(GoToMainMenu);
         }
 
         private void OnDisable()
         {
             mainMenuButton.onClick.RemoveListener(GoToMainMenu);
-            showCvButton.onClick.RemoveListener(ShowCv);
+            cancelSkipButton.onClick.RemoveListener(ShowMenuWindow);
+            confirmSkipButton.onClick.RemoveListener(SkipGame);
+            skipGameButton.onClick.RemoveListener(AskToSkip);
+            showCvButton.onClick.RemoveListener(ToggleCv);
             restartButton.onClick.RemoveListener(Restart);
             resumeButton.onClick.RemoveListener(Close);
             openButton.onClick.RemoveListener(Open);
@@ -87,10 +107,31 @@ namespace CvWarehouse.Presentation.Warehouse
             SceneManager.LoadSceneAsync(gameObject.scene.name);
         }
 
-        private void ShowCv()
+        private void ToggleCv()
         {
             Close();
-            waybill.ShowFullCv();
+            if (screenSplit.IsWaybillExpanded)
+                screenSplit.CollapseWaybill();
+            else
+                screenSplit.ExpandWaybill();
+        }
+
+        private void AskToSkip()
+        {
+            menuWindow.SetActive(false);
+            skipConfirmWindow.SetActive(true);
+        }
+
+        private void ShowMenuWindow()
+        {
+            skipConfirmWindow.SetActive(false);
+            menuWindow.SetActive(true);
+        }
+
+        private void SkipGame()
+        {
+            Close();
+            waybill.SkipToFullCv();
         }
 
         private void GoToMainMenu()
